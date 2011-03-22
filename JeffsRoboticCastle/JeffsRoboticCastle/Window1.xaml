@@ -1,0 +1,9 @@
+﻿<Window x:Class="MyGameWindow.Window1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="JeffsRoboticCastle" Height="900" Width="1700"
+        Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp" Icon="icon.png">
+    <Grid>
+        <Canvas Margin="0,0,0,0" Name="canvas1" />
+    </Grid>
+</Window>
