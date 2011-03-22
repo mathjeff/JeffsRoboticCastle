@@ -2,7 +2,7 @@ INTRO:
 JeffsRoboticCastle is a sidescroller in which you have a bunch of weapons available to help you get past the various enemies.
 The game is intended to be very customizable
 Currently the main way to customize it is to change the values in the code.
-The keyword "DESIGNER_HERE" is in a few places in the code to make it easier to tell where a game designer roughly where to make changes
+The keyword "DESIGN_HERE" is in a few places in the code to make it easier to tell where a game designer roughly where to make changes
 The images in the Images folder may be edited too
 
 
