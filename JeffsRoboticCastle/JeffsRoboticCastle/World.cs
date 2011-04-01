@@ -28,7 +28,7 @@ class World
         this.searchers = new WorldSearcher[3, 3];
         int i, j;
         double[] typicalDimensions = new double[2];
-        typicalDimensions[0] = typicalDimensions[1] = 50;
+        typicalDimensions[0] = typicalDimensions[1] = 100;
         for (i = 0; i < 3; i++)
         {
             for (j = 0; j < 3; j++)
@@ -245,7 +245,7 @@ class World
         }
         if (o.isAProjectile())
         {
-            System.Diagnostics.Trace.WriteLine("deactivating projectile at " + o.getCenter()[0].ToString() + "," + o.getCenter()[1].ToString());
+            //System.Diagnostics.Trace.WriteLine("deactivating projectile at " + o.getCenter()[0].ToString() + "," + o.getCenter()[1].ToString());
             Projectile converted = (Projectile)o;
             if (!this.projectiles.Contains(converted))
                 System.Diagnostics.Trace.WriteLine("Error: World tried to deactivate a projectile that was not active");
@@ -546,12 +546,19 @@ class World
     }*/
     void moveObjects(double numSeconds)
     {
-	    int i;
 	    // move objects
-	    for (i = 0; i < this.objects.Count; i++)
+        foreach (Character c in this.characters)
+        {
+            this.moveObject(c, numSeconds);
+        }
+        foreach (Projectile p in this.projectiles)
+        {
+            this.moveObject(p, numSeconds);
+        }
+	    /*for (i = 0; i < this.objects.Count; i++)
 	    {
 		    this.moveObject(objects[i], numSeconds);
-	    }
+	    }*/
     }
     // create any new projectiles from the weapons that characters are firing
     void spawnProjectiles(double numSeconds)

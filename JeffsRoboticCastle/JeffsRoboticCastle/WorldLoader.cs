@@ -10,17 +10,17 @@ class WorldLoader
 {
 // Public
     // Constructor
-    public WorldLoader(Canvas newCanvas, double[] screenPosition, double[] screenSize)
+    public WorldLoader(Canvas canvas, double[] screenSize)
     {
         // setup a canvas to put the world on, for the purpose of cropping
-        this.gameCanvas = newCanvas;
-        this.worldCanvas = new Canvas();
+        this.worldCanvas = canvas;
+        /*this.worldCanvas = new Canvas();
         this.worldCanvas.Width = screenSize[0];
         this.worldCanvas.Height = screenSize[1];
         this.worldCanvas.RenderTransform = new TranslateTransform(screenPosition[0], screenPosition[1]);
         this.worldCanvas.ClipToBounds = true;
         this.gameCanvas.Children.Add(worldCanvas);
-
+        */
         // setup machinery to make it fast to run
         this.blockSize = new double[2];
         blockSize[0] = screenSize[0];
@@ -29,8 +29,8 @@ class WorldLoader
         activeDimensions[0] = blockSize[0] * 2;
         activeDimensions[1] = blockSize[0] * 2;
         double[] existentDimensions = new double[2];
-        existentDimensions[0] = activeDimensions[0] * 2;
-        existentDimensions[1] = activeDimensions[1] * 2;
+        existentDimensions[0] = activeDimensions[0];
+        existentDimensions[1] = activeDimensions[1];
         this.worldDimensions = new double[2];
         worldDimensions[0] = 30000;
         worldDimensions[1] = 2000;
@@ -66,9 +66,10 @@ class WorldLoader
         double[] location = new double[2];
         location[0] = 1000;
         location[1] = 400;
-        this.addItem(new Enemy(location, 0, 0, 1));
+        //this.addItem(new Enemy(location, 2, 3, 4));
         double x;
         double y;
+        //return;
 #if false
         y = 600;
         for (x = -1000; x < 2000; x += 100)
@@ -93,10 +94,11 @@ class WorldLoader
             }
         }
         x = 1000;
+#if true
         while (x < worldDimensions[0])
         {
             // add an enemy
-            x += 100 + 600 * generator.NextDouble();
+            x += 50 + 300 * generator.NextDouble();
             y = 600 * generator.NextDouble();
             weaponType1 = (int)(15 * generator.NextDouble());
             weaponType2 = (int)(15 * generator.NextDouble());
@@ -107,8 +109,9 @@ class WorldLoader
             location = new double[2]; location[0] = x; location[1] = y;
             this.addItem(new Painting(location, 0));
         }
-
+#endif
 #if true
+        // add platforms
         for (i = 0; i < 300; i++)
         {
             x = generator.NextDouble() * worldDimensions[0];
@@ -355,7 +358,7 @@ class WorldLoader
         //RealityBubble newBubble = new RealityBubble(activeBox, existentBox);
         return newBubble;
     }
-    Canvas gameCanvas;
+    //Canvas gameCanvas;
     Canvas worldCanvas;
     World world;
     WorldSearcher searcher;

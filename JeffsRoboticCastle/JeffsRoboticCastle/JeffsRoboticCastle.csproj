@@ -37,6 +37,8 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -99,6 +101,7 @@
     <Compile Include="HitPointBar.cs" />
     <Compile Include="ImageLoader.cs" />
     <Compile Include="JeffsRoboticCastle.cs" />
+    <Compile Include="MenuScreen.cs" />
     <Compile Include="Painting.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Player.cs" />
@@ -109,13 +112,16 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RealityBubble.cs" />
+    <Compile Include="Screen.cs" />
     <Compile Include="SelectedWeaponsDisplay.cs" />
     <Compile Include="Stun.cs" />
     <Compile Include="Weapon.cs" />
+    <Compile Include="WeaponDesignScreen.cs" />
     <Compile Include="WeaponGridDisplay.cs" />
     <Compile Include="WeaponStatusDisplay.cs" />
     <Compile Include="World.cs" />
     <Compile Include="WorldLoader.cs" />
+    <Compile Include="WorldScreen.cs" />
     <Compile Include="WorldSearcher.cs" />
   </ItemGroup>
   <ItemGroup>

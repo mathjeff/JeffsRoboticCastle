@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 class JeffsRoboticCastle
 {
@@ -12,13 +13,22 @@ class JeffsRoboticCastle
         //mediaPlayer.LoadedBehavior = MediaState.Play;
         //newCanvas.Children.Add(mediaPlayer);
 
-        this.canvas = newCanvas;
+        this.mainCanvas = newCanvas;
+        this.setupPlayer();
 	    this.setupDrawing(screenWidth, screenHeight);
 	    //this.userCamera = new Camera(RectangleF(0, 0, (float)windowWidth, (float)windowHeight), RectangleF(0, 0, (float)windowWidth, (float)windowHeight));
 	    this.setupWorld();
-        this.setupCharacterStatusDisplay();
+        //this.setupCharacterStatusDisplay();
         //this.audioPlayer = new AudioPlayer(newCanvas);
         //this.audioPlayer.setSoundFile("09 Who Am I Living For_.m4a");
+    }
+    // general game control
+    public bool isWorldRunning()
+    {
+        if (this.currentScreen == this.worldScreen)
+            return true;
+        else
+            return false;
     }
     public void start()
     {
@@ -28,16 +38,100 @@ class JeffsRoboticCastle
     {
         this.audioPlayer.stop();
     }
+    public void KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        // tell the screen that a button was pressed, in case it's a menu that cares about it
+        this.currentScreen.KeyDown(sender, e);
+        // tell the world that a button was pressed
+        if (this.isWorldRunning())
+            this.worldKeyDown(sender, e);
+    }
+    public void KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        // tell the current screen that a button was released, in case it's a menu that cares about it
+        this.currentScreen.KeyUp(sender, e);
+        // tell the world that a button was released
+        if (this.isWorldRunning())
+            this.worldKeyUp(sender, e);
+    }
+    // this function handles any necessary action that the world must take due to a keypress
+    public void worldKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        // #define DESIGN_HERE
+        if (e.Key == Key.W)
+        {
+            this.playerJump();
+        }
+        if (e.Key == Key.A)
+        {
+            this.movePlayerLeft();
+        }
+        if (e.Key == Key.D)
+        {
+            this.movePlayerRight();
+        }
+        if (e.Key == Key.OemSemicolon)
+        {
+            //this.game.selectWeapon1();
+            this.playerPressTrigger(true);
+        }
+        if (e.Key == Key.L)
+        {
+            //this.game.cyclePlayerWeaponBackward();
+            this.selectWeapon1();
+        }
+        if (e.Key == Key.P)
+        {
+            //System.Diagnostics.Trace.WriteLine("trigger pressed");
+            //this.game.playerPressTrigger(true);
+            this.selectWeapon2();
+        }
+        if (e.Key == Key.OemQuotes)
+        {
+            //this.game.cyclePlayerWeaponForward();
+            this.selectWeapon3();
+        }
+        if (e.Key == Key.Space)
+        {
+            this.resetPlayerWeapon();
+            //this.game.playerPressTrigger(true);
+        }
+    }
+    public void worldKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        // #define DESIGN_HERE
+        if (e.Key == Key.A)
+        {
+            this.stopMovingPlayerLeft();
+        }
+        if (e.Key == Key.D)
+        {
+            this.stopMovingPlayerRight();
+        }
+        if (e.Key == Key.OemSemicolon)
+        {
+            //System.Diagnostics.Trace.WriteLine("trigger released");
+            this.playerPressTrigger(false);
+        }
+    }
     // image drawing
     // advance the game by one time unit
 	public void timerTick(double numSeconds)
     {
-        if (numSeconds > 0)
+        if (this.isWorldRunning())
         {
-            this.worldLoader.timerTick(numSeconds);
-            this.worldLoader.scrollTo(this.player);
-            this.statusDisplay.update();
+            if (numSeconds > 0)
+            {
+                // advance the world
+                this.worldLoader.timerTick(numSeconds);
+                // scroll the screen
+                this.worldLoader.scrollTo(this.player);
+            }
         }
+        // update the screen
+        Screen newScreen = this.currentScreen.timerTick(numSeconds);
+        // transition to the next screen if necessary
+        this.setCurrentScreen(newScreen);
     }
     // user commands
 	// movement
@@ -105,13 +199,15 @@ class JeffsRoboticCastle
 	    this.player.pressTrigger(pressed);
     }
 
-private
+//private
 	void setupDrawing(int screenWidth, int screenHeight)
     {
         // save screen size
-        this.screenSize = new double[2];
+        screenSize = new double[2];
         screenSize[0] = screenWidth;
         screenSize[1] = screenHeight;
+        double[] screenPosition = new double[2];
+        /*
         // determine the position for the world
         this.worldWindowPosition = new double[2];
         this.worldWindowPosition[0] = 0;
@@ -120,22 +216,22 @@ private
         this.worldWindowSize = new double[2];
         this.worldWindowSize[0] = screenWidth - worldWindowPosition[0];
         this.worldWindowSize[1] = screenHeight - worldWindowPosition[1];
-    }
-	void setupWorld()
-    {
-        //System.Windows.Shapes.Rectangle worldRect = new System.Windows.Shapes.Rectangle();
-        /*Canvas worldCanvas = new Canvas();
-        worldCanvas.Width = worldWindowSize[0];
-        worldCanvas.Height = worldWindowSize[1];
-        worldCanvas.ClipToBounds = true;
-        worldCanvas.RenderTransform = new System.Windows.Media.TranslateTransform(worldWindowPosition[0], worldWindowPosition[1]);
-        this.canvas.Children.Add(worldCanvas);
+        // create a screen to hold the world and heads-up-display
+        this.worldCanvas = new Canvas();
         */
-        //worldCanvas.
-        //worldCanvas.
-        // crealte an object to keep track of the world
-        this.worldLoader = new WorldLoader(canvas, worldWindowPosition, worldWindowSize);
-
+        this.worldScreen = new WorldScreen(this.mainCanvas, screenPosition, screenSize);
+        // menu screen explaining how everything works
+        MenuScreen menuScreen = new MenuScreen(this.mainCanvas, screenSize);
+        // screen for designing weapons
+        WeaponDesignScreen designScreen = new WeaponDesignScreen(this.mainCanvas, screenSize);
+        menuScreen.setNextScreen(designScreen);
+        designScreen.setPlayer(this.player);
+        designScreen.setNextScreen(this.worldScreen);
+        menuScreen.setBackgroundBitmap(ImageLoader.loadImage("Instructions.png"));
+        this.setCurrentScreen(menuScreen);
+    }
+    void setupPlayer()
+    {
         // #define DESIGN_HERE
         // spawn the player
         double[] location = new double[2]; location[0] = 30; location[1] = 30;
@@ -157,10 +253,39 @@ private
         this.player.addWeapon(new Weapon(14));
         this.player.addWeapon(new Weapon(15));
         this.player.gotoWeaponTreeRoot();
+    }
+	void setupWorld()
+    {
+        //System.Windows.Shapes.Rectangle worldRect = new System.Windows.Shapes.Rectangle();
+        /*Canvas worldCanvas = new Canvas();
+        worldCanvas.Width = worldWindowSize[0];
+        worldCanvas.Height = worldWindowSize[1];
+        worldCanvas.ClipToBounds = true;
+        worldCanvas.RenderTransform = new System.Windows.Media.TranslateTransform(worldWindowPosition[0], worldWindowPosition[1]);
+        this.canvas.Children.Add(worldCanvas);
+        */
+        //worldCanvas.
+        //worldCanvas.
+        // create an object to keep track of the world
+        //this.worldLoader = new WorldLoader(worldCanvas, worldWindowPosition, worldWindowSize);
+        this.worldLoader = new WorldLoader(this.worldScreen.getWorldCanvas(), this.worldScreen.getWorldWindowSize());
+
         this.worldLoader.addItemAndDisableUnloading(this.player);
+        this.worldScreen.followCharacter(this.player);
         //this.worldLoader.addItem(this.player);
     }
-    void setupCharacterStatusDisplay()
+    void setCurrentScreen(Screen newScreen)
+    {
+        if (newScreen != currentScreen)
+        {
+            if (this.currentScreen != null)
+                this.currentScreen.hide();
+            this.currentScreen = newScreen;
+            if (this.currentScreen != null)
+                this.currentScreen.show();
+        }
+    }
+    /*void setupCharacterStatusDisplay()
     {
         double[] statusLocation = new double[2];
         statusLocation[0] = 0;
@@ -168,15 +293,20 @@ private
         double[] statusSize = new double[2];
         statusSize[0] = this.screenSize[0];
         statusSize[1] = this.worldWindowPosition[1];
-        statusDisplay = new CharacterStatusDisplay(this.canvas, statusLocation, statusSize, this.player);
-    }
+        statusDisplay = new CharacterStatusDisplay(this.worldScreen.getCanvas(), statusLocation, statusSize);
+    }*/
+    Canvas mainCanvas;
+    /*
     double[] worldWindowPosition;
     double[] worldWindowSize;
+    Canvas worldCanvas;
+    CharacterStatusDisplay statusDisplay;
+    */
     double[] screenSize;
-	//Camera userCamera;
+    //Camera userCamera;
 	WorldLoader worldLoader;
 	Player player;
-    Canvas canvas;
     AudioPlayer audioPlayer;
-    CharacterStatusDisplay statusDisplay;
+    WorldScreen worldScreen;
+    Screen currentScreen;
 };

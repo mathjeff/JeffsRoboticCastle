@@ -12,9 +12,8 @@ using System.Windows.Media;
 class SelectedWeaponsDisplay
 {
 // public
-    public SelectedWeaponsDisplay(Canvas newCanvas, Character subject, double[] position, double[] size)
+    public SelectedWeaponsDisplay(Canvas newCanvas, double[] position, double[] size)
     {
-        this.character = subject;
 #if WEAPON_SCROLLWHEEL_VISUAL
         this.weapons = new WeaponStatusDisplay[3];
         int i;
@@ -34,7 +33,8 @@ class SelectedWeaponsDisplay
         position.CopyTo(childPosition, 0);
         double[] childSize = new double[size.Length];
         size.CopyTo(childSize, 0);
-        this.grids = new WeaponGridDisplay[subject.getWeaponTreeBranchFactor()];
+        //this.grids = new WeaponGridDisplay[subject.getWeaponTreeBranchFactor()];
+        this.grids = new WeaponGridDisplay[3];
         childSize[0] /= (1.5 * grids.Length - .5);
         int i;
         for (i = 0; i < grids.Length; i++)
@@ -44,6 +44,11 @@ class SelectedWeaponsDisplay
         }
         //this.rightGrid = new WeaponGridDisplay(newCanvas, childPosition, childSize);
 #endif
+    }
+    public void followCharacter(Character subject)
+    {
+        this.character = subject;
+        this.update();
     }
     public void update()
     {

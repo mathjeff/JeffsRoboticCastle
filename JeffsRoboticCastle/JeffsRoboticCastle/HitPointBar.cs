@@ -9,10 +9,8 @@ using System.Windows.Shapes;
 class HitPointBar
 {
 // public
-    public HitPointBar(Canvas canvas, Character subject, double[] position, double[] size)
+    public HitPointBar(Canvas canvas, double[] position, double[] size)
     {
-        this.character = subject;
-
         this.backgroundBar = new Rectangle();
         backgroundBar.Width = size[0];
         backgroundBar.Height = size[1];
@@ -26,7 +24,10 @@ class HitPointBar
         valueBar.Fill = Brushes.Red;
         valueBar.RenderTransform = new TranslateTransform(position[0], position[1]);
         canvas.Children.Add(valueBar);
-        
+    }
+    public void followCharacter(Character subject)
+    {
+        this.character = subject;
         this.update();
     }
     public void update()

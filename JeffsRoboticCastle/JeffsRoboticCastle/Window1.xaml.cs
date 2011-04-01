@@ -57,64 +57,13 @@ namespace MyGameWindow
         // This function is called when a key is pressed down, and it decides what the key should do
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            // #define DESIGN_HERE
-            if (e.Key == Key.W)
-		    {
-			    this.game.playerJump();
-		    }
-		    if (e.Key == Key.A)
-		    {
-			    this.game.movePlayerLeft();
-		    }
-		    if (e.Key == Key.D)
-		    {
-			    this.game.movePlayerRight();
-		    }
-            if (e.Key == Key.OemSemicolon)
-            {
-                //this.game.selectWeapon1();
-                this.game.playerPressTrigger(true);
-            }
-            if (e.Key == Key.L)
-            {
-                //this.game.cyclePlayerWeaponBackward();
-                this.game.selectWeapon1();
-            }
-            if (e.Key == Key.P)
-            {
-                //System.Diagnostics.Trace.WriteLine("trigger pressed");
-                //this.game.playerPressTrigger(true);
-                this.game.selectWeapon2();
-            }
-            if (e.Key == Key.OemQuotes)
-            {
-                //this.game.cyclePlayerWeaponForward();
-                this.game.selectWeapon3();
-            }
-            if (e.Key == Key.Space)
-            {
-                this.game.resetPlayerWeapon();
-                //this.game.playerPressTrigger(true);
-            }
+            this.game.KeyDown(sender, e);
         }
 
         // This function is called when a key is released, and it decides what the key should do
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            // #define DESIGN_HERE
-            if (e.Key == Key.A)
-		    {
-			    this.game.stopMovingPlayerLeft();
-		    }
-		    if (e.Key == Key.D)
-		    {
-			    this.game.stopMovingPlayerRight();
-		    }
-            if (e.Key == Key.OemSemicolon)
-            {
-                //System.Diagnostics.Trace.WriteLine("trigger released");
-                this.game.playerPressTrigger(false);
-            }
+            this.game.KeyUp(sender, e);
         }
 
         // This function is called repeatedly and makes the world move by a small amount

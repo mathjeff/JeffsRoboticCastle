@@ -20,25 +20,42 @@ class AI
         this.firstNeuron = dodgeNode1;
 #else
         double[] v;
+        AIFireNode fireNode1 = new AIFireNode(false);
         // fire iff you expect to hit your target
-        AITickDecisionNode scanNode1 = new AITickDecisionNode(0.25);
-            // every 20 ticks, consider shooting
+        AITickDecisionNode scanNode1 = new AITickDecisionNode(0.08);
+        fireNode1.setNextNode(scanNode1);
+        // every once in a while, check whether it's in range and shoot if it is
             AITargetDecisionNode targetNode1 = new AITargetDecisionNode(0, 0, 0);
             scanNode1.setLeftChild(targetNode1);
                 // if we're in range, then fire
-                AIFireNode fireNode1 = new AIFireNode(false);
-                targetNode1.setLeftChild(fireNode1);
                 AIFireNode fireNode2 = new AIFireNode(true);
-                fireNode1.setNextNode(fireNode2);
+                targetNode1.setLeftChild(fireNode2);
             // else
-                // if we're not in range, then switch weapons
+                // if we're not in range, then move closer
+                AITargetDecisionNode leftTargetNode = new AITargetDecisionNode(-1, 0, 10000);
+                targetNode1.setRightChild(leftTargetNode);
+                    // if the user is on the left, go left
+                    v = new double[2]; v[0] = -100; v[1] = 0;
+                    AISetVelocityNode goLeftNode1 = new AISetVelocityNode(v);
+                    leftTargetNode.setLeftChild(goLeftNode1);
+                    // if the user is on the left, go right
+                    v = new double[2]; v[0] = 100; v[1] = 0;
+                    AISetVelocityNode goRightNode1 = new AISetVelocityNode(v);
+                    leftTargetNode.setRightChild(goRightNode1);
+                // if we're not in range, then occasionally switch weapons
+                AITickDecisionNode weaponSwitchCounter = new AITickDecisionNode(0.03);
+                goLeftNode1.setNextNode(weaponSwitchCounter);
+                goRightNode1.setNextNode(weaponSwitchCounter);
                 AISelectWeaponNode selectWeaponNode1 = new AISelectWeaponNode();
-                targetNode1.setRightChild(selectWeaponNode1);
+                weaponSwitchCounter.setLeftChild(selectWeaponNode1);
+                //targetNode1.setRightChild(selectWeaponNode1);
         // Now check if there is an incoming projectile
         AICollisionDecisionNode dodgeNode1 = new AICollisionDecisionNode(3, 1, 0, 0.3);
         fireNode2.setNextNode(dodgeNode1);
         scanNode1.setRightChild(dodgeNode1);
         selectWeaponNode1.setNextNode(dodgeNode1);
+        //goLeftNode1.setNextNode(dodgeNode1);
+        //goRightNode1.setNextNode(dodgeNode1);
         AICollisionDecisionNode dodgeNode2 = new AICollisionDecisionNode(3, 0, 1, 0);
         dodgeNode1.setLeftChild(dodgeNode2);
         // If there is an incoming projectile, then dodge
@@ -70,6 +87,29 @@ class AI
             }
         }
         // If there is no incoming projectile, then chase the user
+        // If we're about to bump into a wall, jump
+        AICollisionDecisionNode obstacleDecisionNode1 = new AICollisionDecisionNode(1, 1, 0, 0.01);
+        dodgeNode1.setRightChild(obstacleDecisionNode1);
+        dodgeNode2.setRightChild(obstacleDecisionNode1);
+        AICollisionDecisionNode obstacleDecisionNode2 = new AICollisionDecisionNode(1, 0, 1, 0.01);
+        obstacleDecisionNode1.setLeftChild(obstacleDecisionNode2);
+        AIPositionDecisionNode obstacleDecisionNode3 = new AIPositionDecisionNode(1, 0, -1, 40);
+        obstacleDecisionNode2.setLeftChild(obstacleDecisionNode3);
+        AIJumpNode wallJumpNode = new AIJumpNode();
+        obstacleDecisionNode3.setLeftChild(wallJumpNode);
+        // If jumping would help target, then jump
+        AIPositionDecisionNode jumpCheckNode1 = new AIPositionDecisionNode(2, 0, 1, 250);
+        obstacleDecisionNode1.setRightChild(jumpCheckNode1);
+        obstacleDecisionNode2.setRightChild(jumpCheckNode1);
+        obstacleDecisionNode3.setRightChild(jumpCheckNode1);
+        AITickDecisionNode jumpCheckNode2 = new AITickDecisionNode(0.01);
+        jumpCheckNode1.setLeftChild(jumpCheckNode2);
+        AITargetDecisionNode jumpCheckNode3 = new AITargetDecisionNode(0, 1, 10000);
+        jumpCheckNode2.setLeftChild(jumpCheckNode3);
+        AIJumpNode targetJumpNode = new AIJumpNode();
+        jumpCheckNode3.setLeftChild(targetJumpNode);
+
+        /* // If there is no incoming projectile, then chase the user
         {
             AIPositionDecisionNode chaseNode = new AIPositionDecisionNode(2, 1, 0, 200);
             dodgeNode1.setRightChild(chaseNode);
@@ -90,27 +130,11 @@ class AI
             obstacleDecisionNode1.setLeftChild(obstacleDecisionNode2);
             AIJumpNode wallJumpNode = new AIJumpNode();
             obstacleDecisionNode2.setLeftChild(wallJumpNode);
-        }
-
-
-        /*double[] v = new double[2]; v[0] = -1000; v[1] = 0;
-        AISetVelocityNode node1 = new AISetVelocityNode(v);
-        AIGeometryDecisionNode node2 = new AIGeometryDecisionNode(1, 1, 0, .1);
-        node1.setNextNode(node2);
-        AIJumpNode jumpNode = new AIJumpNode();
-        node2.setLeftChild(jumpNode);
-        this.firstNeuron = node1;*/
-        // make the decision tree
-        /*AIFireNode fireNode = new AIFireNode(true);
-        AIDecisionNode node2 = new AICollisionDecisionNode(3, 1, 0, 0.3);
-        AIDecisionNode node3 = new AICollisionDecisionNode(3, 0, 1, 0);
-        fireNode.setNextNode(node2);
-        AIJumpNode jumpNode = new AIJumpNode();
-        node2.setLeftChild(node3);
-        node3.setLeftChild(jumpNode);*/
+        }*/
 
         // remember the decision tree
-        this.firstNeuron = scanNode1;
+        this.firstNeuron = fireNode1;
+        fireNode1.setBrain(this);
         //this.firstNeuron = fireNode1;
 #endif
 
@@ -120,11 +144,13 @@ class AI
         // clear the flags of what is nearby so that the information we get will still be current
         body.invalidateNeighborData();
         AINode currentNode = this.firstNeuron;
+        this.shotError = null;
         while (currentNode != null)
         {
             currentNode.execute(body);
             currentNode = currentNode.getNextNode(body);
         }
+        this.shotError = null;
     }
     public void reinforce(double quantity)
     {
@@ -142,9 +168,17 @@ class AI
     {
         return this.state;
     }
+    // gives a vector telling by how much the shot is expected to miss the opponent
+    public double[] getShotError(Character body, GameObject target)
+    {
+        if (shotError == null)
+            shotError = body.getCurrentWeapon().simulateShooting(target);
+        return shotError;
+    }
 // private
     AINode firstNeuron;
     int state;
+    double[] shotError;
 }
 
 // The AINode class is like a line of code.
@@ -167,7 +201,7 @@ class AINode
     {
         return null;
     }
-    public void setBrain(AI newBrain)
+    public virtual void setBrain(AI newBrain)
     {
         this.brain = newBrain;
     }
@@ -302,6 +336,14 @@ class AIDecisionNode : AINode
     public override AINode getNextNode(Character body)
     {
         return base.getNextNode(body);
+    }
+    public override void setBrain(AI newBrain)
+    {
+        base.setBrain(newBrain);
+        if (this.leftChild != null)
+            this.leftChild.setBrain(newBrain);
+        if (this.rightChild != null)
+            this.rightChild.setBrain(newBrain);
     }
     public AINode chooseLeftChild()
     {
@@ -642,86 +684,31 @@ class AIPositionDecisionNode : AIGeometryDecisionNode
 class AITargetDecisionNode : AIGeometryDecisionNode
 {
 // public
-    public AITargetDecisionNode(double scaleX, double scaleY, double threshold)
+    public AITargetDecisionNode(double scaleX, double scaleY, double minDist)
     {
-        // returns true if and only if either
-        // the target is currently in range (with "threshold" additional margin of error), or a move of (scaleX, scaleY) will put it closer to in range
-        // currently these aren't being used yet
+        // if the distance to the target is no more than minDist and
+        // a move of scaleX, scaleY would get it closer to being in range, then return the left child
+        // otherwise, return the right child
         this.itsScaleX = scaleX;
         this.itsScaleY = scaleY;
-        this.itsThreshold = threshold;
+        this.itsThreshold = minDist;
+
     }
     public override AINode getNextNode(Character body)
     {
         // compute the expected minimum offset (x,y) of the projectile compared to the target
         GameObject target = body.getNearestEnemyCharacter();
-        if (target == null)
-            return this.chooseRightChild();
-        Weapon currentWeapon = body.getCurrentWeapon();
-        if (currentWeapon == null)
-            return this.chooseRightChild();
-        // compute what the attributes of the projectile would be if it were created now
-        Projectile currentProjectile = currentWeapon.makeProjectile(false);
-        /*Projectile currentProjectile = new Projectile();
-        currentProjectile.setTemplateExplosion(new Explosion());
-        currentProjectile.getTemplateExplosion().setTemplateStun(new Stun());*/
-        //return this.chooseRightChild();
-        // simulate it in 1sec intervals for 10 iterations
-        int i;
-        double[] location;
-        double[] desiredMove;
-        double[] actualMove;
-        double numSeconds = 0.1;
-        int count = Math.Min(30, (int)(currentProjectile.getRemainingFlightTime() / numSeconds));
-        currentProjectile.setTarget(target);
-        for (i = 0; i <= count; i++)
+        double[] offset = this.getBrain().getShotError(body, target);
+        double dist = Math.Sqrt(offset[0] * offset[0] + offset[1] * offset[1]);
+        // make sure that it's in range and that the move being considered will move it closer to in range
+        if ((dist <= this.itsThreshold) && (this.itsScaleX * offset[0] + this.itsScaleY * offset[1] >= 0))
         {
-            currentProjectile.updateVelocity(numSeconds);
-            // figure out how far the projectile wants to move
-            desiredMove = currentProjectile.getMove(numSeconds);
-            // figure out how far the projectile could actually move
-            actualMove = currentProjectile.moveTo(target, desiredMove);
-            // if it doesn't collide then step the simulation and continue
-            location = currentProjectile.getCenter();
-            location[0] += actualMove[0];
-            location[1] += actualMove[1];
-            currentProjectile.setCenter(location);
-            // check if it collides
-            if (actualMove != desiredMove)
-                break;
-        }
-        Explosion tempExplosion = currentProjectile.explode();
-        if (tempExplosion.intersects(target))
             return this.chooseLeftChild();
-        /*// Estimate whether the projectile will hit its target
-        double x = currentProjectile.getCenter()[0] - target.getCenter()[0];
-        double y = currentProjectile.getCenter()[1] - target.getCenter()[1];
-        double distance = Math.Sqrt(x * x + y * y);
-        double startingVX = currentProjectile.getVelocity()[0];
-        double startingVY = currentProjectile.getVelocity()[1];
-        double startingSpeed = Math.Sqrt(startingVX * startingVX + startingVY * startingVY);
-        //double vX = currentProjectile.getVelocity()[0] - target.getVelocity()[0];
-        //double vY = currentProjectile.getVelocity()[1] - target.getVelocity()[0];
-        double homingAccel = currentProjectile.getHomingAccel() - currentProjectile.getBoomerangAccel();
-        double drag = currentProjectile.getDragCoefficient();
-        double stableSpeed;
-        if (drag > 0)
-            stableSpeed = homingAccel / drag;
+        }
         else
-            stableSpeed = startingSpeed;
-        double averageSpeed = (startingSpeed + stableSpeed) / 2;
-        if (averageSpeed <= 0)
-            return this->chooseRightChild();
-        double estimatedDuration = distance / averageSpeed;
-        double homingMovement = .5 * homingAccel * estimatedDuration * estimatedDuration;
-        double unhomedX = x + estimatedDuration * (startingVX - target.getVelocity()[0]);
-        double unhomedY = x + estimatedDuration * (startingVY - target.getVelocity()[1]) - 0.5 * currentProjectile.getGravity() * estimatedDuration * estimatedDuration;
-        double endingVX;
-        double lateralError = x * vY + y * vX;
-        double radius = (target.getShape().getWidth() + target.getShape().getHeight()) / 4 + (projectile.getShape().getWidth() + projectile.getShape().getHeight()) / 4;
-        //double accel = currentProjectile.getHomingAccel() - currentProjectile.getBoomerangAccel();
-         */
-        return this.chooseRightChild();
+        {
+            return this.chooseRightChild();
+        }
     }
 // private
     double itsScaleX, itsScaleY, itsThreshold;
@@ -769,6 +756,12 @@ class AIActionNode : AINode
     public void setNextNode(AINode nextNode)
     {
         this.nextNode = nextNode;
+    }
+    public override void setBrain(AI newBrain)
+    {
+        base.setBrain(newBrain);
+        if (this.nextNode != null)
+            this.nextNode.setBrain(newBrain);
     }
     public override void reinforce(double quantity)
     {

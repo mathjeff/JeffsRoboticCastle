@@ -261,9 +261,9 @@ class Weapon
                 templateProjectile.setVelocity(tempVector);
                 templateProjectile.setGravity(0);
                 templateProjectile.setHomingAccel(15);
-                templateProjectile.setBoomerangAccel(500);
+                templateProjectile.setBoomerangAccel(1515);
                 templateProjectile.setDragCoefficient(0.01);
-                templateProjectile.setRemainingFlightTime(1.9);
+                templateProjectile.setRemainingFlightTime(2);
                 templateProjectile.setPenetration(.8);
                 templateProjectile.setNumExplosionsRemaining(2);
                 templateProjectile.initializeHitpoints(70);
@@ -668,7 +668,7 @@ class Weapon
                 templateStun = new Stun();
                 templateStun.setDamagePerSecond(0);
                 templateStun.setTimeMultiplier(-1);
-                templateStun.setDuration(5);
+                templateStun.setDuration(2);
                 templateExplosion.setTemplateStun(templateStun);
                 break;
             case 13:
@@ -828,6 +828,10 @@ class Weapon
     {
 	    this.maxAmmo = numShots;
     }
+    public void refillAmmo()
+    {
+        this.currentAmmo = this.maxAmmo;
+    }
     public double getMaxAmmo()
     {
         return this.maxAmmo;
@@ -886,6 +890,23 @@ class Weapon
     {
         return this.automatic;
     }
+    public void startWithOwnersVelocity(bool value)
+    {
+        this.addOwnersVelocity = value;
+    }
+    public void enableFiringWhileInactive(bool enable)
+    {
+        this.fireWhileInactive = enable;
+    }
+    public void enableCooldownWhileInactive(bool enable)
+    {
+        this.cooldownWhileInactive = enable;
+    }
+    public void enableRechargeWhileInactive(bool enable)
+    {
+        this.rechargeWhileInactive = enable;
+    }
+
 
 
     // Information about the current state of the weapon
@@ -1035,6 +1056,10 @@ class Weapon
         // return the projectile
         return shot;
     }
+    public void setTemplateProjectile(Projectile newProjectile)
+    {
+        this.templateProjectile = newProjectile;
+    }
     public Projectile getTemplateProjectile()
     {
         return this.templateProjectile;
@@ -1057,6 +1082,106 @@ class Weapon
     {
 	    return this.owner;
     }
+    // simulate firing the weapon and calculate by how far it will miss
+    public double[] simulateShooting(GameObject target)
+    {
+        double[] offset = new double[2];
+        // compute the expected minimum offset (x,y) of the projectile compared to the target
+        if (this.owner == null)
+            return offset;
+        if (target == null)
+            return offset;
+        // compute what the attributes of the projectile would be if it were created now
+        Projectile currentProjectile = this.makeProjectile(false);
+        // simulate it in 1sec intervals for 10 iterations
+        int i;
+        double[] location;
+        double[] desiredMove;
+        double[] actualMove;
+        double numSeconds = 0.1;
+        int count = Math.Min(30, (int)(currentProjectile.getRemainingFlightTime() / numSeconds));
+        currentProjectile.setTarget(target);
+        for (i = 0; i <= count; i++)
+        {
+            currentProjectile.updateVelocity(numSeconds);
+            // figure out how far the projectile wants to move
+            desiredMove = currentProjectile.getMove(numSeconds);
+            // figure out how far the projectile could actually move
+            actualMove = currentProjectile.moveTo(target, desiredMove);
+            // if it doesn't collide then step the simulation and continue
+            location = currentProjectile.getCenter();
+            location[0] += actualMove[0];
+            location[1] += actualMove[1];
+            currentProjectile.setCenter(location);
+            // check if it collides
+            if (actualMove != desiredMove)
+                break;
+        }
+        Explosion tempExplosion = currentProjectile.explode();
+        if (tempExplosion.intersects(target))
+        {
+            //System.Diagnostics.Trace.WriteLine("trajectory predicts a hit");
+            return offset;
+        }
+        // compute the offset from the projectile to the target
+        offset[0] = target.getCenter()[0] - tempExplosion.getCenter()[0];
+        offset[1] = target.getCenter()[1] - tempExplosion.getCenter()[1];
+        //System.Diagnostics.Trace.WriteLine("offsetx = " + offset[0].ToString());
+        return offset;
+    }
+    public double calculateCost()
+    {
+        double tempCost = 0;
+
+        // attributes of the weapon that affect the cost
+        tempCost += maxAmmo;
+        tempCost += ammoRechargeRate * 10;
+        if (ammoRechargeRate > 0)
+            tempCost += 3;
+        tempCost += 1 / (Math.Abs(warmupTime) + 0.001);
+        tempCost += 0.3 / (Math.Abs(cooldownTime) + 0.001);
+        tempCost += 0.1 / (Math.Abs(switchToTime) + 0.001);
+        tempCost += 0.1 / (Math.Abs(switchFromTime) + 0.001);
+        if (fireWhileInactive)
+            tempCost += 1;
+        if (cooldownWhileInactive)
+            tempCost += 1;
+        if (rechargeWhileInactive)
+            tempCost += 2;
+        
+        // attributes of the projectile that affect the cost
+        tempCost += templateProjectile.getShape().getWidth() * templateProjectile.getShape().getHeight() / 10000;
+        tempCost += templateProjectile.getRemainingFlightTime() / 5;
+        tempCost += 1 / (Math.Abs(templateProjectile.getPenetration() - 1) + 0.001);
+        tempCost += templateProjectile.getNumExplosionsRemaining();
+        tempCost += templateProjectile.getHomingAccel() / 2;
+
+        // attributes of the explosion that affect the cost
+        Explosion templateExplosion = templateProjectile.getTemplateExplosion();
+        tempCost += templateExplosion.getShape().getWidth() * templateExplosion.getShape().getHeight() / 10000;
+        tempCost += templateExplosion.getDuration();
+        if (templateExplosion.isFriendlyFireEnabled())
+            tempCost -= 2;
+
+        // attributes of the stun that affect the cost
+        Stun templateStun = templateExplosion.getTemplateStun();
+        tempCost += .3 / (Math.Abs(templateStun.getTimeMultiplier()) + 0.001);
+        tempCost += Math.Abs(templateStun.getTimeMultiplier() - 1);
+        tempCost += Math.Abs(templateStun.getDamagePerSecond());
+        tempCost += templateStun.getDuration();
+
+
+        // we need weapons to get less efficient per dollar as time goes on to prevent one superweapon from always being the best
+        tempCost *= tempCost;
+
+        this.cost = tempCost;
+        
+        return cost;
+    }
+    public double getCost()
+    {
+        return this.cost;
+    }
 private
 	// Attributes about the type of weapon
 	//BitmapImage projectileImage;
@@ -1073,6 +1198,9 @@ private
 	double switchToTime;
 	double switchFromTime;
     bool automatic;
+    bool fireWhileInactive; // Tells whether this weapon can fire without being the current weapon
+    bool cooldownWhileInactive; // Tells whether this weapon can cooldown without being the current weapon
+    bool rechargeWhileInactive; // Tells whether this weapon can recharge ammo without being the current weapon
 
 	// Attributes of the projectile it launches, to determine when it hits
     bool addOwnersVelocity;
@@ -1085,7 +1213,4 @@ private
 	double firingTimer;	// firingTimer equals warmupTime when nothing is going on. It's 0 when it fires, and it equals warmupTime + cooldownTime right after.
     bool pressedRecently;	// Tells whether the trigger transitioned from not pressed to pressed since the last tick
     bool currentTrigger;    // Tells whether the trigger is currently pressed
-    bool fireWhileInactive; // Tells whether this weapon can fire without being the current weapon
-    bool cooldownWhileInactive; // Tells whether this weapon can cooldown without being the current weapon
-    bool rechargeWhileInactive; // Tells whether this weapon can recharge ammo without being the current weapon
 };

@@ -57,12 +57,15 @@ class Player : Character
         for (i = 0; i < this.weaponTreeBranchFactor; i++)
         {
             this.weaponSubTrees.Add(new List<Weapon>());
-            tempLowIndex = ((highWeaponIndex + 1) * i + lowWeaponIndex * (weaponTreeBranchFactor - i)) / weaponTreeBranchFactor;
-            //tempHighIndex = (highWeaponIndex * (i + 1) + lowWeaponIndex * (weaponTreeBranchFactor - (i + 1))) / weaponTreeBranchFactor;
-            tempHighIndex = tempLowIndex + countPerTree - 1;
-            for (j = tempLowIndex; j <= tempHighIndex; j++)
+            if (highWeaponIndex >= 0)
             {
-                this.weaponSubTrees[i].Add(this.getWeaponAtIndex(j));
+                tempLowIndex = ((highWeaponIndex + 1) * i + lowWeaponIndex * (weaponTreeBranchFactor - i)) / weaponTreeBranchFactor;
+                //tempHighIndex = (highWeaponIndex * (i + 1) + lowWeaponIndex * (weaponTreeBranchFactor - (i + 1))) / weaponTreeBranchFactor;
+                tempHighIndex = tempLowIndex + countPerTree - 1;
+                for (j = tempLowIndex; j <= tempHighIndex; j++)
+                {
+                    this.weaponSubTrees[i].Add(this.getWeaponAtIndex(j));
+                }
             }
         }
     }

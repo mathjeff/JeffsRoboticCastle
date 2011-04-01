@@ -294,13 +294,15 @@ private
 
     double penetration;
     Explosion templateExplosion;
-	GameObject collision;
-    double[] collisionLocation;
-    GameObject target;
-    GameObject owner;
     double homingAccel;
     double boomerangAccel;
-    Weapon shooter;
     bool homeOnProjectiles;
     bool homeOnCharacters;
+    
+    // information about the current state of the projectile that don't apply to the template projectile
+    GameObject collision;
+    double[] collisionLocation;
+    Weapon shooter;
+    GameObject target;
+    GameObject owner;
 };

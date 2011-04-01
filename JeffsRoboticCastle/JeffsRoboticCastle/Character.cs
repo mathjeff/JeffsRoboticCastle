@@ -9,6 +9,7 @@ class Character : GameObject
         this.targetVelocity = new double[2];
         this.initializeHitpoints(10);
         this.activeWeapons = new System.Collections.Generic.List<Weapon>();
+        this.money = 1000;
     }
     public override bool isACharacter()
     {
@@ -34,6 +35,19 @@ class Character : GameObject
     public void setContactDamagePerSecond(double value)
     {
         this.contactDamagePerSecond = value;
+    }
+    public bool spendMoney(double amount)
+    {
+        if (this.money >= amount)
+        {
+            this.money -= amount;
+            return true;
+        }
+        return false;
+    }
+    public double getMoney()
+    {
+        return this.money;
     }
     public double[] getTargetVelocity()
     {
@@ -109,12 +123,17 @@ class Character : GameObject
     }
     public void jump()
     {
+        // make sure we're colliding with something and not moving up
 	    if (this.isColliding() && this.getVelocity()[1] <= 0.00001)
 	    {
-            double[] newVelocity = new double[2];
-            newVelocity[0] = this.getVelocity()[0];
-            newVelocity[1] = 1000;
-		    this.setVelocity(newVelocity);
+            // make sure we're not hitting the ceiling
+            if (this.collision.getCenter()[1] - this.collision.getShape().getHeight() / 2 + 0.00001 < this.getCenter()[1] + this.getShape().getHeight() / 2)
+            {
+                double[] newVelocity = new double[2];
+                newVelocity[0] = this.getVelocity()[0];
+                newVelocity[1] = 1000;
+                this.setVelocity(newVelocity);
+            }
 	    }
     }
 
@@ -324,6 +343,7 @@ class Character : GameObject
 	//double hitpoints;
 	double[] maxAccel;
 	double armor;
+    double money;
 	double[] targetVelocity;
 	GameObject collision;	// Tells what this object is colliding with, or null.
 	System.Collections.Generic.List<Weapon> weapons;

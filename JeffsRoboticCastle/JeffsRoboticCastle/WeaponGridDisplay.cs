@@ -49,11 +49,11 @@ class WeaponGridDisplay
                 // add the weapon to the screen
                 this.displays.Add(new WeaponStatusDisplay(this.canvas, position, spacing, currentWeapon));
                 // compute the position of the next one
-                xIndex++;
-                if (xIndex >= countsPerSide[0])
+                yIndex++;
+                if (yIndex >= countsPerSide[1])
                 {
-                    xIndex = 0;
-                    yIndex++;
+                    yIndex = 0;
+                    xIndex++;
                 }
                 position[0] = this.screenPosition[0] + xIndex * spacing[0];
                 position[1] = this.screenPosition[1] + yIndex * spacing[1];
