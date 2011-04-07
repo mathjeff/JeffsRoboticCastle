@@ -206,7 +206,7 @@ class WorldSearcher
         int i, j;
         for (i = 0; i < dim; i++)
         {
-            this.numBlocks[i] = (int)(worldSize[i] / typicalObjectDimensions[i]);
+            this.numBlocks[i] = (int)(Math.Ceiling(worldSize[i] / typicalObjectDimensions[i]));
             this.blockSize[i] = worldSize[i] / this.numBlocks[i];
         }
         // allocate memory for the items in the world

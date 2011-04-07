@@ -98,6 +98,7 @@
     <Compile Include="Enemy.cs" />
     <Compile Include="Explosion.cs" />
     <Compile Include="GameObject.cs" />
+    <Compile Include="Ghost.cs" />
     <Compile Include="HitPointBar.cs" />
     <Compile Include="ImageLoader.cs" />
     <Compile Include="JeffsRoboticCastle.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Painting.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="Portal.cs" />
     <Compile Include="Projectile.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

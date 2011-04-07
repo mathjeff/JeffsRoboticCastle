@@ -18,8 +18,14 @@ class MenuScreen : Screen
     }
     public override void initialize(Canvas c, double[] screenSize)
     {
-        this.desiredScreen = this;
+        this.setNextScreen(this);
         base.initialize(c, screenSize);
+    }
+    public override void show()
+    {
+        this.desiredScreen = this;
+        this.keyDown = false;
+        base.show();
     }
     public void setBackgroundImage(System.Windows.Controls.Image image)
     {

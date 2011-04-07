@@ -9,7 +9,7 @@ class Character : GameObject
         this.targetVelocity = new double[2];
         this.initializeHitpoints(10);
         this.activeWeapons = new System.Collections.Generic.List<Weapon>();
-        this.money = 1000;
+        this.money = 0;
     }
     public override bool isACharacter()
     {
@@ -48,6 +48,10 @@ class Character : GameObject
     public double getMoney()
     {
         return this.money;
+    }
+    public void addMoney(double amount)
+    {
+        this.money += amount;
     }
     public double[] getTargetVelocity()
     {
@@ -296,7 +300,7 @@ class Character : GameObject
         if (!this.nearestEnemyCharacterUpToDate)
         {
             // find the nearest enemy character, using the one from the previous tick as a hint
-            this.nearestEnemyCharacter = (Character)(this.getWorld().findNearestObject(this, false, false, true, this.nearestEnemyCharacter, true, false, false));
+            this.nearestEnemyCharacter = (Character)(this.getWorld().findNearestObject(this, false, false, true, this.nearestEnemyCharacter, true, false, false, false));
             this.nearestEnemyCharacterUpToDate = true;
         }
         return this.nearestEnemyCharacter;
@@ -307,7 +311,7 @@ class Character : GameObject
         if (!this.nearestEnemyProjectileUpToDate)
         {
             // find the nearest enemy projectile, using the one from the previous tick as a hint
-            this.nearestEnemyProjectile = (Projectile)(this.getWorld().findNearestObject(this, false, false, true, this.nearestEnemyProjectile, false, true, false));
+            this.nearestEnemyProjectile = (Projectile)(this.getWorld().findNearestObject(this, false, false, true, this.nearestEnemyProjectile, false, true, false, false));
             this.nearestEnemyProjectileUpToDate = true;
         }
         return this.nearestEnemyProjectile;
@@ -318,7 +322,7 @@ class Character : GameObject
         if (!this.nearestObstacleUpToDate)
         {
             // find the nearest non-ally, non-enemy object, using the one from the previous tick as a hint
-            this.nearestObstacle = this.getWorld().findNearestObject(this, false, true, false, this.nearestObstacle, true, false, false);
+            this.nearestObstacle = this.getWorld().findNearestObject(this, false, true, false, this.nearestObstacle, true, false, false, false);
             this.nearestObstacleUpToDate = true;
         }
         return this.nearestObstacle;

@@ -1003,6 +1003,14 @@ class GameObject
     {
         return false;
     }
+    public virtual bool isAPortal()
+    {
+        return false;
+    }
+    public virtual bool isAGhost()
+    {
+        return false;
+    }
     public virtual void takeDamage(double damagePerSec, double numSeconds)
     {
         // damage is not scaled by the stasis field
@@ -1056,6 +1064,10 @@ class GameObject
     {
         // anything that is just a GameObject doesn't get stunned or damaged
         return false;
+    }
+    public void clearStuns()
+    {
+        this.stuns.Clear();
     }
     public double getTimeMultiplier()
     {

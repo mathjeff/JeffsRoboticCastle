@@ -35,7 +35,7 @@ class Screen
         this.canvas = this.makeCanvas(screenPosition, screenSize);
     }
     // make the menu appear
-    public void show()
+    public virtual void show()
     {
         this.parentCanvas.Children.Add(this.canvas);
     }
@@ -52,6 +52,10 @@ class Screen
     public Canvas getCanvas()
     {
         return this.canvas;
+    }
+    public Canvas getParentCanvas()
+    {
+        return this.parentCanvas;
     }
     public Canvas makeCanvas(double[] position, double[] size)
     {

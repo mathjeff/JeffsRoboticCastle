@@ -86,6 +86,8 @@ namespace MyGameWindow
 #if true
             // The actual timer interval is supposed to be between 3/2 and 2 times the requested timer interval
             //if ((actualNumTicks < requestedNumTicks * 3 / 2) || (actualNumTicks > requestedNumTicks * 2))
+            // make sure that time actually moved forward. For some reason, in extremely rare occurences, it may not move forward
+            if (actualNumTicks >= 0)
             {
                 // If the timer ticked as quickly as we wanted, then try to speed it up a little
                 TimeSpan desiredInterval = new TimeSpan(actualNumTicks * 4 / 7);

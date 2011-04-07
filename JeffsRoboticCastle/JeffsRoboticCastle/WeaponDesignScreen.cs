@@ -17,6 +17,15 @@ class WeaponDesignScreen : MenuScreen
     {
         this.player = subject;
         this.statusDisplay.followCharacter(subject);
+    }
+    public override void show()
+    {
+        this.wantsDemo = false;
+        this.update();
+        base.show();
+    }
+    public void update()
+    {
         this.currentMoney.Content = this.player.getMoney().ToString();
     }
     public override void initialize(Canvas c, double[] screenSize)
@@ -38,11 +47,43 @@ class WeaponDesignScreen : MenuScreen
     public override Screen  timerTick(double numSeconds)
     {
         this.statusDisplay.update();
-        return base.timerTick(numSeconds);
+        if (this.wantsDemo)
+        {
+            // create a new world and go to it
+            this.updateCurrentWeapon();
+            return this.makeDemoWorld();
+        }
+        else
+        {
+            return base.timerTick(numSeconds);
+        }
     }
 
 
 // private
+    WorldScreen makeDemoWorld()
+    {
+        // make a screen to show the world
+        WorldScreen newScreen = new WorldScreen(this.getParentCanvas(), new double[2], this.getSize());
+        // tell the world screen to return to this one when done
+        newScreen.setExitScreen(this);
+
+        // make the world
+        this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 0);
+        
+        // make the player
+        this.demoPlayer = new Player(new double[2]);
+        this.demoPlayer.addWeapon(this.templateWeapon);
+        this.demoPlayer.gotoWeaponTreeRoot();
+        
+        // put the player in the world
+        this.demoWorld.addItemAndDisableUnloading(demoPlayer);
+        
+        // tell the screen user interface to show the status of the player
+        newScreen.followCharacter(this.demoPlayer, this.demoWorld);
+        // return the new screen
+        return newScreen;
+    }
     void addSubviews()
     {
         /*
@@ -113,21 +154,27 @@ class WeaponDesignScreen : MenuScreen
 
         Label switchToTimeLabel = new Label();
         switchToTimeLabel.Content = "Switch-to-Time";
-        addControl(switchToTimeLabel, getLeft(weaponCostLabel), getBottom(automaticLabel) + verticalSpacing, labelWidth, labelHeight);
         switchToTime = new TextBox();
-        addControl(switchToTime, getLeft(weaponCost), getBottom(automatic) + verticalSpacing, labelWidth, labelHeight);
 
         Label switchFromTimeLabel = new Label();
         switchFromTimeLabel.Content = "Switch-from-Time";
-        addControl(switchFromTimeLabel, getLeft(weaponCostLabel), getBottom(switchToTimeLabel) + verticalSpacing, labelWidth, labelHeight);
         switchFromTime = new TextBox();
+#if SWITCH_TIMES
+        addControl(switchToTimeLabel, getLeft(weaponCostLabel), getBottom(automaticLabel) + verticalSpacing, labelWidth, labelHeight);
+        addControl(switchToTime, getLeft(weaponCost), getBottom(automatic) + verticalSpacing, labelWidth, labelHeight);
+        addControl(switchFromTimeLabel, getLeft(weaponCostLabel), getBottom(switchToTimeLabel) + verticalSpacing, labelWidth, labelHeight);
         addControl(switchFromTime, getLeft(weaponCost), getBottom(switchToTime) + verticalSpacing, labelWidth, labelHeight);
-
+#endif
         Label maxAmmoLabel = new Label();
         maxAmmoLabel.Content = "Max Ammo";
-        addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(switchFromTimeLabel) + verticalSpacing, labelWidth, labelHeight);
         maxAmmo = new TextBox();
+#if SWITCH_TIMES
+        addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(switchFromTimeLabel) + verticalSpacing, labelWidth, labelHeight);
         addControl(maxAmmo, getLeft(weaponCost), getBottom(switchFromTime) + verticalSpacing, labelWidth, labelHeight);
+#else
+        addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(automaticLabel) + verticalSpacing, labelWidth, labelHeight);
+        addControl(maxAmmo, getLeft(weaponCost), getBottom(automatic) + verticalSpacing, labelWidth, labelHeight);
+#endif
 
         Label ammoRechargeRateLabel = new Label();
         ammoRechargeRateLabel.Content = "Ammo Recharge/sec";
@@ -254,6 +301,7 @@ class WeaponDesignScreen : MenuScreen
         homeOnPlayersLabel.Content = "Home on Players";
         addControl(homeOnPlayersLabel, getLeft(remainingFlightTimeLabel), getBottom(homeOnProjectilesLabel) + verticalSpacing, labelWidth, labelHeight);
         homeOnPlayers = new CheckBox();
+        homeOnPlayers.IsChecked = true;
         addControl(homeOnPlayers, getLeft(remainingFlightTime), getBottom(homeOnProjectiles) + verticalSpacing, labelWidth, labelHeight);
 
 
@@ -342,10 +390,15 @@ class WeaponDesignScreen : MenuScreen
         calculateButton.Content = "Calculate Cost";
         this.addControl(calculateButton, 900, 600, labelWidth, labelHeight);
 
+        Button demoButton = new Button();
+        demoButton.Click += new RoutedEventHandler(requestWeaponDemo);
+        demoButton.Content = "Demo";
+        this.addControl(demoButton, 900, 700, labelWidth, labelHeight);
+
         Button purchaseButton = new Button();
         purchaseButton.Click += new RoutedEventHandler(purchaseCurrentWeapon);
         purchaseButton.Content = "Purchase";
-        this.addControl(purchaseButton, 900, 850, labelWidth, labelHeight);
+        this.addControl(purchaseButton, 900, 800, labelWidth, labelHeight);
 
         Button doneButton = new Button();
         doneButton.Click += new RoutedEventHandler(requestToExit);
@@ -362,13 +415,13 @@ class WeaponDesignScreen : MenuScreen
     void fillInValues()
     {
         if (maxAmmo.Text == "")
-            maxAmmo.Text = "1";
+            maxAmmo.Text = "5";
         if (ammoRechargeRate.Text == "")
-            ammoRechargeRate.Text = "0";
+            ammoRechargeRate.Text = ".1";
         if (warmupTime.Text == "")
-            warmupTime.Text = "1";
+            warmupTime.Text = ".1";
         if (cooldownTime.Text == "")
-            cooldownTime.Text = "1";
+            cooldownTime.Text = ".9";
         if (switchToTime.Text == "")
             switchToTime.Text = "1";
         if (switchFromTime.Text == "")
@@ -379,7 +432,7 @@ class WeaponDesignScreen : MenuScreen
         if (projectileImage.Text == "")
             projectileImage.Text = "fan.png";
         if (projectileRadius.Text == "")
-            projectileRadius.Text = "100";
+            projectileRadius.Text = "10";
         if (projectileX.Text == "")
             projectileX.Text = "0";
         if (projectileY.Text == "")
@@ -420,6 +473,10 @@ class WeaponDesignScreen : MenuScreen
     void calculateCost(object sender, EventArgs e)
     {
         calculateCost();
+    }
+    void requestWeaponDemo(object sender, EventArgs e)
+    {
+        this.wantsDemo = true;        
     }
     void calculateCost()
     {
@@ -501,6 +558,9 @@ class WeaponDesignScreen : MenuScreen
     }
     Player player;
     Label currentMoney;
+    bool wantsDemo;
+    WorldLoader demoWorld;
+    Player demoPlayer;
     CharacterStatusDisplay statusDisplay;
     // attributes of the weapon itself, rather than the projectiles or explosions
     Label weaponCost;

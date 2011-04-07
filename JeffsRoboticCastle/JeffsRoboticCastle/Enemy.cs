@@ -15,9 +15,9 @@ public
                 startingImage = ImageLoader.loadImage("horseman.png");
 	            this.setCenter(location);
                 this.setShape(new GameRectangle(94, 110));
-                accel = new double[2]; accel[0] = 500; accel[1] = 0;
+                accel = new double[2]; accel[0] = 300; accel[1] = 0;
 	            this.setMaxAccel(accel);
-	            this.setDragCoefficient(3);
+	            this.setDragCoefficient(1);
 	            this.enemyType = type;
                 this.addWeapon(new Weapon(weapon1));
                 this.addWeapon(new Weapon(weapon2));
@@ -27,7 +27,7 @@ public
                 startingImage = ImageLoader.loadImage("eagle.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(56, 43));
-                accel = new double[2]; accel[0] = 200; accel[1] = 500;
+                accel = new double[2]; accel[0] = 250; accel[1] = 500;
                 this.setMaxAccel(accel);
                 this.setDragCoefficient(3);
                 this.enemyType = type;
@@ -39,7 +39,7 @@ public
                 startingImage = ImageLoader.loadImage("swarm.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(16, 9));
-                accel = new double[2]; accel[0] = 100; accel[1] = 0;
+                accel = new double[2]; accel[0] = 200; accel[1] = 0;
                 this.setMaxAccel(accel);
                 this.setDragCoefficient(3);
                 this.enemyType = type;
@@ -51,7 +51,7 @@ public
             default:
                 break;
         }
-        this.setContactDamagePerSecond(1);
+        this.setContactDamagePerSecond(2);
         this.setBitmap(startingImage);
         this.setImageOffset(new double[2]);
         this.setBrain(new AI());

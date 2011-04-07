@@ -47,6 +47,25 @@ class Player : Character
             updateWeaponTrees();
         }
     }
+    public void resetForLevel()
+    {
+        // recharge all the weapons
+        int i, count;
+        count = this.getNumWeapons();
+        Weapon currentWeapon;
+        for (i = 0; i < count; i++)
+        {
+            currentWeapon = this.getWeaponAtIndex(i);
+            currentWeapon.resetCooldown();
+            currentWeapon.refillAmmo();
+        }
+        // return to the starting location
+        this.setCenter(new double[2]);
+        this.setVelocity(new double[2]);
+        this.setHitpoints(this.getMaxHitpoints());
+        this.gotoWeaponTreeRoot();
+        this.clearStuns();
+    }
     // private
     void updateWeaponTrees()
     {

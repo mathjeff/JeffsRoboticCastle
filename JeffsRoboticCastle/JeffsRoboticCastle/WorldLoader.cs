@@ -10,7 +10,7 @@ class WorldLoader
 {
 // Public
     // Constructor
-    public WorldLoader(Canvas canvas, double[] screenSize)
+    public WorldLoader(Canvas canvas, double[] screenSize, int levelNumber)
     {
         // setup a canvas to put the world on, for the purpose of cropping
         this.worldCanvas = canvas;
@@ -32,8 +32,8 @@ class WorldLoader
         existentDimensions[0] = activeDimensions[0];
         existentDimensions[1] = activeDimensions[1];
         this.worldDimensions = new double[2];
-        worldDimensions[0] = 30000;
-        worldDimensions[1] = 2000;
+        worldDimensions[0] = 4500 + 3000 * levelNumber;
+        worldDimensions[1] = 1000;
         //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
         this.world = new World(worldCanvas, screenSize, existentDimensions);
@@ -55,12 +55,12 @@ class WorldLoader
         this.loadedObjects = new System.Collections.Generic.HashSet<GameObject>();
 
 
-        this.populate();
+        this.populate(levelNumber);
 
     }
 
     // put stuff in the world
-    public void populate()
+    public void populate(int levelNumber)
     {
         // #define DESIGN_HERE
         double[] location = new double[2];
@@ -98,8 +98,8 @@ class WorldLoader
         while (x < worldDimensions[0])
         {
             // add an enemy
-            x += 50 + 300 * generator.NextDouble();
-            y = 600 * generator.NextDouble();
+            x += (2000 / worldDimensions[1]) * 3000 * generator.NextDouble() / (levelNumber + 1);
+            y = worldDimensions[1] * generator.NextDouble();
             weaponType1 = (int)(15 * generator.NextDouble());
             weaponType2 = (int)(15 * generator.NextDouble());
             location = new double[2]; location[0] = x; location[1] = y;
@@ -110,12 +110,25 @@ class WorldLoader
             this.addItem(new Painting(location, 0));
         }
 #endif
+        // add an exit
+        location[0] = worldDimensions[0] + 100;
+        location[1] = 50;
+        Portal exit = new Portal();
+        exit.setCenter(location);
+        this.addItem(exit);
 #if true
         // add platforms
-        for (i = 0; i < 300; i++)
+        double spacing = 25;
+        for (i = 0; i < 4; i++)
+        {
+            if (generator.Next(2) == 0)
+                spacing *= 2;
+        }
+        int count = (int)(worldDimensions[0] / spacing);
+        for (i = 0; i < count; i++)
         {
             x = generator.NextDouble() * worldDimensions[0];
-            y = generator.NextDouble() * 500;
+            y = worldDimensions[1] * generator.NextDouble();
             location = new double[2]; location[0] = x; location[1] = y;
             type = (int)(generator.NextDouble() * 2);
             this.addItem(new Platform(location, type));
@@ -334,6 +347,16 @@ class WorldLoader
                 }
             }
         }
+    }
+    // tells whether this character is touching any portans
+    public bool characterTouchingPortal(Character character)
+    {
+        return this.world.characterTouchingPortal(character);
+    }
+    // performs cleanup on the world so it is essentially gone
+    public void destroy()
+    {
+        this.world.destroy();
     }
 // Private
     // Using the current values of the world camera, calculate which parts of the world need to be part of reality

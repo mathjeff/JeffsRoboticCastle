@@ -17,7 +17,7 @@ class JeffsRoboticCastle
         this.setupPlayer();
 	    this.setupDrawing(screenWidth, screenHeight);
 	    //this.userCamera = new Camera(RectangleF(0, 0, (float)windowWidth, (float)windowHeight), RectangleF(0, 0, (float)windowWidth, (float)windowHeight));
-	    this.setupWorld();
+	    this.setupWorld(1);
         //this.setupCharacterStatusDisplay();
         //this.audioPlayer = new AudioPlayer(newCanvas);
         //this.audioPlayer.setSoundFile("09 Who Am I Living For_.m4a");
@@ -43,18 +43,19 @@ class JeffsRoboticCastle
         // tell the screen that a button was pressed, in case it's a menu that cares about it
         this.currentScreen.KeyDown(sender, e);
         // tell the world that a button was pressed
-        if (this.isWorldRunning())
-            this.worldKeyDown(sender, e);
+        //if (this.isWorldRunning())
+        //    this.worldKeyDown(sender, e);
     }
     public void KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
     {
         // tell the current screen that a button was released, in case it's a menu that cares about it
         this.currentScreen.KeyUp(sender, e);
         // tell the world that a button was released
-        if (this.isWorldRunning())
-            this.worldKeyUp(sender, e);
+        //if (this.isWorldRunning())
+        //    this.worldKeyUp(sender, e);
     }
     // this function handles any necessary action that the world must take due to a keypress
+    /*
     public void worldKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         // #define DESIGN_HERE
@@ -114,12 +115,16 @@ class JeffsRoboticCastle
             this.playerPressTrigger(false);
         }
     }
+    */
     // image drawing
     // advance the game by one time unit
 	public void timerTick(double numSeconds)
     {
+        // update the screen
+        Screen newScreen;
         if (this.isWorldRunning())
         {
+            /*
             if (numSeconds > 0)
             {
                 // advance the world
@@ -127,15 +132,40 @@ class JeffsRoboticCastle
                 // scroll the screen
                 this.worldLoader.scrollTo(this.player);
             }
+            */
+            newScreen = this.currentScreen.timerTick(numSeconds);
+            if (newScreen != worldScreen)
+            {
+                // if we get here then they just left the world through a portal or whatever
+                if (this.levelNumber == 5)
+                {
+                    // if they finished all the levels then show the victory screen
+                    MenuScreen victoryScreen = new MenuScreen(this.mainCanvas, this.screenSize);
+                    victoryScreen.setBackgroundBitmap(ImageLoader.loadImage("victory.png"));
+                    newScreen = victoryScreen;
+                    this.player.resetForLevel();
+                }
+                else
+                {
+                    // if there are still more levels then create the new level
+                    this.player.resetForLevel();
+                    this.player.addMoney(1600);
+                    this.levelNumber++;
+                    this.setupWorld(levelNumber);
+                }
+            }
         }
-        // update the screen
-        Screen newScreen = this.currentScreen.timerTick(numSeconds);
+        else
+        {
+            newScreen = this.currentScreen.timerTick(numSeconds);
+        }
         // transition to the next screen if necessary
         this.setCurrentScreen(newScreen);
     }
     // user commands
 	// movement
     // controls for the player
+    /*
     public void playerJump()
     {
         this.player.jump();
@@ -179,6 +209,7 @@ class JeffsRoboticCastle
     {
         this.player.selectWeaponSubtreeAtIndex(3);
     }
+    */
 /*    public void cyclePlayerWeaponForward()
     {
 	    //this.player.cycleWeaponForward();
@@ -228,6 +259,9 @@ class JeffsRoboticCastle
         designScreen.setPlayer(this.player);
         designScreen.setNextScreen(this.worldScreen);
         menuScreen.setBackgroundBitmap(ImageLoader.loadImage("Instructions.png"));
+        //MenuScreen victoryScreen = new MenuScreen(this.mainCanvas, screenSize);
+        this.worldScreen.setExitScreen(menuScreen);
+        //victoryScreen.setBackgroundBitmap(ImageLoader.loadImage("Victory.png"));
         this.setCurrentScreen(menuScreen);
     }
     void setupPlayer()
@@ -236,6 +270,8 @@ class JeffsRoboticCastle
         // spawn the player
         double[] location = new double[2]; location[0] = 30; location[1] = 30;
         this.player = new Player(location);
+        this.player.addMoney(1600);
+#if false
         this.player.addWeapon(new Weapon(0));
         this.player.addWeapon(new Weapon(1));
         this.player.addWeapon(new Weapon(2));
@@ -252,9 +288,10 @@ class JeffsRoboticCastle
         this.player.addWeapon(new Weapon(13));
         this.player.addWeapon(new Weapon(14));
         this.player.addWeapon(new Weapon(15));
+#endif
         this.player.gotoWeaponTreeRoot();
     }
-	void setupWorld()
+	void setupWorld(int levelNum)
     {
         //System.Windows.Shapes.Rectangle worldRect = new System.Windows.Shapes.Rectangle();
         /*Canvas worldCanvas = new Canvas();
@@ -268,10 +305,14 @@ class JeffsRoboticCastle
         //worldCanvas.
         // create an object to keep track of the world
         //this.worldLoader = new WorldLoader(worldCanvas, worldWindowPosition, worldWindowSize);
-        this.worldLoader = new WorldLoader(this.worldScreen.getWorldCanvas(), this.worldScreen.getWorldWindowSize());
+        if (this.worldLoader != null)
+        {
+            this.worldLoader.destroy();
+        }
+        this.worldLoader = new WorldLoader(this.worldScreen.getWorldCanvas(), this.worldScreen.getWorldWindowSize(), levelNum);
 
         this.worldLoader.addItemAndDisableUnloading(this.player);
-        this.worldScreen.followCharacter(this.player);
+        this.worldScreen.followCharacter(this.player, this.worldLoader);
         //this.worldLoader.addItem(this.player);
     }
     void setCurrentScreen(Screen newScreen)
@@ -309,4 +350,5 @@ class JeffsRoboticCastle
     AudioPlayer audioPlayer;
     WorldScreen worldScreen;
     Screen currentScreen;
+    int levelNumber;
 };
