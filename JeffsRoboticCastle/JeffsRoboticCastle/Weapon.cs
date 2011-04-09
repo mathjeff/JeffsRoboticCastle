@@ -47,7 +47,7 @@ class Weapon
         {
             case 0:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
@@ -95,7 +95,7 @@ class Weapon
             case 1:
 
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
@@ -142,7 +142,7 @@ class Weapon
             case 2:
 
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 1;
@@ -188,13 +188,13 @@ class Weapon
                 break;
             case 3:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
                 ammoRechargeRate = 0.1;
                 this.setWarmupTime(0.01);
-                cooldownTime = 5;
+                cooldownTime = 4;
                 switchToTime = 1;
                 switchFromTime = 2;
                 automatic = false;
@@ -230,7 +230,7 @@ class Weapon
                 templateProjectile.setTemplateExplosion(templateExplosion);
 
                 templateStun = new Stun();
-                templateStun.setDamagePerSecond(0.5);
+                templateStun.setDamagePerSecond(0.6);
                 templateStun.setTimeMultiplier(0.7);
                 templateStun.setDuration(0);
                 templateExplosion.setTemplateStun(templateStun);
@@ -238,7 +238,7 @@ class Weapon
             case 4:
 
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
@@ -278,7 +278,7 @@ class Weapon
                 templateProjectile.setTemplateExplosion(templateExplosion);
 
                 templateStun = new Stun();
-                templateStun.setDamagePerSecond(15);
+                templateStun.setDamagePerSecond(16);
                 templateStun.setTimeMultiplier(0.1);
                 templateStun.setDuration(0.1);
                 templateExplosion.setTemplateStun(templateStun);
@@ -286,7 +286,7 @@ class Weapon
 
             case 5:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 30;
@@ -333,7 +333,7 @@ class Weapon
                 break;
             case 6:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
@@ -382,7 +382,7 @@ class Weapon
 
             case 7:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
@@ -428,7 +428,7 @@ class Weapon
                 break;
             case 8:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
@@ -476,7 +476,7 @@ class Weapon
                 break;
             case 9:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
@@ -524,7 +524,7 @@ class Weapon
 
             case 10:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 8;
@@ -574,7 +574,7 @@ class Weapon
 
             case 11:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
@@ -626,7 +626,7 @@ class Weapon
 
             case 12:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 2;
@@ -673,7 +673,7 @@ class Weapon
                 break;
             case 13:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
@@ -721,7 +721,7 @@ class Weapon
                 break;
             case 14:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
@@ -769,13 +769,13 @@ class Weapon
                 break;
             case 15:
                 // Attributes about when you may own the item
-                cost = 100;
+                cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
                 ammoRechargeRate = .005;
-                this.setWarmupTime(0.01);
-                cooldownTime = 2;
+                this.setWarmupTime(1);
+                cooldownTime = 3;
                 switchToTime = 1;
                 switchFromTime = 2;
                 automatic = false;
@@ -810,7 +810,7 @@ class Weapon
                 templateStun = new Stun();
                 templateStun.setDamagePerSecond(0);
                 templateStun.setTimeMultiplier(0);
-                templateStun.setDuration(9);
+                templateStun.setDuration(7);
                 templateExplosion.setTemplateStun(templateStun);
                 break;
             default:
@@ -898,6 +898,10 @@ class Weapon
     {
         this.addOwnersVelocity = value;
     }
+    public bool shouldStartWithOwnersVelocity()
+    {
+        return this.addOwnersVelocity;
+    }
     public void enableFiringWhileInactive(bool enable)
     {
         this.fireWhileInactive = enable;
@@ -910,9 +914,17 @@ class Weapon
     {
         this.cooldownWhileInactive = enable;
     }
+    public bool coolsDownWhileInactive()
+    {
+        return this.cooldownWhileInactive;
+    }
     public void enableRechargeWhileInactive(bool enable)
     {
         this.rechargeWhileInactive = enable;
+    }
+    public bool rechargesWhileInactive()
+    {
+        return this.rechargeWhileInactive;
     }
 
 
@@ -1204,8 +1216,8 @@ class Weapon
             tempCost *= 2;
 
         // attributes of the projectile that affect the cost
-        tempCost *= (1 + templateProjectile.getShape().getWidth() / 50);
-        tempCost *= (1 + templateProjectile.getShape().getHeight() / 50);
+        tempCost *= (1 + templateProjectile.getShape().getWidth() / 150);
+        tempCost *= (1 + templateProjectile.getShape().getHeight() / 150);
         tempCost *= (1 + templateProjectile.getRemainingFlightTime() / 5);
         tempCost *= (1 + 1 / (Math.Abs(templateProjectile.getPenetration() - 1) + 0.001));
         tempCost *= (1 + templateProjectile.getNumExplosionsRemaining() * 2);
@@ -1213,8 +1225,8 @@ class Weapon
 
         // attributes of the explosion that affect the cost
         Explosion templateExplosion = templateProjectile.getTemplateExplosion();
-        tempCost *= (1 + templateExplosion.getShape().getWidth() / 150);
-        tempCost *= (1 + templateExplosion.getShape().getHeight() / 150);
+        tempCost *= (1 + templateExplosion.getShape().getWidth() / 50);
+        tempCost *= (1 + templateExplosion.getShape().getHeight() / 50);
         tempCost *= (1 + templateExplosion.getDuration());
         if (templateExplosion.isFriendlyFireEnabled())
             tempCost /= 2;
@@ -1223,9 +1235,9 @@ class Weapon
         Stun templateStun = templateExplosion.getTemplateStun();
         tempCost *= (1 + 1 / (Math.Abs(templateStun.getTimeMultiplier()) + 0.001));
         tempCost *= (1 + Math.Abs(templateStun.getTimeMultiplier() - 1));
-        tempCost *= (1 + Math.Abs(templateStun.getDamagePerSecond()) * 2);
+        tempCost *= (1 + Math.Abs(templateStun.getDamagePerSecond()) * 2.5);
         if ((templateStun.getDamagePerSecond() < 0) && (templateExplosion.isFriendlyFireEnabled()))
-            tempCost *= 24;
+            tempCost *= 30;
         tempCost *= (1 + templateExplosion.getDuration() + templateStun.getDuration());
 
 

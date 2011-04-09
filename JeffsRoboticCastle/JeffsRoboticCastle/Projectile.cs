@@ -45,6 +45,11 @@ class Projectile : GameObject
         this.owner = original.owner;
         this.boomerangAccel = original.boomerangAccel;
     }
+    // tells whether this object can make itself move
+    public override bool isMovable()
+    {
+        return true;
+    }
 
     // Information about flight
     // Time until it is forced to explode and disappear

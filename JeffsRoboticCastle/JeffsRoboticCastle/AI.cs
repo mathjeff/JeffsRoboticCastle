@@ -184,7 +184,11 @@ class AI
     public double[] getShotError(Character body, GameObject target)
     {
         if (shotError == null)
-            shotError = body.getCurrentWeapon().simulateShooting(target);
+        {
+            Weapon currentWeapon = body.getCurrentWeapon();
+            if (currentWeapon != null)
+                shotError = currentWeapon.simulateShooting(target);
+        }
         return shotError;
     }
 // private
@@ -711,16 +715,16 @@ class AITargetDecisionNode : AIGeometryDecisionNode
         // compute the expected minimum offset (x,y) of the projectile compared to the target
         GameObject target = body.getNearestEnemyCharacter();
         double[] offset = this.getBrain().getShotError(body, target);
-        double dist = Math.Sqrt(offset[0] * offset[0] + offset[1] * offset[1]);
-        // make sure that it's in range and that the move being considered will move it closer to in range
-        if ((dist <= this.itsThreshold) && (this.itsScaleX * offset[0] + this.itsScaleY * offset[1] >= 0))
+        if (offset != null)
         {
-            return this.chooseLeftChild();
+            double dist = Math.Sqrt(offset[0] * offset[0] + offset[1] * offset[1]);
+            // make sure that it's in range and that the move being considered will move it closer to in range
+            if ((dist <= this.itsThreshold) && (this.itsScaleX * offset[0] + this.itsScaleY * offset[1] >= 0))
+            {
+                return this.chooseLeftChild();
+            }
         }
-        else
-        {
-            return this.chooseRightChild();
-        }
+        return this.chooseRightChild();
     }
 // private
     double itsScaleX, itsScaleY, itsThreshold;

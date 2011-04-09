@@ -23,6 +23,11 @@ class WeaponDesignScreen : MenuScreen
         this.wantsDemo = false;
         this.update();
         base.show();
+        if (this.templateWeapon != null)
+        {
+            this.templateWeapon.refillAmmo();
+            this.templateWeapon.resetCooldown();
+        }
     }
     public void update()
     {
@@ -33,10 +38,9 @@ class WeaponDesignScreen : MenuScreen
         // setup drawing
         base.initialize(c, screenSize);
         this.setBackgroundBitmap(ImageLoader.loadImage("blueprint.png"));
-        this.templateWeapon = new Weapon(1);
         this.addSubviews();
-        this.fillInValues();
-        this.calculateCost();
+        //this.fillInValues();
+        this.quickBuildWeapon();
     }
     public override void KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
@@ -44,13 +48,17 @@ class WeaponDesignScreen : MenuScreen
     public override void KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
     {
     }
-    public override Screen  timerTick(double numSeconds)
+    public override Screen timerTick(double numSeconds)
     {
+        // update the weapon's cost if needed
+        this.calculateCost();
+        // update the display of purchased weapons if needed
         this.statusDisplay.update();
+        // decide whether to create the demo world
         if (this.wantsDemo)
         {
             // create a new world and go to it
-            this.updateCurrentWeapon();
+            //this.updateCurrentWeapon();
             return this.makeDemoWorld();
         }
         else
@@ -84,6 +92,7 @@ class WeaponDesignScreen : MenuScreen
         // return the new screen
         return newScreen;
     }
+    // creates and adds a lot of text boxes to type into
     void addSubviews()
     {
         /*
@@ -300,9 +309,9 @@ class WeaponDesignScreen : MenuScreen
         Label homeOnPlayersLabel = new Label();
         homeOnPlayersLabel.Content = "Home on Players";
         addControl(homeOnPlayersLabel, getLeft(remainingFlightTimeLabel), getBottom(homeOnProjectilesLabel) + verticalSpacing, labelWidth, labelHeight);
-        homeOnPlayers = new CheckBox();
-        homeOnPlayers.IsChecked = true;
-        addControl(homeOnPlayers, getLeft(remainingFlightTime), getBottom(homeOnProjectiles) + verticalSpacing, labelWidth, labelHeight);
+        homeOnCharacters = new CheckBox();
+        homeOnCharacters.IsChecked = true;
+        addControl(homeOnCharacters, getLeft(remainingFlightTime), getBottom(homeOnProjectiles) + verticalSpacing, labelWidth, labelHeight);
 
 
 
@@ -314,7 +323,7 @@ class WeaponDesignScreen : MenuScreen
         TextBox homingAccel;
         TextBox boomerangAccel;
         CheckBox homeOnProjectiles;
-        CheckBox homeOnPlayers;
+        CheckBox homeOnCharacters;
         */
 
 
@@ -385,10 +394,10 @@ class WeaponDesignScreen : MenuScreen
         TextBox damagePerSecond;
         TextBox duration;*/
 
-        Button calculateButton = new Button();
-        calculateButton.Click += new RoutedEventHandler(calculateCost);
-        calculateButton.Content = "Calculate Cost";
-        this.addControl(calculateButton, 900, 600, labelWidth, labelHeight);
+        Button quickBuildWeaponButton = new Button();
+        quickBuildWeaponButton.Click += new RoutedEventHandler(quickBuildWeapon);
+        quickBuildWeaponButton.Content = "Quick-build weapon";
+        this.addControl(quickBuildWeaponButton, 900, 600, labelWidth, labelHeight);
 
         Button demoButton = new Button();
         demoButton.Click += new RoutedEventHandler(requestWeaponDemo);
@@ -410,6 +419,29 @@ class WeaponDesignScreen : MenuScreen
         addControl(currentMoneyLabel, 50, 200, labelWidth, labelHeight);
         currentMoney = new Label();
         addControl(currentMoney, getLeft(currentMoneyLabel), getBottom(currentMoneyLabel), labelWidth, labelHeight);
+    }
+    // adds the textbox to the screen
+    void addControl(TextBox box, double x, double y, double width, double height)
+    {
+        box.TextChanged += new TextChangedEventHandler(textBoxChanged);
+        base.addControl(box, x, y, width, height);
+    }
+    // adds a checkbox to the screen
+    void addControl(CheckBox box, double x, double y, double width, double height)
+    {
+        box.Checked += new RoutedEventHandler(checkBoxChanged);
+        box.Unchecked += new RoutedEventHandler(checkBoxChanged);
+        base.addControl(box, x, y, width, height);
+    }
+    // This function gets called whenever a text box changes
+    void textBoxChanged(object sender, EventArgs e)
+    {
+        this.costUpdated = false;
+    }
+    // This function gets called whenever a check box changes
+    void checkBoxChanged(object sender, EventArgs e)
+    {
+        this.costUpdated = false;
     }
     // put some reasonable guesses into the text boxes based on what's already present
     void fillInValues()
@@ -470,19 +502,40 @@ class WeaponDesignScreen : MenuScreen
         if (stunDuration.Text == "")
             stunDuration.Text = "0";
     }
-    void calculateCost(object sender, EventArgs e)
+    void quickBuildWeapon(object sender, EventArgs e)
     {
-        calculateCost();
+        quickBuildWeapon();
     }
+    void quickBuildWeapon()
+    {
+        this.prebuildWeapon(this.quickbuildWeaponIndex);
+        this.weaponCost.Content = templateWeapon.getCost().ToString();
+        this.quickbuildWeaponIndex++;
+        if (this.quickbuildWeaponIndex > 15)
+            quickbuildWeaponIndex = 0;
+    }
+    // this gets called when the user requests to try out the weapon
     void requestWeaponDemo(object sender, EventArgs e)
     {
         this.wantsDemo = true;        
     }
+    // calculate the cost of the weapon and update the onscreen label
+    void calculateCost(object sender, EventArgs e)
+    {
+        calculateCost();
+    }
+    // calculate the cost of the weapon and update the onscreen label
     void calculateCost()
     {
-        this.updateCurrentWeapon();
-        this.weaponCost.Content = this.templateWeapon.calculateCost().ToString();
+        if (!(this.costUpdated))
+        {
+            this.updateCurrentWeapon();
+            this.templateWeapon.calculateCost();
+            this.costUpdated = true;
+        }
+        this.weaponCost.Content = this.templateWeapon.getCost().ToString();
     }
+    // have the player pay for and receive the current weapon
     void purchaseCurrentWeapon(object sender, EventArgs e)
     {
         this.calculateCost();
@@ -494,6 +547,7 @@ class WeaponDesignScreen : MenuScreen
         // update the user's money
         this.currentMoney.Content = this.player.getMoney().ToString();
     }
+    // update the attributes of the current weapon based on the text fields
     void updateCurrentWeapon()
     {
         templateWeapon = new Weapon();
@@ -528,7 +582,7 @@ class WeaponDesignScreen : MenuScreen
         templateProjectile.setHomingAccel(parseDouble(homingAccel));
         templateProjectile.setBoomerangAccel(parseDouble(boomerangAccel));
         templateProjectile.enableHomingOnProjectiles(homeOnProjectiles.IsChecked.Value);
-        templateProjectile.enableHomingOnCharacters(homeOnPlayers.IsChecked.Value);
+        templateProjectile.enableHomingOnCharacters(homeOnCharacters.IsChecked.Value);
         templateWeapon.setTemplateProjectile(templateProjectile);
 
         Explosion templateExplosion = new Explosion();
@@ -544,10 +598,68 @@ class WeaponDesignScreen : MenuScreen
         templateStun.setDuration(parseDouble(stunDuration));
         templateExplosion.setTemplateStun(templateStun);
     }
+    // create set text fields' values to the values for the given weapon type
+    void prebuildWeapon(int type)
+    {
+        this.templateWeapon = new Weapon(type);
+        this.updateFieldsFromWeapon();
+        this.costUpdated = true;
+    }
+    void updateFieldsFromWeapon()
+    {
+        // attributes of the weapon
+        maxAmmo.Text = templateWeapon.getMaxAmmo().ToString();
+        ammoRechargeRate.Text = templateWeapon.getAmmoRechargeRate().ToString();
+        warmupTime.Text = templateWeapon.getWarmupTime().ToString();
+        cooldownTime.Text = templateWeapon.getCooldownTime().ToString();
+        switchToTime.Text = templateWeapon.getSwitchToTime().ToString();
+        switchFromTime.Text = templateWeapon.getSwitchFromTime().ToString();
+        automatic.IsChecked = templateWeapon.isAutomatic();
+        addOwnersVelocity.IsChecked = templateWeapon.shouldStartWithOwnersVelocity();
+        fireWhileInactive.IsChecked = templateWeapon.canFireWhileInactive();
+        cooldownWhileInactive.IsChecked = templateWeapon.coolsDownWhileInactive();
+        rechargeWhileInactive.IsChecked = templateWeapon.rechargesWhileInactive();
+        
+        // attributes of the projectile
+        Projectile templateProjectile = templateWeapon.getTemplateProjectile();
+        projectileX.Text = templateProjectile.getCenter()[0].ToString();
+        projectileY.Text = templateProjectile.getCenter()[1].ToString();
+        projectileVX.Text = templateProjectile.getVelocity()[0].ToString();
+        projectileVY.Text = templateProjectile.getVelocity()[1].ToString();
+        projectileDrag.Text = templateProjectile.getDragCoefficient().ToString();
+        projectileImage.Text = templateProjectile.getImage().Source.ToString();
+        projectileRadius.Text = ((templateProjectile.getShape().getWidth() + templateProjectile.getShape().getHeight()) / 4).ToString();
+        remainingFlightTime.Text = templateProjectile.getRemainingFlightTime().ToString();
+        numExplosionsRemaining.Text = templateProjectile.getNumExplosionsRemaining().ToString();
+        penetration.Text = templateProjectile.getPenetration().ToString();
+        homingAccel.Text = templateProjectile.getHomingAccel().ToString();
+        boomerangAccel.Text = templateProjectile.getBoomerangAccel().ToString();
+        homeOnProjectiles.IsChecked = templateProjectile.shouldHomeOnProjectiles();
+        homeOnCharacters.IsChecked = templateProjectile.shouldHomeOnCharacters();
+
+        // attributes of the explosion
+        Explosion templateExplosion = templateProjectile.getTemplateExplosion();
+        explosionImage.Text = templateExplosion.getImage().Source.ToString();
+        explosionRadius.Text = ((templateExplosion.getShape().getWidth() + templateExplosion.getShape().getHeight()) / 4).ToString();
+        explosionDuration.Text = templateExplosion.getDuration().ToString();
+        friendlyFire.IsChecked = templateExplosion.isFriendlyFireEnabled();
+
+        // attributes of the stun
+        Stun templateStun = templateExplosion.getTemplateStun();
+        timeMultiplier.Text = templateStun.getTimeMultiplier().ToString();
+        damagePerSecond.Text = templateStun.getDamagePerSecond().ToString();
+        stunDuration.Text = templateStun.getDuration().ToString();
+
+        // now update anything else that might need it
+        //this.calculateCost();
+        this.weaponCost.Content = this.templateWeapon.getCost();
+    }
     double parseDouble(TextBox field)
     {
         if (field.Text == "")
             field.Text = "0";
+        if ((field.Text == ".") || (field.Text == "-"))
+            return 0;
         return Double.Parse(field.Text);
     }
     int parseInt(TextBox field)
@@ -562,6 +674,8 @@ class WeaponDesignScreen : MenuScreen
     WorldLoader demoWorld;
     Player demoPlayer;
     CharacterStatusDisplay statusDisplay;
+    int quickbuildWeaponIndex;
+    bool costUpdated;
     // attributes of the weapon itself, rather than the projectiles or explosions
     Label weaponCost;
     TextBox maxAmmo;
@@ -591,7 +705,7 @@ class WeaponDesignScreen : MenuScreen
     TextBox homingAccel;
     TextBox boomerangAccel;
     CheckBox homeOnProjectiles;
-    CheckBox homeOnPlayers;
+    CheckBox homeOnCharacters;
 
     // attributes of the explosion
     TextBox explosionImage;

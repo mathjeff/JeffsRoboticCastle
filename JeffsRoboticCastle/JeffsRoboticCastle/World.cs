@@ -29,13 +29,30 @@ class World
         int i, j;
         double[] typicalDimensions = new double[2];
         typicalDimensions[0] = typicalDimensions[1] = 100;
+        // projectiles are usually few in number, so use smaller boxes for optimizing projectiles
+        double[] typicalProjectileDimensions = new double[2];
+        typicalProjectileDimensions[0] = typicalProjectileDimensions[1] = 50;
         for (i = 0; i < 3; i++)
         {
             for (j = 0; j < 4; j++)
             {
-                this.searchers[i, j] = new WorldSearcher(2, typicalDimensions, dimensionsOfRealityBubble);
+                if (j == 1)
+                {
+                    // projectiles are usually few in number,
+                    // so the only case where the gridlines help much are where we have lots of projectiles all next to each other
+                    // In that case, we want small boxes to best optimize the worst case
+                    this.searchers[i, j] = new WorldSearcher(2, typicalProjectileDimensions, dimensionsOfRealityBubble);
+                }
+                else
+                {
+                    this.searchers[i, j] = new WorldSearcher(2, typicalDimensions, dimensionsOfRealityBubble);
+                }
             }
         }
+        // terrain is usually spaced out further, so use larger boxes for optimizing terrain
+        double[] typicalTerrainDimensions = new double[2];
+        typicalTerrainDimensions[0] = typicalTerrainDimensions[1] = 200;
+        this.searchers[0, 0] = new WorldSearcher(2, typicalTerrainDimensions, dimensionsOfRealityBubble);
         this.worldImageTransform = new MatrixTransform();
         this.camera = new Camera(new WorldBox(0, screenSize[0], 0, screenSize[1]), new WorldBox(0, screenSize[0], 0, screenSize[1]));
         this.camera.saveTransformIn(worldImageTransform);
@@ -247,7 +264,8 @@ class World
     }
     public void activateGhost(Ghost g)
     {
-        // we don't care whether a ghost is active or not because currently the don't ever move
+        // we don't ever need to iterate over all the ghosts so we don't store a separate list of them
+        activateObject(g);
     }
     public void activateObject(GameObject o)
     {
@@ -319,6 +337,12 @@ class World
         }
         this.unloadObject(item);
     }
+    // tells the world to get rid of this object
+    public void removeItem(GameObject item)
+    {
+        this.deactivateItem(item);
+        this.unloadItem(item);
+    }
 
     public WorldBox getVisibleWorldBox()
     {
@@ -387,7 +411,7 @@ class World
         // remove the object
         this.unloadObject(e);
     }
-    // RemoveObject gets rid of the object forever
+    // RemoveObject gets rid of the object forever, but only gets rid of attributes pertaining specific to the GameObject class
     public void removeObject(GameObject o)
     {
         // remove it from the world
@@ -438,7 +462,7 @@ class World
         this.applyContactDamage(numSeconds);
         this.explodeProjectiles(numSeconds);
     }
-    // this function tells whether the chararacter is touching a portan, to determine when the character leaves the world
+    // this function tells whether the chararacter is touching a portal, to determine when the character leaves the world
     public bool characterTouchingPortal(Character character)
     {
         List<GameObject> collisions = this.findCollisions(character, false, true, false, null, false, false, false, true);
@@ -622,10 +646,10 @@ class World
 		    projectiles = tempCharacter.getProjectiles(numSeconds * tempCharacter.getTimeMultiplier());
             foreach (Projectile tempProjectile in projectiles)
             {
-                if (this.loader != null)
-                    this.loader.addItem(tempProjectile);
-                else
-                    this.addProjectile(tempProjectile);
+                //if (this.loader != null)
+                //    this.loader.addItem(tempProjectile);
+                //else
+                this.addProjectile(tempProjectile);
             }
 	    }
     }

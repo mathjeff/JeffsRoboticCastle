@@ -23,32 +23,33 @@ class WorldLoader
         */
         // setup machinery to make it fast to run
         this.blockSize = new double[2];
-        blockSize[0] = screenSize[0];
-        blockSize[1] = screenSize[1];
-        double[] activeDimensions = new double[2];
-        activeDimensions[0] = blockSize[0] * 2;
-        activeDimensions[1] = blockSize[0] * 2;
-        double[] existentDimensions = new double[2];
-        existentDimensions[0] = activeDimensions[0];
-        existentDimensions[1] = activeDimensions[1];
+        blockSize[0] = screenSize[0] / 4;
+        blockSize[1] = screenSize[1] / 4;
+        double[] characterActiveDimensions = new double[2];
+        characterActiveDimensions[0] = screenSize[0] * 1.75;
+        characterActiveDimensions[1] = screenSize[1] * 1.75;
+        double[] terrainActiveDimensions = new double[2];
+        terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 2;
+        terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 2;
         this.worldDimensions = new double[2];
         worldDimensions[0] = 4500 + 3000 * levelNumber;
         worldDimensions[1] = 1000;
         //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
-        this.world = new World(worldCanvas, screenSize, existentDimensions);
+        this.world = new World(worldCanvas, screenSize, terrainActiveDimensions);
         // Inform the world who it needs to tell whenever something moves
         this.world.setLoader(this);
         // Setup to hold the unspawned objects
-        this.searcher = new WorldSearcher(2, blockSize, worldDimensions);
+        this.terrainSearcher = new WorldSearcher(2, blockSize, worldDimensions);
+        this.characterSearcher = new WorldSearcher(2, blockSize, worldDimensions);
 
-        // calculate the initial reality bubble
-        WorldBox activeRegion = new WorldBox(0, activeDimensions[0], 0, activeDimensions[1]);
-        WorldBox existentRegion = new WorldBox(0, existentDimensions[0], 0, existentDimensions[1]);
+        // calculate the initial reality bubbles 
+        WorldBox terrainRegion = new WorldBox(0, terrainActiveDimensions[0], 0, terrainActiveDimensions[1]);
+        WorldBox characterRegion = new WorldBox(0, characterActiveDimensions[0], 0, characterActiveDimensions[1]);
         //int i;
         //for (i = 0; i < 2; i++)
         //    existentRegion.enlarge(i, existentRegion.getSize(i));
-        this.initialRealityBubble = new RealityBubble(activeRegion, existentRegion);
+        this.initialRealityBubble = new RealityBubble(characterRegion, terrainRegion);
         this.realityBubble = this.calculateRealityBubble();
         this.objectsToUnspawn = new System.Collections.Generic.HashSet<GameObject>();
         this.objectsToDeactivate = new System.Collections.Generic.HashSet<GameObject>();
@@ -81,8 +82,6 @@ class WorldLoader
         return;
 #endif
         int i, type;
-        int weaponType1;
-        int weaponType2;
         Random generator = new Random();
         // add wallpaper
         for (x = 0; x < worldDimensions[0]; x += 1200)
@@ -98,13 +97,20 @@ class WorldLoader
         while (x < worldDimensions[0])
         {
             // add an enemy
-            x += (2000 / worldDimensions[1]) * 3000 * generator.NextDouble() / (levelNumber + 1);
+            // choose the enemy's location
+            x += (1000 / worldDimensions[1]) * 3000 * generator.NextDouble() / (levelNumber + 1);
             y = worldDimensions[1] * generator.NextDouble();
-            weaponType1 = (int)(15 * generator.NextDouble());
-            weaponType2 = (int)(15 * generator.NextDouble());
             location = new double[2]; location[0] = x; location[1] = y;
+            // choose the enemy's type
             type = (int)(generator.NextDouble() * 3);
-            this.addItem(new Enemy(location, type, weaponType1, weaponType2));
+            // make the enemy
+            Enemy tempEnemy = new Enemy(location, type);
+            // give the enemy a bunch of weapons
+            for (i = 0; i < levelNumber; i++)
+            {
+                tempEnemy.addWeapon(new Weapon(generator.Next(16)));
+            }
+            this.addItem(tempEnemy);
             // give the enemy a painting to look at
             location = new double[2]; location[0] = x; location[1] = y;
             this.addItem(new Painting(location, 0));
@@ -223,10 +229,12 @@ class WorldLoader
             this.world.unloadItem(o2);
         }
         // First, deactivate anything from the previous tick that is getting close to the edge of the world
+        // Currently this is not being used
+        /*
         foreach (GameObject o2 in this.objectsToDeactivate)
         {
             this.world.deactivateItem(o2);
-        }
+        }*/
         this.objectsToDeactivate.Clear();
         this.objectsToUnspawn.Clear();
 
@@ -241,28 +249,32 @@ class WorldLoader
         WorldBox newActiveRegion = newRealityBubble.getActiveRegion();
         WorldBox oldActiveRegion = this.realityBubble.getActiveRegion();
         // Find everything that is no longer active
-        System.Collections.Generic.List<GameObject> previouslyActive = this.searcher.getObjectsOnlyInA(oldActiveRegion, newActiveRegion);
+        System.Collections.Generic.List<GameObject> previouslyActive = this.characterSearcher.getObjectsOnlyInA(oldActiveRegion, newActiveRegion);
         foreach (GameObject o2 in previouslyActive)
         {
-            this.world.deactivateItem(o2);
+            //this.world.deactivateItem(o2);
+            this.world.removeItem(o2);
         }
         // Find everything that is no longer present
-        System.Collections.Generic.List<GameObject> oldItems = this.searcher.getObjectsOnlyInA(oldExistenceRegion, newExistenceRegion);
+        System.Collections.Generic.List<GameObject> oldItems = this.terrainSearcher.getObjectsOnlyInA(oldExistenceRegion, newExistenceRegion);
         foreach (GameObject o2 in oldItems)
         {
-            this.world.unloadItem(o2);
+            //this.world.unloadItem(o2);
+            this.world.removeItem(o2);
         }
         // Find everything that just became present
-        System.Collections.Generic.List<GameObject> newItems = this.searcher.getObjectsOnlyInA(newExistenceRegion, oldExistenceRegion);
+        System.Collections.Generic.List<GameObject> newItems = this.terrainSearcher.getObjectsOnlyInA(newExistenceRegion, oldExistenceRegion);
         foreach (GameObject o2 in newItems)
         {
-            this.world.addDisabledItem(o2);
+            //this.world.addDisabledItem(o2);
+            this.world.addItem(o2);
         }
         // Find everything that just became active
-        System.Collections.Generic.List<GameObject> newlyActive = this.searcher.getObjectsOnlyInA(newActiveRegion, oldActiveRegion);
+        System.Collections.Generic.List<GameObject> newlyActive = this.characterSearcher.getObjectsOnlyInA(newActiveRegion, oldActiveRegion);
         foreach (GameObject o2 in newlyActive)
         {
-            this.world.activateItem(o2);
+            //this.world.activateItem(o2);
+            this.world.addItem(o2);
         }
         this.realityBubble = newRealityBubble;
     }
@@ -277,25 +289,40 @@ class WorldLoader
     }
     public void addItem(GameObject o)
     {
-        this.searcher.addItem(o);
+        // keep track of the fact that we have to manage this item
         this.loadedObjects.Add(o);
-        IndexBox existenceIndices = this.searcher.getIndexBoxFromWorldBox(this.realityBubble.getExistentRegion());
-        IndexBox objectIndices = this.searcher.getIndexBoxFromWorldBox(o.getBoundingBox());
-        if (existenceIndices.intersects(objectIndices))
+        // get the object's bounding box
+        // decide whether to compare against the smaller character reality bubble or the larger terrain reality bubble
+        if (o.isMovable())
         {
-            IndexBox activeIndices = this.searcher.getIndexBoxFromWorldBox(this.realityBubble.getActiveRegion());
+            this.characterSearcher.addItem(o);
+            IndexBox activeIndices = this.characterSearcher.getIndexBoxFromWorldBox(this.realityBubble.getActiveRegion());
+            IndexBox objectIndices = this.characterSearcher.getIndexBoxFromWorldBox(o.getBoundingBox());
             if (activeIndices.intersects(objectIndices))
+            {
                 this.world.addItem(o);
-            else
-                this.world.addDisabledItem(o);
+            }
         }
+        else
+        {
+            this.terrainSearcher.addItem(o);
+            IndexBox existenceIndices = this.terrainSearcher.getIndexBoxFromWorldBox(this.realityBubble.getExistentRegion());
+            IndexBox objectIndices = this.terrainSearcher.getIndexBoxFromWorldBox(o.getBoundingBox());
+            if (existenceIndices.intersects(objectIndices))
+            {
+                this.world.addItem(o);
+            }
+        }    
     }
     // This function gets called by the world when it wants to destroy an object
     public void removingObject(GameObject o)
     {
         if (loadedObjects.Contains(o))
         {
-            this.searcher.removeItem(o);
+            if (o.isMovable())
+                this.characterSearcher.removeItem(o);
+            else
+                this.terrainSearcher.removeItem(o);
             this.loadedObjects.Remove(o);
             if (this.objectsToUnspawn.Contains(o))
                 this.objectsToUnspawn.Remove(o);
@@ -318,7 +345,10 @@ class WorldLoader
 #else
         // If the object isn't in the searcher then we will never call the itemEndingMove and it won't actually change anything
         // It is slightly worse form to leave out the if statement here but it is slightly faster for runtime
-        this.searcher.itemStartingMove(o);
+        if (o.isMovable())
+            this.characterSearcher.itemStartingMove(o);
+        else
+            this.terrainSearcher.itemStartingMove(o);
 #endif
     }
     // This function is called when an object just finished moving
@@ -329,14 +359,28 @@ class WorldLoader
         // If an object is created by the world then we don't control it here
         if (this.loadedObjects.Contains(o))
         {
-            IndexBox existentIndices = this.searcher.getIndexBoxFromWorldBox(this.realityBubble.getExistentRegion());
-            IndexBox objectIndices = this.searcher.getIndexBoxFromWorldBox(o.getBoundingBox());
-            this.searcher.itemEndingMove(o);
+            WorldSearcher searcher;
+            IndexBox existentIndices;
+            IndexBox objectIndices;
+            if (o.isMovable())
+            {
+                searcher = this.characterSearcher;
+                existentIndices = searcher.getIndexBoxFromWorldBox(this.realityBubble.getActiveRegion());
+            }
+            else
+            {
+                searcher = this.terrainSearcher;
+                existentIndices = searcher.getIndexBoxFromWorldBox(this.realityBubble.getExistentRegion());
+            }
+            objectIndices = searcher.getIndexBoxFromWorldBox(o.getBoundingBox());
+            searcher.itemEndingMove(o);
             if (!existentIndices.intersects(objectIndices))
             {
                 // flag it to remove later
                 this.objectsToUnspawn.Add(o);
             }
+
+            /*
             else
             {
                 IndexBox activeIndices = this.searcher.getIndexBoxFromWorldBox(this.realityBubble.getActiveRegion());
@@ -346,6 +390,7 @@ class WorldLoader
                     this.objectsToDeactivate.Add(o);
                 }
             }
+            */
         }
     }
     // tells whether this character is touching any portans
@@ -384,7 +429,8 @@ class WorldLoader
     //Canvas gameCanvas;
     Canvas worldCanvas;
     World world;
-    WorldSearcher searcher;
+    WorldSearcher characterSearcher;
+    WorldSearcher terrainSearcher;
     RealityBubble initialRealityBubble;
     //double[] dimensionsOfRealityBubble;
     double[] blockSize;

@@ -625,6 +625,11 @@ class GameObject
         this.gravity = original.gravity;
         this.setDragCoefficient(original.getDragCoefficient());
     }
+    // tells whether this object can make itself move
+    public virtual bool isMovable()
+    {
+        return false;
+    }
 
     public double[] getCenter()
     {

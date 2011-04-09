@@ -6,7 +6,15 @@ public class ImageLoader
 {
     public static BitmapImage loadImage(System.String fileName)
     {
-        fileName = "../../../Images/" + fileName;
+        String testString = fileName;
+        if (System.IO.File.Exists(testString))
+        {
+            fileName = testString;
+        }
+        else
+        {
+            fileName = "../../../Images/" + fileName;
+        }
         BitmapImage image = new BitmapImage();
         image.BeginInit();
         image.UriSource = new Uri(fileName, UriKind.Relative);

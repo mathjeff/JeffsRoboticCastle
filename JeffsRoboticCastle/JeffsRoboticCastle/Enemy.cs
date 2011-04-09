@@ -3,7 +3,7 @@ class Enemy : Character
 {
 public
     // constructor for an enemy
-	Enemy(double[] location, int type, int weapon1, int weapon2)
+	Enemy(double[] location, int type)
     {
         BitmapImage startingImage = null;
         double[] accel;
@@ -19,8 +19,6 @@ public
 	            this.setMaxAccel(accel);
 	            this.setDragCoefficient(1);
 	            this.enemyType = type;
-                this.addWeapon(new Weapon(weapon1));
-                this.addWeapon(new Weapon(weapon2));
                 this.setGravity(1000);
                 break;
             case 1:
@@ -31,8 +29,6 @@ public
                 this.setMaxAccel(accel);
                 this.setDragCoefficient(3);
                 this.enemyType = type;
-                this.addWeapon(new Weapon(weapon1));
-                this.addWeapon(new Weapon(weapon2));
                 this.setGravity(50);
                 break;
             case 2:
@@ -43,8 +39,6 @@ public
                 this.setMaxAccel(accel);
                 this.setDragCoefficient(3);
                 this.enemyType = type;
-                this.addWeapon(new Weapon(weapon1));
-                this.addWeapon(new Weapon(weapon2));
                 this.setGravity(1000);
                 this.initializeHitpoints(5);
                 break;
@@ -57,8 +51,8 @@ public
         this.setBrain(new AI());
     }
 
-    // Have the AI decide what the enemy should do
-    public override void think()
+// Have the AI decide what the enemy should do
+public override void think()
     {
         this.getBrain().think(this);
     }

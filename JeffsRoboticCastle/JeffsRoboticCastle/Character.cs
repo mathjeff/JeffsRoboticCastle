@@ -15,6 +15,12 @@ class Character : GameObject
     {
         return true;
     }
+    // tells whether this object can make itself move
+    public override bool isMovable()
+    {
+        return true;
+    }
+
 
     public double getArmor()
     {

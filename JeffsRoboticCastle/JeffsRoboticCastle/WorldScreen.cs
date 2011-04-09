@@ -27,6 +27,12 @@ class WorldScreen : Screen
         this.statusDisplay.followCharacter(newPlayer);
         this.world = newWorld;
     }
+    public override void show()
+    {
+        this.stopMovingPlayerLeft();
+        this.stopMovingPlayerRight();
+        base.show();
+    }
 // private
     void createSubviews(double[] position, double[] size)
     {
