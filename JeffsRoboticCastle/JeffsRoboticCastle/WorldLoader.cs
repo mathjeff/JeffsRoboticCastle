@@ -26,14 +26,14 @@ class WorldLoader
         blockSize[0] = screenSize[0] / 4;
         blockSize[1] = screenSize[1] / 4;
         double[] characterActiveDimensions = new double[2];
-        characterActiveDimensions[0] = screenSize[0] * 1.75;
-        characterActiveDimensions[1] = screenSize[1] * 1.75;
+        characterActiveDimensions[0] = screenSize[0];
+        characterActiveDimensions[1] = screenSize[1];
         double[] terrainActiveDimensions = new double[2];
         terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 2;
         terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 2;
         this.worldDimensions = new double[2];
         worldDimensions[0] = 4500 + 3000 * levelNumber;
-        worldDimensions[1] = 1000;
+        worldDimensions[1] = 800;
         //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
         this.world = new World(worldCanvas, screenSize, terrainActiveDimensions);
@@ -94,19 +94,21 @@ class WorldLoader
         }
         x = 1000;
 #if true
+        int numWeapons;
         while (x < worldDimensions[0])
         {
             // add an enemy
             // choose the enemy's location
-            x += (1000 / worldDimensions[1]) * 3000 * generator.NextDouble() / (levelNumber + 1);
+            x += (800 / worldDimensions[1]) * (1000 * generator.NextDouble() + 1000) / (levelNumber + 1);
             y = worldDimensions[1] * generator.NextDouble();
             location = new double[2]; location[0] = x; location[1] = y;
             // choose the enemy's type
-            type = (int)(generator.NextDouble() * 3);
+            type = generator.Next(5);
             // make the enemy
             Enemy tempEnemy = new Enemy(location, type);
             // give the enemy a bunch of weapons
-            for (i = 0; i < levelNumber; i++)
+            numWeapons = (int)((levelNumber + 1) / 2);
+            for (i = 0; i < numWeapons; i++)
             {
                 tempEnemy.addWeapon(new Weapon(generator.Next(16)));
             }

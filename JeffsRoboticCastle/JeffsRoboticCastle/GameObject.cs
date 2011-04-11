@@ -924,7 +924,12 @@ class GameObject
 	    double[] offset = new double[2];
 	    offset[0] = g2.getCenter()[0] - g1.getCenter()[0];
 	    offset[1] = g2.getCenter()[1] - g1.getCenter()[1];
-	    return s1.moveTo(s2, offset, move);
+        // calculate the maximum allowable move
+        double[] result = s1.moveTo(s2, offset, move);
+        // figure out whether this is the same move or an altered one
+        if (move[0] == result[0] && move[1] == result[1])
+            return move;
+        return result;
     }
     // tells how far apart two GameObjects are
     public double distanceTo(GameObject other)

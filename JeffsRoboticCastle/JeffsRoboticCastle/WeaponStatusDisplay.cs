@@ -35,6 +35,12 @@ class WeaponStatusDisplay
         this.ammoBar.Width = size[0] - weaponImage.Width;
         this.ammoBar.Height = size[1];
         newCanvas.Children.Add(this.ammoBar);
+        // a status bar indicating how soon the weapon will fire
+        this.firingBar = new Rectangle();
+        this.firingBar.RenderTransform = new TranslateTransform(position[0] + weaponImage.Width, position[1]);
+        this.firingBar.Width = size[0] - weaponImage.Width;
+        this.firingBar.Height = size[1] / 3;
+        newCanvas.Children.Add(firingBar);
         this.canvas = newCanvas;
         this.setWeapon(newWeapon);
     }
@@ -55,6 +61,26 @@ class WeaponStatusDisplay
     public void update()
     {
         //Weapon newWeapon = this.character.getCurrentWeaponShiftedByIndex(this.indexOffset);
+        // update the bar that shows the current firing timer
+        double maxDuration;
+        double currentDuration;
+        if (currentWeapon.isWarmingUp())
+        {
+            maxDuration = currentWeapon.getWarmupTime();
+            currentDuration = maxDuration - currentWeapon.getRemainingWarmup();
+            this.firingBar.Fill = Brushes.Blue;
+        }
+        else
+        {
+            maxDuration = currentWeapon.getCooldownTime();
+            currentDuration = currentWeapon.getRemainingCooldown();
+            this.firingBar.Fill = Brushes.Red;
+        }
+        if (maxDuration <= 0)
+            maxDuration = 1;
+        this.firingBar.Width = this.ammoBarBackground.Width * currentDuration / maxDuration;
+
+        // update the bar that shows the current ammo
         double value = this.currentWeapon.getCurrentAmmo() / this.currentWeapon.getMaxAmmo();
         this.ammoBar.Width = (value * this.ammoBarBackground.Width);
     }
@@ -63,6 +89,7 @@ class WeaponStatusDisplay
         this.canvas.Children.Remove(this.weaponImage);
         this.canvas.Children.Remove(this.ammoBar);
         this.canvas.Children.Remove(this.ammoBarBackground);
+        this.canvas.Children.Remove(this.firingBar);
     }
 // private
     Canvas canvas;
@@ -72,4 +99,5 @@ class WeaponStatusDisplay
     Weapon currentWeapon;
     Rectangle ammoBar;
     Rectangle ammoBarBackground;
+    Rectangle firingBar;
 }

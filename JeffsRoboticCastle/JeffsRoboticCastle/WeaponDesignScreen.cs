@@ -81,7 +81,7 @@ class WeaponDesignScreen : MenuScreen
         
         // make the player
         this.demoPlayer = new Player(new double[2]);
-        this.demoPlayer.addWeapon(this.templateWeapon);
+        this.demoPlayer.addWeapon(new Weapon(this.templateWeapon));
         this.demoPlayer.gotoWeaponTreeRoot();
         
         // put the player in the world
@@ -541,7 +541,8 @@ class WeaponDesignScreen : MenuScreen
         this.calculateCost();
         if (this.player.spendMoney(this.templateWeapon.getCost()))
         {
-            this.player.addWeapon(templateWeapon);
+            Weapon newWeapon = new Weapon(templateWeapon);
+            this.player.addWeapon(newWeapon);
             this.player.gotoWeaponTreeRoot();
         }
         // update the user's money

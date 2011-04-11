@@ -250,7 +250,16 @@ class Character : GameObject
     }
     public void setWeaponIndex(int index)
     {
-        this.currentWeaponIndex = index;
+        if (this.currentWeaponIndex != index)
+        {
+            Weapon currentWeapon = this.getCurrentWeapon();
+            if (currentWeapon.isWarmingUp() && !currentWeapon.canFireWhileInactive())
+            {
+                // if the weapon can't fire while inactive and it is about to become inactive, cancel the firing
+                currentWeapon.resetCooldown();
+            }
+            this.currentWeaponIndex = index;
+        }
     }
     public override void takeDamage(double damagePerSec, double numSeconds)
     {

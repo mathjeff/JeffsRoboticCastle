@@ -14,7 +14,7 @@ public
             case 0:
                 startingImage = ImageLoader.loadImage("horseman.png");
 	            this.setCenter(location);
-                this.setShape(new GameRectangle(94, 110));
+                this.setShape(new GameRectangle(88, 103));
                 accel = new double[2]; accel[0] = 300; accel[1] = 0;
 	            this.setMaxAccel(accel);
 	            this.setDragCoefficient(1);
@@ -25,22 +25,44 @@ public
                 startingImage = ImageLoader.loadImage("eagle.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(56, 43));
-                accel = new double[2]; accel[0] = 250; accel[1] = 500;
+                accel = new double[2]; accel[0] = 400; accel[1] = 500;
                 this.setMaxAccel(accel);
                 this.setDragCoefficient(3);
                 this.enemyType = type;
-                this.setGravity(50);
+                this.setGravity(75);
                 break;
             case 2:
                 startingImage = ImageLoader.loadImage("swarm.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(16, 9));
-                accel = new double[2]; accel[0] = 200; accel[1] = 0;
+                accel = new double[2]; accel[0] = 250; accel[1] = 0;
                 this.setMaxAccel(accel);
                 this.setDragCoefficient(3);
                 this.enemyType = type;
                 this.setGravity(1000);
                 this.initializeHitpoints(5);
+                break;
+            case 3:
+                startingImage = ImageLoader.loadImage("armadillo.png");
+                this.setCenter(location);
+                this.setShape(new GameRectangle(105, 53));
+                accel = new double[2]; accel[0] = 250; accel[1] = 0;
+                this.setMaxAccel(accel);
+                this.setDragCoefficient(5);
+                this.enemyType = type;
+                this.setGravity(1000);
+                this.initializeHitpoints(30);
+                break;
+            case 4:
+                startingImage = ImageLoader.loadImage("goblin2.png");
+                this.setCenter(location);
+                this.setShape(new GameRectangle(18, 51));
+                accel = new double[2]; accel[0] = 450; accel[1] = 0;
+                this.setMaxAccel(accel);
+                this.setDragCoefficient(3);
+                this.enemyType = type;
+                this.setGravity(1000);
+                this.initializeHitpoints(20);
                 break;
             default:
                 break;

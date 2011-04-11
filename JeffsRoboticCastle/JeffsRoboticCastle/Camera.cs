@@ -13,7 +13,7 @@ class Camera
         this.screenBox = screenRect;
         // The padding is a measure of the minimum amount of world we always show on each side of the user
         this.padding = new double[2];
-        padding[0] = worldRect.getSize(0) / 6;
+        padding[0] = worldRect.getSize(0) / 4;
         padding[1] = worldRect.getSize(1) / 12;
     }
     public WorldBox getWorldBox()

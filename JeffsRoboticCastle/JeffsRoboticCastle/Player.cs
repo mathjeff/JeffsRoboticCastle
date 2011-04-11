@@ -60,7 +60,10 @@ class Player : Character
             currentWeapon.refillAmmo();
         }
         // return to the starting location
-        this.setCenter(new double[2]);
+        double[] position = new double[2];
+        position[0] = 0;
+        position[1] = this.getShape().getHeight() / 2;
+        this.setCenter(position);
         this.setVelocity(new double[2]);
         this.setHitpoints(this.getMaxHitpoints());
         this.gotoWeaponTreeRoot();
