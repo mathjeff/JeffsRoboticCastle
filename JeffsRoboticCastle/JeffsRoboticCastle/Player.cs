@@ -22,7 +22,7 @@ class Player : Character
 	    this.setMaxAccel(accel);
 	    this.setDragCoefficient(3);
 	    this.setTeamNum(2);
-        this.initializeHitpoints(20);
+        this.initializeHitpoints(40);
         this.weaponTreeBranchFactor = 3;
         this.weaponSubTrees = new List<List<Weapon>>();
     }

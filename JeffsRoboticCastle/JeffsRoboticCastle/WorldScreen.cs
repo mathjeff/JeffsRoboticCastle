@@ -26,6 +26,8 @@ class WorldScreen : Screen
         this.player = newPlayer;
         this.statusDisplay.followCharacter(newPlayer);
         this.world = newWorld;
+        // scroll before showing the screen so that the screen doesn't suddenly move after the first frame
+        this.world.scrollTo(this.player);
     }
     public override void show()
     {

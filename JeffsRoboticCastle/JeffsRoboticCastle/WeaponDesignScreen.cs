@@ -122,7 +122,7 @@ class WeaponDesignScreen : MenuScreen
         double labelWidth = 200;
         double labelHeight = 25;
         //double verticalPadding1 = 5;
-        double verticalSpacing = labelHeight + 3;
+        double verticalSpacing = labelHeight + 1;
         double horizontalSpacing = 100;
         
         // attributes of the weapon itself, rather than the projectiles or explosions
@@ -134,7 +134,7 @@ class WeaponDesignScreen : MenuScreen
         weaponCostLabel.Content = "Weapon Cost";
         addControl(weaponCostLabel, getLeft(weaponLabel), getBottom(weaponLabel) + 1, labelWidth, labelHeight);
         weaponCost = new Label();
-        addControl(weaponCost, getLeft(weaponCostLabel), getBottom(weaponCostLabel) + 2, labelWidth, labelHeight);
+        addControl(weaponCost, getLeft(weaponCostLabel), getBottom(weaponCostLabel), labelWidth, labelHeight);
 
         Label addOwnersVelocityLabel = new Label();
         addOwnersVelocityLabel.Content = "Add owner's velocity";
@@ -270,11 +270,17 @@ class WeaponDesignScreen : MenuScreen
         projectileDrag = new TextBox();
         addControl(projectileDrag, getLeft(projectileVY), getBottom(projectileVY) + verticalSpacing, labelWidth, labelHeight);
 
+        Label projectileGravityLabel = new Label();
+        projectileGravityLabel.Content = "Gravity";
+        addControl(projectileGravityLabel, getLeft(projectileDragLabel), getBottom(projectileDragLabel) + verticalSpacing, labelWidth, labelHeight);
+        projectileGravity = new TextBox();
+        addControl(projectileGravity, getLeft(projectileDrag), getBottom(projectileDrag) + verticalSpacing, labelWidth, labelHeight);
+
         Label remainingFlightTimeLabel = new Label();
         remainingFlightTimeLabel.Content = "Max Flight time";
-        addControl(remainingFlightTimeLabel, getLeft(projectileDragLabel), getBottom(projectileDragLabel) + verticalSpacing, labelWidth, labelHeight);
+        addControl(remainingFlightTimeLabel, getLeft(projectileGravityLabel), getBottom(projectileGravityLabel) + verticalSpacing, labelWidth, labelHeight);
         remainingFlightTime = new TextBox();
-        addControl(remainingFlightTime, getLeft(projectileDrag), getBottom(projectileDrag) + verticalSpacing, labelWidth, labelHeight);
+        addControl(remainingFlightTime, getLeft(projectileGravity), getBottom(projectileGravity) + verticalSpacing, labelWidth, labelHeight);
 
         Label numExplosionsRemainingLabel = new Label();
         numExplosionsRemainingLabel.Content = "Max # Explosions";
@@ -475,6 +481,8 @@ class WeaponDesignScreen : MenuScreen
             projectileVY.Text = "0";
         if (projectileDrag.Text == "")
             projectileDrag.Text = "0";
+        if (projectileGravity.Text == "")
+            projectileGravity.Text = "0";
         if (remainingFlightTime.Text == "")
             remainingFlightTime.Text = "10";
         if (numExplosionsRemaining.Text == "")
@@ -575,6 +583,7 @@ class WeaponDesignScreen : MenuScreen
         tempVector[1] = parseDouble(projectileVY);
         templateProjectile.setVelocity(tempVector);
         templateProjectile.setDragCoefficient(parseDouble(projectileDrag));
+        templateProjectile.setGravity(parseDouble(projectileGravity));
         templateProjectile.setBitmap(ImageLoader.loadImage(projectileImage.Text));
         templateProjectile.setShape(new GameCircle(parseDouble(projectileRadius)));
         templateProjectile.setRemainingFlightTime(parseDouble(remainingFlightTime));
@@ -628,6 +637,7 @@ class WeaponDesignScreen : MenuScreen
         projectileVX.Text = templateProjectile.getVelocity()[0].ToString();
         projectileVY.Text = templateProjectile.getVelocity()[1].ToString();
         projectileDrag.Text = templateProjectile.getDragCoefficient().ToString();
+        projectileGravity.Text = templateProjectile.getGravity().ToString();
         projectileImage.Text = templateProjectile.getImage().Source.ToString();
         projectileRadius.Text = ((templateProjectile.getShape().getWidth() + templateProjectile.getShape().getHeight()) / 4).ToString();
         remainingFlightTime.Text = templateProjectile.getRemainingFlightTime().ToString();
@@ -700,6 +710,7 @@ class WeaponDesignScreen : MenuScreen
     TextBox projectileVX;
     TextBox projectileVY;
     TextBox projectileDrag;
+    TextBox projectileGravity;
     TextBox remainingFlightTime;
     TextBox numExplosionsRemaining; // how many more times it can explode before being removed
     TextBox penetration;

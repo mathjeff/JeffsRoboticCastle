@@ -20,6 +20,8 @@ public
 	            this.setDragCoefficient(1);
 	            this.enemyType = type;
                 this.setGravity(1000);
+                this.initializeHitpoints(11);
+                this.setJumpSpeed(1000);
                 break;
             case 1:
                 startingImage = ImageLoader.loadImage("eagle.png");
@@ -30,6 +32,8 @@ public
                 this.setDragCoefficient(3);
                 this.enemyType = type;
                 this.setGravity(75);
+                this.initializeHitpoints(9);
+                this.setJumpSpeed(500);
                 break;
             case 2:
                 startingImage = ImageLoader.loadImage("swarm.png");
@@ -41,17 +45,19 @@ public
                 this.enemyType = type;
                 this.setGravity(1000);
                 this.initializeHitpoints(5);
+                this.setJumpSpeed(500);
                 break;
             case 3:
                 startingImage = ImageLoader.loadImage("armadillo.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(105, 53));
-                accel = new double[2]; accel[0] = 250; accel[1] = 0;
+                accel = new double[2]; accel[0] = 200; accel[1] = 0;
                 this.setMaxAccel(accel);
-                this.setDragCoefficient(5);
+                this.setDragCoefficient(4);
                 this.enemyType = type;
                 this.setGravity(1000);
                 this.initializeHitpoints(30);
+                this.setJumpSpeed(500);
                 break;
             case 4:
                 startingImage = ImageLoader.loadImage("goblin2.png");
@@ -62,7 +68,8 @@ public
                 this.setDragCoefficient(3);
                 this.enemyType = type;
                 this.setGravity(1000);
-                this.initializeHitpoints(20);
+                this.initializeHitpoints(15);
+                this.setJumpSpeed(950);
                 break;
             default:
                 break;

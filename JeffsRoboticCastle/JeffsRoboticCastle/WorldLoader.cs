@@ -23,14 +23,14 @@ class WorldLoader
         */
         // setup machinery to make it fast to run
         this.blockSize = new double[2];
-        blockSize[0] = screenSize[0] / 4;
-        blockSize[1] = screenSize[1] / 4;
+        blockSize[0] = screenSize[0] / 8;
+        blockSize[1] = screenSize[1] / 8;
         double[] characterActiveDimensions = new double[2];
         characterActiveDimensions[0] = screenSize[0];
         characterActiveDimensions[1] = screenSize[1];
         double[] terrainActiveDimensions = new double[2];
-        terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 2;
-        terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 2;
+        terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 4;
+        terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 4;
         this.worldDimensions = new double[2];
         worldDimensions[0] = 4500 + 3000 * levelNumber;
         worldDimensions[1] = 800;
@@ -90,6 +90,8 @@ class WorldLoader
             {
                 location = new double[2]; location[0] = x; location[1] = y;
                 this.addItem(new Painting(location, 1));
+                location[1] = 0;
+                this.addItem(new PickupItem(location));
             }
         }
         x = 1000;
@@ -99,7 +101,7 @@ class WorldLoader
         {
             // add an enemy
             // choose the enemy's location
-            x += (800 / worldDimensions[1]) * (1000 * generator.NextDouble() + 1000) / (levelNumber + 1);
+            x += (800 / worldDimensions[1]) * (900 * generator.NextDouble() + 900) / (levelNumber + 1);
             y = worldDimensions[1] * generator.NextDouble();
             location = new double[2]; location[0] = x; location[1] = y;
             // choose the enemy's type

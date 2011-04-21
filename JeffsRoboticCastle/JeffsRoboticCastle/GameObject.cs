@@ -1013,11 +1013,15 @@ class GameObject
     {
         return false;
     }
+    public virtual bool isAGhost()
+    {
+        return false;
+    }
     public virtual bool isAPortal()
     {
         return false;
     }
-    public virtual bool isAGhost()
+    public virtual bool isAPickupItem()
     {
         return false;
     }

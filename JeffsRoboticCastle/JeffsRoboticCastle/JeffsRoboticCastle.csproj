@@ -104,6 +104,7 @@
     <Compile Include="JeffsRoboticCastle.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="Painting.cs" />
+    <Compile Include="PickupItem.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Portal.cs" />

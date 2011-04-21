@@ -335,6 +335,11 @@ class World
             this.unloadPlatform((Platform)item);
             return;
         }
+        if (item.isAPickupItem())
+        {
+            this.unloadPickupItem((PickupItem)item);
+            return;
+        }
         this.unloadObject(item);
     }
     // tells the world to get rid of this object
@@ -411,6 +416,22 @@ class World
         // remove the object
         this.unloadObject(e);
     }
+    public void removePickupItem(PickupItem i)
+    {
+        // remove it from the world
+        this.unloadPickupItem(i);
+        // tell the world loader not to bring it back
+        this.removingObject(i);
+    }
+    public void unloadPickupItem(PickupItem item)
+    {
+        // remove it from the searcher
+        this.searchers[item.getTeamNum(), 3].removeItem(item);
+        // remove the image
+        this.unloadObject(item);
+    }
+
+
     // RemoveObject gets rid of the object forever, but only gets rid of attributes pertaining specific to the GameObject class
     public void removeObject(GameObject o)
     {
@@ -461,6 +482,8 @@ class World
         this.processDeath(numSeconds);
         this.applyContactDamage(numSeconds);
         this.explodeProjectiles(numSeconds);
+
+        this.pickupPowerups(numSeconds);
     }
     // this function tells whether the chararacter is touching a portal, to determine when the character leaves the world
     public bool characterTouchingPortal(Character character)
@@ -470,7 +493,7 @@ class World
         {
             foreach (GameObject collision in collisions)
             {
-                if (collision.intersects(character))
+                if (collision.isAPortal() && collision.intersects(character))
                     return true;
             }
         }
@@ -749,10 +772,31 @@ class World
         {
             if (!characters[i].isAlive())
             {
+                // create an ammo box on the character's location
+                this.addItem(new PickupItem(characters[i].getCenter()));
+                // get rid of the character
                 removeCharacter(characters[i]);
             }
         }
     }
+    // have each character pick up any powerups that he or she is touching
+    void pickupPowerups(double numSeconds)
+    {
+        System.Collections.Generic.List<GameObject> collisions;
+        foreach (Character character in this.characters)
+        {
+            collisions = this.findCollisions(character, true, true, false, null, false, false, false, true);
+            foreach (GameObject collision in collisions)
+            {
+                if (collision.isAPickupItem() && character.intersects(collision))
+                {
+                    character.refillSomeAmmo();
+                    this.removePickupItem((PickupItem)collision);
+                }
+            }
+        }
+    }
+
 
     // Moves the object according to its velocity. Also figure out if it's colliding with anything
     void moveObject(GameObject o, double numSeconds)
@@ -1065,139 +1109,6 @@ class World
         return collisions;
     }
 
-    // finds all the enemy Characters, Platforms and Projectiles that are colliding with this item
-    /*System.Collections.Generic.List<GameObject> findEnemyCollisions(GameObject item)
-    {
-        // create an empty list to save in
-        System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
-        System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
-        int i, team;
-        for (team = 1; team < this.searchers.GetLength(0); team++)
-        {
-            if (team != item.getTeamNum())
-            {
-                temp = this.searchers[team, 0].getCollisions(item);   // get the characters and platforms
-                for (i = 0; i < temp.Count; i++)
-                {
-                    collisions.Add(temp[i]);
-                }
-                temp = this.searchers[team, 1].getCollisions(item);  // get the projectiles
-                for (i = 0; i < temp.Count; i++)
-                {
-                    collisions.Add(temp[i]);
-                }
-            }
-        }
-        return collisions;
-    }
-    */
-    // finds all the enemy Characters and Platforms that are colliding with this item
-    /*System.Collections.Generic.List<GameObject> findEnemyCharacters(GameObject item)
-    {
-        // create an empty list to save in
-        System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
-        System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
-        int i, team;
-        for (team = 1; team < this.searchers.GetLength(0); team++)
-        {
-            if (team != item.getTeamNum())
-            {
-                temp = this.searchers[team, 0].getCollisions(item);   // get the characters and platforms
-                for (i = 0; i < temp.Count; i++)
-                {
-                    collisions.Add(temp[i]);
-                }
-            }
-        }
-        return collisions;
-    }*/
-    // finds all terrain and characters that may collide with this item
-    /*System.Collections.Generic.List<GameObject> getObjectsInTheWay(GameObject item, double[] move)
-    {
-        System.Collections.Generic.List<GameObject> collisions;
-        System.Collections.Generic.List<GameObject> temp;
-        collisions = this.searchers[0, 0].getCollisions(item, move);    // get collisions with terrain
-        int i, team;
-        for (team = 1; team < this.searchers.GetLength(0); team++)
-        {
-            temp = this.searchers[team, 0].getCollisions(item, move);   // get collisions with characters
-            for (i = 0; i < temp.Count; i++)
-            {
-                collisions.Add(temp[i]);
-            }
-        }
-        return collisions;
-    }*/
-    // finds all enemy projectiles and explosions that may collide with this item
-    /*System.Collections.Generic.List<GameObject> findEnemyWeaponry(GameObject item, double[] move)
-    {
-        System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
-        System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
-        int i, team;
-        for (team = 1; team < this.searchers.GetLength(0); team++)
-        {
-            if (team != item.getTeamNum())
-            {
-                temp = this.searchers[team, 1].getCollisions(item, move);   // get collisions with projectiles
-                for (i = 0; i < temp.Count; i++)
-                {
-                    collisions.Add(temp[i]);
-                }
-                temp = this.searchers[team, 2].getCollisions(item, move);   // get collisions with explosions
-                for (i = 0; i < temp.Count; i++)
-                {
-                    collisions.Add(temp[i]);
-                }               
-            }
-        }
-        return collisions;
-    }*/
-    // finds all the enemy Characters, Platforms Projectiles, and explosions that are colliding with this item
-    /*System.Collections.Generic.List<GameObject> findAllEnemyCollisions(GameObject item, double[] move)
-    {
-        // create an empty list to save in
-        System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
-        System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
-        int i, type, team;
-        for (team = 1; team < this.searchers.GetLength(0); team++)
-        {
-            if (team != item.getTeamNum())
-            {
-                for (type = 0; type < 3; type++)
-                {
-                    temp = this.searchers[team, type].getCollisions(item, move);   // get the collisions for this team and type
-                    for (i = 0; i < temp.Count; i++)
-                    {
-                        collisions.Add(temp[i]);
-                    }
-                }
-            }
-        }
-        return collisions;
-    }*/
-    /*System.Collections.Generic.List<GameObject> findTerrainCollisions(GameObject item, double[] move)
-    {
-        return this.searchers[0, 0].getCollisions(item, move);
-    }*/
-    // finds all enemy projectiles that may collide with this item
-   /* System.Collections.Generic.List<GameObject> findEnemyProjectiles(GameObject item, double[] move)
-    {
-        System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
-        System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
-        int i, team;
-        for (team = 1; team < this.searchers.GetLength(0); team++)
-        {
-            if (team != item.getTeamNum())
-            {
-                temp = this.searchers[team, 1].getCollisions(item, move);   // get collisions with projectiles
-                for (i = 0; i < temp.Count; i++)
-                {
-                    collisions.Add(temp[i]);
-                }
-            }
-        }
-        return collisions;
-    }*/
     // return the WorldSearcher that has to handle this item
     WorldSearcher getSearcherForObject(GameObject item)
     {

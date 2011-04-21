@@ -10,6 +10,7 @@ class Character : GameObject
         this.initializeHitpoints(10);
         this.activeWeapons = new System.Collections.Generic.List<Weapon>();
         this.money = 0;
+        this.setJumpSpeed(1000);
     }
     public override bool isACharacter()
     {
@@ -131,6 +132,17 @@ class Character : GameObject
         else
             return false;
     }
+    public void setJumpSpeed(double newSpeed)
+    {
+        double[] newVelocity = new double[2];
+        newVelocity[0] = 0;
+        newVelocity[1] = newSpeed;
+        this.setJumpVelocity(newVelocity);
+    }
+    public void setJumpVelocity(double[] newVelocity)
+    {
+        this.jumpVelocity = newVelocity;
+    }
     public void jump()
     {
         // make sure we're colliding with something and not moving up
@@ -139,10 +151,15 @@ class Character : GameObject
             // make sure we're not hitting the ceiling
             if (this.collision.getCenter()[1] - this.collision.getShape().getHeight() / 2 + 0.00001 < this.getCenter()[1] + this.getShape().getHeight() / 2)
             {
+                // now jump
                 double[] newVelocity = new double[2];
-                newVelocity[0] = this.getVelocity()[0];
-                newVelocity[1] = 1000;
+                if (this.isFacingRight())
+                    newVelocity[0] = this.getVelocity()[0] + this.jumpVelocity[0];
+                else
+                    newVelocity[0] = this.getVelocity()[0] - this.jumpVelocity[0];
+                newVelocity[1] = this.jumpVelocity[1];
                 this.setVelocity(newVelocity);
+                
             }
 	    }
     }
@@ -261,6 +278,26 @@ class Character : GameObject
             this.currentWeaponIndex = index;
         }
     }
+    // recharge some ammunition due to reaching an ammo box
+    public void refillSomeAmmo()
+    {
+        if (this.getNumWeapons() > 0)
+        {
+            // fill up the current weapon with the contents of the ammo box
+            int index = 0;
+            double remainingAmmo = 1;
+            Weapon weapon;
+            while ((index < this.getNumWeapons()) && (remainingAmmo >= 0))
+            {
+                // get the next weapon to refill
+                weapon = this.getCurrentWeaponShiftedByIndex(index);
+                // refill up to the maximum amount in the box and figure out how much is left over
+                remainingAmmo -= weapon.refillAmmo(remainingAmmo);
+                // move to the next weapon
+                index++;
+            }
+        }
+    }
     public override void takeDamage(double damagePerSec, double numSeconds)
     {
         // subtract the armor per second and take damage equal to the result
@@ -364,6 +401,7 @@ class Character : GameObject
 	double armor;
     double money;
 	double[] targetVelocity;
+    double[] jumpVelocity;
 	GameObject collision;	// Tells what this object is colliding with, or null.
 	System.Collections.Generic.List<Weapon> weapons;
 	int currentWeaponIndex;

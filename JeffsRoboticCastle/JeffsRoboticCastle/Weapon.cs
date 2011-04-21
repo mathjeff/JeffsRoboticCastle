@@ -51,6 +51,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
+                ammoPerBox = 0;
                 ammoRechargeRate = 3;
                 this.setWarmupTime(0.001);
                 cooldownTime = 0.2;
@@ -99,6 +100,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 9;
+                ammoPerBox = 4;
                 ammoRechargeRate = .03;
                 this.setWarmupTime(.9);
                 cooldownTime = 1;
@@ -146,6 +148,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 4;
+                ammoPerBox = 4;
                 ammoRechargeRate = .05;
                 this.setWarmupTime(0.01);
                 cooldownTime = 3;
@@ -195,6 +198,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
+                ammoPerBox = 4;
                 ammoRechargeRate = 0.1;
                 this.setWarmupTime(0.01);
                 cooldownTime = 3.5;
@@ -245,6 +249,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
+                ammoPerBox = 8;
                 ammoRechargeRate = .25;
                 this.setWarmupTime(0.01);
                 cooldownTime = 2;
@@ -293,6 +298,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 36;
+                ammoPerBox = 20;
                 ammoRechargeRate = 1.1;
                 this.setWarmupTime(0.001);
                 cooldownTime = 0;
@@ -340,6 +346,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
+                ammoPerBox = 3;
                 ammoRechargeRate = .5;
                 this.setWarmupTime(0.01);
                 cooldownTime = 1;
@@ -389,6 +396,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 7;
+                ammoPerBox = 2;
                 ammoRechargeRate = 0.2;
                 this.setWarmupTime(0.01);
                 cooldownTime = 0.1;
@@ -435,6 +443,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 4;
+                ammoPerBox = 1;
                 ammoRechargeRate = 0.02;
                 this.setWarmupTime(3);
                 cooldownTime = 3;
@@ -483,6 +492,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
+                ammoPerBox = 3;
                 ammoRechargeRate = 0.01;
                 this.setWarmupTime(0.01);
                 cooldownTime = 1;
@@ -531,6 +541,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 8;
+                ammoPerBox = 8;
                 ammoRechargeRate = 0.3;
                 this.setWarmupTime(0.01);
                 cooldownTime = 0.01;
@@ -581,6 +592,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 5;
+                ammoPerBox = 3;
                 ammoRechargeRate = 0.01;
                 this.setWarmupTime(0.01);
                 cooldownTime = 3;
@@ -633,7 +645,8 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 3;
-                ammoRechargeRate = .2;
+                ammoPerBox = 2;
+                ammoRechargeRate = .15;
                 this.setWarmupTime(0.001);
                 cooldownTime = 1;
                 switchToTime = 1;
@@ -665,11 +678,11 @@ class Weapon
                 templateExplosion.setShape(new GameCircle(25));
                 templateExplosion.setBitmap(ImageLoader.loadImage("Banana.png"));
                 //templateExplosion.setStunFraction(2);
-                templateExplosion.setDuration(10);
+                templateExplosion.setDuration(9.6);
                 templateProjectile.setTemplateExplosion(templateExplosion);
 
                 templateStun = new Stun();
-                templateStun.setDamagePerSecond(0.5);
+                templateStun.setDamagePerSecond(0.4);
                 templateStun.setTimeMultiplier(-.9);
                 templateStun.setDuration(1);
                 templateExplosion.setTemplateStun(templateStun);
@@ -680,6 +693,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
+                ammoPerBox = 10;
                 ammoRechargeRate = 0.005;
                 this.setWarmupTime(0.01);
                 cooldownTime = 1;
@@ -728,6 +742,7 @@ class Weapon
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
+                ammoPerBox = 3;
                 ammoRechargeRate = 0.1;
                 this.setWarmupTime(0.01);
                 cooldownTime = 0;
@@ -775,8 +790,9 @@ class Weapon
                 cost = 1600;
 
                 // Attributes about when you may fire
-                maxAmmo = 5;
-                ammoRechargeRate = .005;
+                maxAmmo = 3;
+                ammoPerBox = 1;
+                ammoRechargeRate = .01;
                 this.setWarmupTime(1);
                 cooldownTime = 3;
                 switchToTime = 1;
@@ -838,6 +854,7 @@ class Weapon
 
         // Attributes about when you may fire
         this.maxAmmo = other.maxAmmo;
+        this.ammoPerBox = other.ammoPerBox;
         this.ammoRechargeRate = other.ammoRechargeRate;
         this.setWarmupTime(other.warmupTime);
         this.cooldownTime = other.cooldownTime;
@@ -866,6 +883,17 @@ class Weapon
     public void refillAmmo()
     {
         this.currentAmmo = this.maxAmmo;
+    }
+    // refills up to maxFraction of a box worth of ammo, and returns what fraction it filled up
+    public double refillAmmo(double maxFraction)
+    {
+        double difference = this.maxAmmo - currentAmmo;
+        double increase = Math.Min(difference, maxFraction * this.ammoPerBox);
+        this.currentAmmo += increase;
+        if (this.ammoPerBox != 0)
+            return increase / this.ammoPerBox;
+        else
+            return 0;
     }
     public void resetCooldown()
     {
@@ -1249,8 +1277,11 @@ class Weapon
         if (ammoRechargeRate > 0)
             tempCost *= 3;
         tempCost *= (1 + ammoRechargeRate * 15);
-        tempCost *= (1 + 1 / (Math.Abs(warmupTime) + 0.001));
-        tempCost *= (1 + 0.3 / (Math.Abs(cooldownTime) + 0.001));
+        double warmup = Math.Abs(warmupTime);
+        double fireDuration = Math.Abs(warmupTime) + Math.Abs(cooldownTime) + 0.001;
+        tempCost *= Math.Pow(.5, warmup / fireDuration);
+        //tempCost *= (1 + 1 / (Math.Abs(warmupTime) + 0.001));
+        tempCost *= (1 + 0.3 / (Math.Abs(warmupTime) + Math.Abs(cooldownTime) + 0.001));
         //tempCost *= (1 + 0.1 / (Math.Abs(switchToTime) + 0.001));
         //tempCost *= (1 + 0.1 / (Math.Abs(switchFromTime) + 0.001));
         if (fireWhileInactive)
@@ -1263,11 +1294,16 @@ class Weapon
         // attributes of the projectile that affect the cost
         tempCost *= (1 + templateProjectile.getShape().getWidth() / 150);
         tempCost *= (1 + templateProjectile.getShape().getHeight() / 150);
-        tempCost *= (1 + templateProjectile.getRemainingFlightTime() / 5);
-        tempCost *= (1 + 1 / (Math.Abs(templateProjectile.getPenetration() - 1) + 0.001));
-        tempCost *= (1 + templateProjectile.getNumExplosionsRemaining() * 2);
-        tempCost *= (1 + templateProjectile.getHomingAccel() / 6);
-
+        //tempCost *= (1 + templateProjectile.getRemainingFlightTime() / 5);
+        //tempCost *= (1 + 1 / (Math.Abs(templateProjectile.getPenetration() - 1) + 0.001));
+        //tempCost *= (1 + templateProjectile.getNumExplosionsRemaining() * 2);
+        double penetration = templateProjectile.getPenetration();
+        if (penetration == 1)
+            tempCost *= (1 + templateProjectile.getNumExplosionsRemaining());
+        else
+            tempCost *= (1 + templateProjectile.getNumExplosionsRemaining() + 
+                (1 - Math.Pow(templateProjectile.getPenetration(), templateProjectile.getNumExplosionsRemaining())) / (1 - penetration));
+        tempCost *= (1 + (1 + templateProjectile.getHomingAccel()) * (1 + templateProjectile.getRemainingFlightTime()) / 100);
         // attributes of the explosion that affect the cost
         Explosion templateExplosion = templateProjectile.getTemplateExplosion();
         tempCost *= (1 + templateExplosion.getShape().getWidth() / 50);
@@ -1281,8 +1317,13 @@ class Weapon
         tempCost *= (1 + 1 / (Math.Abs(templateStun.getTimeMultiplier()) + 0.001));
         tempCost *= (1 + Math.Abs(templateStun.getTimeMultiplier() - 1));
         tempCost *= (1 + Math.Abs(templateStun.getDamagePerSecond()) * 2.5);
-        if ((templateStun.getDamagePerSecond() < 0) && (templateExplosion.isFriendlyFireEnabled()))
-            tempCost *= 30;
+        if (templateExplosion.isFriendlyFireEnabled())
+        {
+            if (templateStun.getDamagePerSecond() < 0)
+                tempCost *= 35;
+            if (templateStun.getTimeMultiplier() > 1)
+                tempCost *= 35;
+        }
         tempCost *= (1 + templateExplosion.getDuration() + templateStun.getDuration());
 
 
@@ -1309,6 +1350,7 @@ private
 	// Attributes about when you may fire
 	double maxAmmo;
 	double ammoRechargeRate;
+    double ammoPerBox;
 	double warmupTime;
 	double cooldownTime;
 	double switchToTime;
