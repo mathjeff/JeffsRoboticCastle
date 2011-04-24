@@ -33,7 +33,7 @@ class WorldLoader
         terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 4;
         this.worldDimensions = new double[2];
         worldDimensions[0] = 4500 + 3000 * levelNumber;
-        worldDimensions[1] = 800;
+        worldDimensions[1] = 600;
         //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
         this.world = new World(worldCanvas, screenSize, terrainActiveDimensions);
@@ -101,7 +101,7 @@ class WorldLoader
         {
             // add an enemy
             // choose the enemy's location
-            x += (800 / worldDimensions[1]) * (900 * generator.NextDouble() + 900) / (levelNumber + 1);
+            x += (800 / worldDimensions[1]) * (500 * generator.NextDouble() + 1100) / (levelNumber + 1);
             y = worldDimensions[1] * generator.NextDouble();
             location = new double[2]; location[0] = x; location[1] = y;
             // choose the enemy's type
@@ -128,7 +128,7 @@ class WorldLoader
         this.addItem(exit);
 #if true
         // add platforms
-        double spacing = 25;
+        double spacing = 21;
         for (i = 0; i < 4; i++)
         {
             if (generator.Next(2) == 0)

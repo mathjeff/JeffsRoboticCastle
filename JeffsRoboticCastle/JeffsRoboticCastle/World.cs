@@ -463,21 +463,21 @@ class World
         // Must process AI before clearing collision flags because we only let it jump if it's on the ground
         // Must clear collision flags before moving because moving will set the collision flags again
         // Should have projectiles find targets before moving
-        // Must clear stun values before processing explosions because the explosions will recalculate the stun values
         // Should process explosions before processing death beacause explosions can cause death
         // Must process explosions before exploding projectiles because the explosions can explode other projectiles
+        // Should process explosions before moving characters so that a detonated projectile will always do damage
 
         this.projectilesFindTargets();
         this.processAIs();
        
         this.clearCollisionFlags();
-        
-        this.moveObjects(numSeconds);
-        
-        this.spawnProjectiles(numSeconds);
-        //this.clearStunFlags();
-        
+
         this.processExplosions(numSeconds);
+
+        this.moveCharacters(numSeconds);
+        this.moveProjectiles(numSeconds);
+        
+        this.spawnProjectiles(numSeconds);        
         
         this.processDeath(numSeconds);
         this.applyContactDamage(numSeconds);
@@ -643,21 +643,20 @@ class World
         // Now we've found a bunch of possible targets. Search for the closest
         return p.findClosest(candidates);
     }*/
-    void moveObjects(double numSeconds)
+    void moveCharacters(double numSeconds)
     {
 	    // move objects
         foreach (Character c in this.characters)
         {
             this.moveObject(c, numSeconds);
         }
+    }
+    void moveProjectiles(double numSeconds)
+    {
         foreach (Projectile p in this.projectiles)
         {
             this.moveObject(p, numSeconds);
         }
-	    /*for (i = 0; i < this.objects.Count; i++)
-	    {
-		    this.moveObject(objects[i], numSeconds);
-	    }*/
     }
     // create any new projectiles from the weapons that characters are firing
     void spawnProjectiles(double numSeconds)
@@ -672,7 +671,10 @@ class World
                 //if (this.loader != null)
                 //    this.loader.addItem(tempProjectile);
                 //else
+                // create the projectile
                 this.addProjectile(tempProjectile);
+                // figure out whether it has to explode right away
+                this.checkDetonation(tempProjectile);
             }
 	    }
     }
@@ -724,7 +726,9 @@ class World
                 {
                     if (explosions[i].intersects(collisions[j]))
                     {
-                        this.explode((Projectile)collisions[j]);
+                        //this.explode((Projectile)collisions[j]);
+                        // mark the projectile as colliding with this explosion
+                        collisions[j].setColliding(explosions[i]);
                     }
                 }
             }
@@ -840,50 +844,7 @@ class World
             double[] newMove;
             if (o.isAProjectile())
             {
-                // find any enemy object that collides with it
-                //collisions = this.findAllEnemyCollisions(o, move);
-                collisions = this.findCollisions(o, false, false, true, move, true, true, true, false);
-                foreach (GameObject other in collisions)
-                {
-                    newMove = this.movementForCollision(o, other, move);    // check that it actually collides
-                    if (newMove != move)
-                    {
-                        // Check that it's not a repeat collision
-                        if (!o.intersects(other))
-                        {
-                            // Inform both objects of the collision
-                            o.setColliding(other);
-                            o.setCollisionMove(newMove);
-                            if (other.isAProjectile())
-                            {
-                                other.setColliding(o);
-                                //other.setCollisionLocation(other.getCenter());
-                            }
-                        }
-                    }
-                }
-                if (!o.isColliding())
-                {
-                    // if it didn't hit any enemies, we still have to check whether it hit any terrain
-                    //collisions = this.findTerrainCollisions(o, move);
-                    collisions = this.findCollisions(o, false, true, false, move, true, false, false, false);
-                    foreach (GameObject other in collisions)
-                    {
-                        newMove = this.movementForCollision(o, other, move);    // check that it actually collides
-                        if (newMove != move)
-                        {
-                            // Check that it's not a repeat collision
-                            if (!o.intersects(other))
-                            {
-                                // inform it of the collision
-                                o.setColliding(other);
-                                o.setCollisionMove(newMove);
-                                // terrain doesn't care about collisions, so if we get here we can stop checking
-                                break;
-                            }
-                        }
-                    }
-                }
+                this.checkDetonationForMove((Projectile)o, move);
             }
             else
             {
@@ -964,6 +925,93 @@ class World
             // Inform the world loader that it's done moving
             if (this.loader != null)
                 this.loader.objectEndingMove(o);
+        }
+    }
+
+    // Figures out if making this move would cause this projectile to explode. If so, it updates collision flags in the projectile and whatever it hit
+    void checkDetonationForMove(Projectile p, double[] move)
+    {
+        // find any enemy object that collides with it
+        List<GameObject> collisions = this.findCollisions(p, false, false, true, move, true, true, true, false);
+        double[] newMove;
+        foreach (GameObject other in collisions)
+        {
+            newMove = this.movementForCollision(p, other, move);    // check that it actually collides
+            if (newMove != move)
+            {
+                // Check that it's not a repeat collision
+                if (!p.intersects(other))
+                {
+                    // Inform both objects of the collision
+                    p.setColliding(other);
+                    p.setCollisionMove(newMove);
+                    if (other.isAProjectile())
+                    {
+                        other.setColliding(p);
+                        //other.setCollisionLocation(other.getCenter());
+                    }
+                }
+            }
+        }
+        if (!p.isColliding())
+        {
+            // if it didn't hit any enemies, we still have to check whether it hit any terrain
+            //collisions = this.findTerrainCollisions(o, move);
+            collisions = this.findCollisions(p, false, true, false, move, true, false, false, false);
+            foreach (GameObject other in collisions)
+            {
+                newMove = this.movementForCollision(p, other, move);    // check that it actually collides
+                if (newMove != move)
+                {
+                    // Check that it's not a repeat collision
+                    if (!p.intersects(other))
+                    {
+                        // inform it of the collision
+                        p.setColliding(other);
+                        p.setCollisionMove(newMove);
+                        // terrain doesn't care about collisions, so if we get here we can stop checking
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    // figures out if this projectile should explode based on the current location. If so, it updates collision flags and whatever it hit
+    void checkDetonation(Projectile p)
+    {
+        // find any enemy object that collides with it
+        List<GameObject> collisions = this.findCollisions(p, false, false, true, null, true, true, true, false);
+        //double[] newMove = new double[2];
+        foreach (GameObject other in collisions)
+        {
+            if (p.intersects(other))
+            {
+                // Inform both objects of the collision
+                p.setColliding(other);
+                //p.setCollisionMove(newMove);
+                if (other.isAProjectile())
+                {
+                    other.setColliding(p);
+                    //other.setCollisionLocation(other.getCenter());
+                }
+            }
+        }
+        if (!p.isColliding())
+        {
+            // if it didn't hit any enemies, we still have to check whether it hit any terrain
+            //collisions = this.findTerrainCollisions(o, move);
+            collisions = this.findCollisions(p, false, true, false, null, true, false, false, false);
+            foreach (GameObject other in collisions)
+            {
+                if (p.intersects(other))
+                {
+                    // inform it of the collision
+                    p.setColliding(other);
+                    //p.setCollisionMove(newMove);
+                    // terrain doesn't care about collisions, so if we get here we can stop checking
+                    break;
+                }
+            }
         }
     }
     // given that the mover wants to make the desiredMove and obstacle may be in the way, return the actual move that we will allow
@@ -1048,7 +1096,7 @@ class World
         // create an empty list to save in
         System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
         System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
-        int i, team;
+        int team;
         for (team = 0; team < this.searchers.GetLength(0); team++)
         {
             // first make sure that we care about this team
@@ -1074,33 +1122,33 @@ class World
             if (includeCharacters)
             {
                 temp = this.searchers[team, 0].getCollisions(item, move);   // find characters and platforms
-                for (i = 0; i < temp.Count; i++)
+                foreach (GameObject g in temp)
                 {
-                    collisions.Add(temp[i]);
+                    collisions.Add(g);
                 }
             }
             if (includeProjectiles)
             {
                 temp = this.searchers[team, 1].getCollisions(item, move);   // find projectiles
-                for (i = 0; i < temp.Count; i++)
+                foreach (GameObject g in temp)
                 {
-                    collisions.Add(temp[i]);
+                    collisions.Add(g);
                 }
             }
             if (includeExplosions)
             {
                 temp = this.searchers[team, 2].getCollisions(item, move);   // find explosions
-                for (i = 0; i < temp.Count; i++)
+                foreach (GameObject g in temp)
                 {
-                    collisions.Add(temp[i]);
+                    collisions.Add(g);
                 }
             }
             if (includeGhosts)
             {
                 temp = this.searchers[team, 3].getCollisions(item, move);   // find explosions
-                for (i = 0; i < temp.Count; i++)
+                foreach (GameObject g in temp)
                 {
-                    collisions.Add(temp[i]);
+                    collisions.Add(g);
                 }
             }
         }

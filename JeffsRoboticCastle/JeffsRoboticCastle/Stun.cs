@@ -73,7 +73,7 @@ class Stun
     }
     public void degrade(double value)
     {
-        this.timeMultiplier = 1 - (1 - this.timeMultiplier) * value;
+        //this.timeMultiplier = 1 - (1 - this.timeMultiplier) * value;
         this.damagePerSecond *= value;
         this.duration *= value;
     }

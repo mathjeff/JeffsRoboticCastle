@@ -28,6 +28,7 @@ namespace MyGameWindow
     {
         int windowWidth = 1600;
         int windowHeight = 1000;
+        long desiredNumTicks = 0;
         JeffsRoboticCastle game;
         DateTime latestTickTime;
         //TimeSpan timerInterval;
@@ -48,7 +49,7 @@ namespace MyGameWindow
             this.dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(game_tick);
             //timerInterval = new TimeSpan(0, 0, 0, 0, 50);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 50);
+            dispatcherTimer.Interval = new TimeSpan(desiredNumTicks);
             maxTickTime = new TimeSpan(0, 0, 0, 1, 0);
             //dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 0);
             dispatcherTimer.Start();
@@ -72,6 +73,11 @@ namespace MyGameWindow
             // Get the current time
             DateTime currentTime = DateTime.Now;
             TimeSpan elapsedTime = currentTime.Subtract(latestTickTime);
+            // cap the elapsed time to 1 second
+            if (elapsedTime.CompareTo(maxTickTime) > 0)
+            {
+                elapsedTime = maxTickTime;
+            }
             double elapsedSeconds = elapsedTime.TotalSeconds;
             //System.Diagnostics.Trace.WriteLine("Actual num seconds = " + elapsedSeconds.ToString());
             //System.Diagnostics.Trace.WriteLine("Intended num seconds = " + this.dispatcherTimer.Interval.TotalSeconds.ToString());
@@ -89,12 +95,14 @@ namespace MyGameWindow
             // make sure that time actually moved forward. For some reason, in extremely rare occurences, it may not move forward
             if (actualNumTicks >= 0)
             {
-                // If the timer ticked as quickly as we wanted, then try to speed it up a little
-                TimeSpan desiredInterval = new TimeSpan(actualNumTicks * 4 / 7);
-                if (desiredInterval.CompareTo(maxTickTime) > 0)
+                // Change the desired duration to be slightly faster than the recent average duration
+                desiredNumTicks = (14 * desiredNumTicks + actualNumTicks) / 16;
+                //TimeSpan desiredInterval = new TimeSpan(actualNumTicks / 2);
+                TimeSpan desiredInterval = new TimeSpan(desiredNumTicks);
+                /*if (desiredInterval.CompareTo(maxTickTime) > 0)
                 {
                     desiredInterval = maxTickTime;
-                }
+                }*/
                 // This way, actualNumTicks = requestedNumTicks * 7 / 4, halfway between 3/2 and 2
                 //desiredInterval = new TimeSpan(0, 0, 0, 0, 100);
                 this.dispatcherTimer.Interval = desiredInterval;

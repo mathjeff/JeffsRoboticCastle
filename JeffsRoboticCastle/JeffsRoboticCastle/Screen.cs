@@ -102,6 +102,21 @@ class Screen
         control.Height = height;
         this.canvas.Children.Add(control);
     }
+    public double parseDouble(TextBox field)
+    {
+        if (field.Text == "")
+            field.Text = "0";
+        if ((field.Text == ".") || (field.Text == "-"))
+            return 0;
+        return Double.Parse(field.Text);
+    }
+    public int parseInt(TextBox field)
+    {
+        if (field.Text == "")
+            field.Text = "0";
+        return Int32.Parse(field.Text);
+    }
+
 
 // private
     Canvas parentCanvas;

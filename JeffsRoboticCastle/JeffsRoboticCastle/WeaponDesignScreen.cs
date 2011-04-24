@@ -191,11 +191,17 @@ class WeaponDesignScreen : MenuScreen
         ammoRechargeRate = new TextBox();
         addControl(ammoRechargeRate, getLeft(weaponCost), getBottom(maxAmmo) + verticalSpacing, labelWidth, labelHeight);
 
+        Label ammoPerBoxLabel = new Label();
+        ammoPerBoxLabel.Content = "Ammo/box";
+        addControl(ammoPerBoxLabel, getLeft(weaponCostLabel), getBottom(ammoRechargeRateLabel) + verticalSpacing, labelWidth, labelHeight);
+        ammoPerBox = new TextBox();
+        addControl(ammoPerBox, getLeft(weaponCost), getBottom(ammoRechargeRate) + verticalSpacing, labelWidth, labelHeight);
+
         Label fireWhileInactiveLabel = new Label();
         fireWhileInactiveLabel.Content = "Fire while Inactive";
-        addControl(fireWhileInactiveLabel, getLeft(weaponCostLabel), getBottom(ammoRechargeRateLabel) + verticalSpacing, labelWidth, labelHeight);
+        addControl(fireWhileInactiveLabel, getLeft(weaponCostLabel), getBottom(ammoPerBoxLabel) + verticalSpacing, labelWidth, labelHeight);
         fireWhileInactive = new CheckBox();
-        addControl(fireWhileInactive, getLeft(weaponCost), getBottom(ammoRechargeRate) + verticalSpacing, labelWidth, labelHeight);
+        addControl(fireWhileInactive, getLeft(weaponCost), getBottom(ammoPerBox) + verticalSpacing, labelWidth, labelHeight);
 
         Label cooldownWhileInactiveLabel = new Label();
         cooldownWhileInactiveLabel.Content = "Cooldown while Inactive";
@@ -456,6 +462,8 @@ class WeaponDesignScreen : MenuScreen
             maxAmmo.Text = "5";
         if (ammoRechargeRate.Text == "")
             ammoRechargeRate.Text = ".1";
+        if (ammoPerBox.Text == "")
+            ammoPerBox.Text = ".1";
         if (warmupTime.Text == "")
             warmupTime.Text = ".1";
         if (cooldownTime.Text == "")
@@ -564,6 +572,7 @@ class WeaponDesignScreen : MenuScreen
         templateWeapon.setMaxAmmo(parseDouble(maxAmmo));
         templateWeapon.refillAmmo();
         templateWeapon.setAmmoRechargeRate(parseDouble(ammoRechargeRate));
+        templateWeapon.setAmmoPerBox(parseDouble(ammoPerBox));
         templateWeapon.setWarmupTime(parseDouble(warmupTime));
         templateWeapon.setCooldownTime(parseDouble(cooldownTime));
         templateWeapon.setSwitchToTime(parseDouble(switchToTime));
@@ -620,6 +629,7 @@ class WeaponDesignScreen : MenuScreen
         // attributes of the weapon
         maxAmmo.Text = templateWeapon.getMaxAmmo().ToString();
         ammoRechargeRate.Text = templateWeapon.getAmmoRechargeRate().ToString();
+        ammoPerBox.Text = templateWeapon.getAmmoPerBox().ToString();
         warmupTime.Text = templateWeapon.getWarmupTime().ToString();
         cooldownTime.Text = templateWeapon.getCooldownTime().ToString();
         switchToTime.Text = templateWeapon.getSwitchToTime().ToString();
@@ -665,20 +675,7 @@ class WeaponDesignScreen : MenuScreen
         //this.calculateCost();
         this.weaponCost.Content = this.templateWeapon.getCost();
     }
-    double parseDouble(TextBox field)
-    {
-        if (field.Text == "")
-            field.Text = "0";
-        if ((field.Text == ".") || (field.Text == "-"))
-            return 0;
-        return Double.Parse(field.Text);
-    }
-    int parseInt(TextBox field)
-    {
-        if (field.Text == "")
-            field.Text = "0";
-        return Int32.Parse(field.Text);
-    }
+
     Player player;
     Label currentMoney;
     bool wantsDemo;
@@ -691,6 +688,7 @@ class WeaponDesignScreen : MenuScreen
     Label weaponCost;
     TextBox maxAmmo;
     TextBox ammoRechargeRate;
+    TextBox ammoPerBox;
     TextBox warmupTime;
     TextBox cooldownTime;
     TextBox switchToTime;

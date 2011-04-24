@@ -17,7 +17,7 @@ class JeffsRoboticCastle
         this.setupPlayer();
 	    this.setupDrawing(screenWidth, screenHeight);
 	    //this.userCamera = new Camera(RectangleF(0, 0, (float)windowWidth, (float)windowHeight), RectangleF(0, 0, (float)windowWidth, (float)windowHeight));
-	    this.setupWorld(1);
+	    //this.setupWorld(1);
         //this.setupCharacterStatusDisplay();
         //this.audioPlayer = new AudioPlayer(newCanvas);
         //this.audioPlayer.setSoundFile("09 Who Am I Living For_.m4a");
@@ -134,6 +134,7 @@ class JeffsRoboticCastle
             }
             */
             newScreen = this.currentScreen.timerTick(numSeconds);
+            // check whether they just came from the level selection screen
             if (newScreen != worldScreen)
             {
                 // if we get here then they just left the world through a portal or whatever
@@ -158,6 +159,19 @@ class JeffsRoboticCastle
         else
         {
             newScreen = this.currentScreen.timerTick(numSeconds);
+            if (newScreen != currentScreen)
+            {
+                if (currentScreen == levelSelectionScreen)
+                {
+                    this.levelNumber = levelSelectionScreen.getChosenLevelNumber();
+                    if (levelNumber < 1)
+                        levelNumber = 1;
+                    if (levelNumber > 5)
+                        levelNumber = 5;
+                    this.setupWorld(this.levelNumber);
+                    this.player.addMoney(this.levelNumber * 1600);
+                }
+            }
         }
         // transition to the next screen if necessary
         this.setCurrentScreen(newScreen);
@@ -251,8 +265,11 @@ class JeffsRoboticCastle
         this.worldCanvas = new Canvas();
         */
         this.worldScreen = new WorldScreen(this.mainCanvas, screenPosition, screenSize);
+        // level selection screen letting the user jump to another level
+        levelSelectionScreen = new LevelSelectionScreen(this.mainCanvas, screenSize);
         // menu screen explaining how everything works
         MenuScreen menuScreen = new MenuScreen(this.mainCanvas, screenSize);
+        levelSelectionScreen.setNextScreen(menuScreen);
         // screen for designing weapons
         WeaponDesignScreen designScreen = new WeaponDesignScreen(this.mainCanvas, screenSize);
         menuScreen.setNextScreen(designScreen);
@@ -262,7 +279,7 @@ class JeffsRoboticCastle
         //MenuScreen victoryScreen = new MenuScreen(this.mainCanvas, screenSize);
         this.worldScreen.setExitScreen(menuScreen);
         //victoryScreen.setBackgroundBitmap(ImageLoader.loadImage("Victory.png"));
-        this.setCurrentScreen(menuScreen);
+        this.setCurrentScreen(levelSelectionScreen);
     }
     void setupPlayer()
     {
@@ -270,7 +287,7 @@ class JeffsRoboticCastle
         // spawn the player
         double[] location = new double[2]; location[0] = 30; location[1] = 30;
         this.player = new Player(location);
-        this.player.addMoney(1600);
+        //this.player.addMoney(1600);
 #if false
         this.player.addWeapon(new Weapon(0));
         this.player.addWeapon(new Weapon(1));
@@ -350,5 +367,6 @@ class JeffsRoboticCastle
     AudioPlayer audioPlayer;
     WorldScreen worldScreen;
     Screen currentScreen;
+    LevelSelectionScreen levelSelectionScreen;
     int levelNumber;
 };

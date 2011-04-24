@@ -18,7 +18,7 @@ class Player : Character
 	    this.setShape(new GameCircle(21));
 #endif
         this.setBitmap(startingImage);
-        double[] accel = new double[2]; accel[0] = 500; accel[1] = 0;
+        double[] accel = new double[2]; accel[0] = 600; accel[1] = 0;
 	    this.setMaxAccel(accel);
 	    this.setDragCoefficient(3);
 	    this.setTeamNum(2);

@@ -102,6 +102,7 @@
     <Compile Include="HitPointBar.cs" />
     <Compile Include="ImageLoader.cs" />
     <Compile Include="JeffsRoboticCastle.cs" />
+    <Compile Include="LevelSelectionScreen.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="Painting.cs" />
     <Compile Include="PickupItem.cs" />

@@ -74,7 +74,7 @@ class WeaponStatusDisplay
         {
             maxDuration = currentWeapon.getCooldownTime();
             currentDuration = currentWeapon.getRemainingCooldown();
-            this.firingBar.Fill = Brushes.Red;
+            this.firingBar.Fill = Brushes.Yellow;
         }
         if (maxDuration <= 0)
             maxDuration = 1;
