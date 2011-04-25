@@ -1266,6 +1266,7 @@ class Weapon
         //tempCost *= (1 + 1 / (Math.Abs(templateProjectile.getPenetration() - 1) + 0.001));
         //tempCost *= (1 + templateProjectile.getNumExplosionsRemaining() * 2);
         double penetration = templateProjectile.getPenetration();
+        penetration *= penetration; // square it because it affects both explosion duration and damage
         if (penetration == 1)
             tempCost *= (templateProjectile.getNumExplosionsRemaining() * 5 + 1);
         else

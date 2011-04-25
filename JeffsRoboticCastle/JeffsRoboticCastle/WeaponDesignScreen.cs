@@ -115,20 +115,20 @@ class WeaponDesignScreen : MenuScreen
         // add a status display to show the current weapons
         double[] statusDisplaySize = new double[2];
         statusDisplaySize[0] = this.getSize()[0];
-        statusDisplaySize[1] = 200;
+        statusDisplaySize[1] = this.getSize()[1] / 5;
         statusDisplay = new CharacterStatusDisplay(this.getCanvas(), new double[2], statusDisplaySize);
 
         // add a bunch of controls for the creation of new weapons
-        double labelWidth = 200;
-        double labelHeight = 25;
+        double labelWidth = this.getSize()[0] / 8;
+        double labelHeight = this.getSize()[1] / 40;
         //double verticalPadding1 = 5;
-        double verticalSpacing = labelHeight + 1;
-        double horizontalSpacing = 100;
+        double verticalSpacing = labelHeight;
+        double horizontalSpacing = labelWidth / 2;
         
         // attributes of the weapon itself, rather than the projectiles or explosions
         Label weaponLabel = new Label();
         weaponLabel.Content = "Weapon";
-        this.addControl(weaponLabel, 300, statusDisplaySize[1], labelWidth, labelHeight);
+        this.addControl(weaponLabel, this.getSize()[0] * 3 / 16, statusDisplaySize[1], labelWidth, labelHeight);
 
         Label weaponCostLabel = new Label();
         weaponCostLabel.Content = "Weapon Cost";
@@ -409,26 +409,26 @@ class WeaponDesignScreen : MenuScreen
         Button quickBuildWeaponButton = new Button();
         quickBuildWeaponButton.Click += new RoutedEventHandler(quickBuildWeapon);
         quickBuildWeaponButton.Content = "Quick-build weapon";
-        this.addControl(quickBuildWeaponButton, 900, 600, labelWidth, labelHeight);
+        this.addControl(quickBuildWeaponButton, getRight(projectileGravity) + horizontalSpacing, getTop(projectileGravity), labelWidth, labelHeight);
 
         Button demoButton = new Button();
         demoButton.Click += new RoutedEventHandler(requestWeaponDemo);
         demoButton.Content = "Demo";
-        this.addControl(demoButton, 900, 700, labelWidth, labelHeight);
+        this.addControl(demoButton, getLeft(quickBuildWeaponButton), getTop(numExplosionsRemaining), labelWidth, labelHeight);
 
         Button purchaseButton = new Button();
         purchaseButton.Click += new RoutedEventHandler(purchaseCurrentWeapon);
         purchaseButton.Content = "Purchase";
-        this.addControl(purchaseButton, 900, 800, labelWidth, labelHeight);
+        this.addControl(purchaseButton, getLeft(quickBuildWeaponButton), getTop(homingAccel), labelWidth, labelHeight);
 
         Button doneButton = new Button();
         doneButton.Click += new RoutedEventHandler(requestToExit);
         doneButton.Content = "Done";
-        this.addControl(doneButton, 900, 900, labelWidth, labelHeight);
+        this.addControl(doneButton, getLeft(quickBuildWeaponButton), getTop(homeOnProjectiles), labelWidth, labelHeight);
 
         Label currentMoneyLabel = new Label();
         currentMoneyLabel.Content = "Current Money";
-        addControl(currentMoneyLabel, 50, 200, labelWidth, labelHeight);
+        addControl(currentMoneyLabel, getLeft(weaponLabel) - labelWidth, getBottom(weaponLabel), labelWidth, labelHeight);
         currentMoney = new Label();
         addControl(currentMoney, getLeft(currentMoneyLabel), getBottom(currentMoneyLabel), labelWidth, labelHeight);
     }

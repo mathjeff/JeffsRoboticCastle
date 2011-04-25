@@ -43,7 +43,8 @@ class MenuScreen : Screen
     {
         Image newImage = new Image();
         newImage.Source = bitmap;
-        newImage.Stretch = System.Windows.Media.Stretch.Uniform;
+        //newImage.Stretch = System.Windows.Media.Stretch.Uniform;
+        newImage.Stretch = System.Windows.Media.Stretch.Fill;
         newImage.Width = this.getSize()[0];
         newImage.Height = this.getSize()[1];
         this.setBackgroundImage(newImage);

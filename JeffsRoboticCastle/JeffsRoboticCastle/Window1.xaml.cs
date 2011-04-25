@@ -42,6 +42,8 @@ namespace MyGameWindow
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            windowWidth = (int)this.ActualWidth;
+            windowHeight = (int)this.ActualHeight;
             game = new JeffsRoboticCastle(canvas1, windowWidth, windowHeight);
             game.start();
 
