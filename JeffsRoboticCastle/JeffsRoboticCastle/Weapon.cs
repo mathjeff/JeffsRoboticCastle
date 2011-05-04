@@ -1280,6 +1280,7 @@ class Weapon
         //tempCost *= (.1 + 2 * Math.Abs(templateExplosion.getDuration()));
         if (templateExplosion.isFriendlyFireEnabled())
             tempCost /= 2;
+        tempCost *= (1 + Math.Abs(templateExplosion.getKnockbackAccel()) / 100);
 
         // attributes of the stun that affect the cost
         Stun templateStun = templateExplosion.getTemplateStun();
@@ -1288,7 +1289,7 @@ class Weapon
         tempCost *= (.1 + Math.Abs(templateStun.getDamagePerSecond()) * 2);
         if (templateExplosion.isFriendlyFireEnabled())
         {
-            if (templateStun.getDamagePerSecond() < 0)
+            if (templateStun.getDamagePerSecond() <= 0)
                 tempCost *= 35;
             if (templateStun.getTimeMultiplier() > 1)
                 tempCost *= 35;

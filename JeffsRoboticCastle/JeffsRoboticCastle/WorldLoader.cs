@@ -33,7 +33,7 @@ class WorldLoader
         terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 4;
         this.worldDimensions = new double[2];
         worldDimensions[0] = 4500 + 3000 * levelNumber;
-        worldDimensions[1] = 600;
+        worldDimensions[1] = 1200;
         //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
         this.world = new World(worldCanvas, screenSize, terrainActiveDimensions);
@@ -101,7 +101,7 @@ class WorldLoader
         {
             // add an enemy
             // choose the enemy's location
-            x += (800 / worldDimensions[1]) * (500 * generator.NextDouble() + 1100) / (levelNumber + 1);
+            x += 4 / 3 * (500 * generator.NextDouble() + 1100) / (levelNumber + 1);
             y = worldDimensions[1] * generator.NextDouble();
             location = new double[2]; location[0] = x; location[1] = y;
             // choose the enemy's type
@@ -137,8 +137,8 @@ class WorldLoader
         int count = (int)(worldDimensions[0] / spacing);
         for (i = 0; i < count; i++)
         {
-            x = generator.NextDouble() * worldDimensions[0];
-            y = worldDimensions[1] * generator.NextDouble();
+            x = generator.NextDouble() * worldDimensions[0] + 100;
+            y = worldDimensions[1] * generator.NextDouble() * .5;
             location = new double[2]; location[0] = x; location[1] = y;
             type = (int)(generator.NextDouble() * 2);
             this.addItem(new Platform(location, type));
@@ -224,6 +224,33 @@ class WorldLoader
                 this.world.addPlatform(new Platform(location));
             }
         }*/
+
+        // create the walls of the world
+        // top wall
+        GameObject topWall;
+        x = 0;
+        while (x < worldDimensions[0])
+        {
+            location = new double[2]; location[0] = x; location[1] = worldDimensions[1];
+            topWall = new Platform(location, 0);
+            this.addItem(topWall);
+            x += topWall.getShape().getWidth();
+        }
+
+        // left wall
+        GameObject leftWall;
+        y = 0;
+        while (y < worldDimensions[1])
+        {
+            location = new double[2]; location[0] = 0; location[1] = y;
+            leftWall = new Platform(location, 1);
+            this.addItem(leftWall);
+            y += leftWall.getShape().getHeight();
+        }
+        location = new double[2]; location[0] = 0; location[1] = y;
+        leftWall = new Platform(location, 1);
+        this.addItem(leftWall);
+        // don't need to bother with the right wall, because the exit is there
     }
     public void scrollTo(GameObject o)
     {

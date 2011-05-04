@@ -61,8 +61,8 @@ class Player : Character
         }
         // return to the starting location
         double[] position = new double[2];
-        position[0] = 0;
-        position[1] = this.getShape().getHeight() / 2;
+        position[0] = 200;
+        position[1] = this.getShape().getHeight() / 2 + 5;
         this.setCenter(position);
         this.setVelocity(new double[2]);
         this.setHitpoints(this.getMaxHitpoints());

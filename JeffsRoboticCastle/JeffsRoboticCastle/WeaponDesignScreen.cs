@@ -80,7 +80,10 @@ class WeaponDesignScreen : MenuScreen
         this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 0);
         
         // make the player
-        this.demoPlayer = new Player(new double[2]);
+        double[] location = new double[2];
+        location[0] = 100;
+        location[1] = 30;
+        this.demoPlayer = new Player(location);
         this.demoPlayer.addWeapon(new Weapon(this.templateWeapon));
         this.demoPlayer.gotoWeaponTreeRoot();
         
@@ -367,6 +370,12 @@ class WeaponDesignScreen : MenuScreen
         friendlyFire = new CheckBox();
         addControl(friendlyFire, getLeft(explosionImage), getBottom(explosionDuration) + verticalSpacing, labelWidth, labelHeight);
 
+        Label knockbackLabel = new Label();
+        knockbackLabel.Content = "Knockback Accel";
+        addControl(knockbackLabel, getLeft(explosionImageLabel), getBottom(friendlyFireLabel) + verticalSpacing, labelWidth, labelHeight);
+        knockBack = new TextBox();
+        addControl(knockBack, getLeft(explosionImage), getBottom(friendlyFire) + verticalSpacing, labelWidth, labelHeight);
+
 
         /*
         // attributes of the explosion
@@ -609,6 +618,7 @@ class WeaponDesignScreen : MenuScreen
         templateExplosion.setShape(new GameCircle(parseDouble(explosionRadius)));
         templateExplosion.setDuration(parseDouble(explosionDuration));
         templateExplosion.setFriendlyFireEnabled(friendlyFire.IsChecked.Value);
+        templateExplosion.setKnockbackAccel(parseDouble(knockBack));
         templateProjectile.setTemplateExplosion(templateExplosion);
 
         Stun templateStun = new Stun();
@@ -664,6 +674,7 @@ class WeaponDesignScreen : MenuScreen
         explosionRadius.Text = ((templateExplosion.getShape().getWidth() + templateExplosion.getShape().getHeight()) / 4).ToString();
         explosionDuration.Text = templateExplosion.getDuration().ToString();
         friendlyFire.IsChecked = templateExplosion.isFriendlyFireEnabled();
+        knockBack.Text = templateExplosion.getKnockbackAccel().ToString();
 
         // attributes of the stun
         Stun templateStun = templateExplosion.getTemplateStun();
@@ -722,6 +733,7 @@ class WeaponDesignScreen : MenuScreen
     TextBox explosionRadius;
     TextBox explosionDuration;
     CheckBox friendlyFire;
+    TextBox knockBack;
 
     // attributes of the stun
     TextBox timeMultiplier;

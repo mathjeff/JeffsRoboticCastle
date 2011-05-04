@@ -554,11 +554,23 @@ class World
 // private
     void clearCollisionFlags()
     {
+        foreach (Projectile p in this.projectiles)
+        {
+            p.setColliding(null);
+            p.setCollisionLocation(null);
+        }
+        foreach (Character c in this.characters)
+        {
+            c.setColliding(null);
+            c.setCollisionLocation(null);
+        }
+        /*
         foreach (GameObject o in this.objects)
         {
             o.setColliding(null);
             o.setCollisionLocation(null);
         }
+        */
     }
     void clearStunFlags()
     {

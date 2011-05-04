@@ -1060,6 +1060,7 @@ class GameObject
             this.resetTimeMultiplier();
             double duration;
             System.Collections.ArrayList finishedStuns = new System.Collections.ArrayList(1);
+            // adjust the time multiplier and take damage
             foreach (Stun currentStun in this.stuns.Values)
             {
                 this.scaleTimeMultiplier(currentStun.getTimeMultiplier());
@@ -1068,6 +1069,16 @@ class GameObject
                 if (currentStun.isFinished(numSeconds))
                     finishedStuns.Add(currentStun);
             }
+            // accelerate
+            double[] velocity = this.getVelocity();
+            double multiplier = this.getTimeMultiplier() * numSeconds;
+            foreach (Stun currentStun in this.stuns.Values)
+            {
+                velocity[0] += currentStun.getAccel()[0] * multiplier;
+                velocity[1] += currentStun.getAccel()[1] * multiplier;
+            }
+            // update velocity
+            this.setVelocity(velocity);
             foreach (Stun currentStun in finishedStuns)
             {
                 this.stuns.Remove(currentStun.getCreator());

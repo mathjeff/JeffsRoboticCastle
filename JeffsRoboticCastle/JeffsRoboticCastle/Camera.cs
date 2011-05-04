@@ -13,7 +13,7 @@ class Camera
         this.screenBox = screenRect;
         // The padding is a measure of the minimum amount of world we always show on each side of the user
         this.padding = new double[2];
-        padding[0] = worldRect.getSize(0) / 4;
+        padding[0] = worldRect.getSize(0) / 6;
         padding[1] = worldRect.getSize(1) / 12;
     }
     public WorldBox getWorldBox()
@@ -34,29 +34,35 @@ class Camera
     public bool scrollTo(GameObject o)
     {
         bool moved = false;
-        if (this.worldBox.getLowCoordinate(0) + padding[0] > o.getLeft())
+        double deltaX;
+        deltaX = (o.getLeft() + o.getVelocity()[0] * .2) - (this.worldBox.getLowCoordinate(0) + padding[0]);
+        if (deltaX < 0)
         {
-            this.worldBox.shift(0, o.getLeft() - (worldBox.getLowCoordinate(0) + padding[0]));
+            this.worldBox.shift(0, deltaX);
             moved = true;
         }
         else
         {
-            if (worldBox.getHighCoordinate(0) - padding[0] < o.getRight())
+            deltaX = (o.getRight() + o.getVelocity()[0] * .2) - (this.worldBox.getHighCoordinate(0) - padding[0]);
+            if (deltaX > 0)
             {
-                this.worldBox.shift(0, o.getRight() - (worldBox.getHighCoordinate(0) - padding[0]));
+                this.worldBox.shift(0, deltaX);
                 moved = true;
             }
         }
-        if (this.worldBox.getLowCoordinate(1) + padding[1] > o.getBottom())
+        double deltaY;
+        deltaY = (o.getBottom() + o.getVelocity()[1] * .2) - (this.worldBox.getLowCoordinate(1) + padding[1]);
+        if (deltaY < 0)
         {
-            this.worldBox.shift(1, o.getBottom() - (worldBox.getLowCoordinate(1) + padding[1]));
+            this.worldBox.shift(1, deltaY);
             moved = true;
         }
         else
         {
-            if (worldBox.getHighCoordinate(1) - padding[1] < o.getTop())
+            deltaY = (o.getTop() + o.getVelocity()[1] * .2) - (this.worldBox.getHighCoordinate(1) - padding[1]);
+            if (deltaY > 0)
             {
-                this.worldBox.shift(1, o.getTop() - (worldBox.getHighCoordinate(1) - padding[0]));
+                this.worldBox.shift(1, deltaY);
                 moved = true;
             }
         }

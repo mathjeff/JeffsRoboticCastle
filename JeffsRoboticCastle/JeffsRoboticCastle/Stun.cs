@@ -51,6 +51,14 @@ class Stun
     {
         return this.damagePerSecond;
     }
+    public void setAccel(double[] newAccel)
+    {
+        this.accel = newAccel;
+    }
+    public double[] getAccel()
+    {
+        return this.accel;
+    }
     public void setDuration(double value)
     {
         this.duration = value;
@@ -82,6 +90,7 @@ class Stun
     double timeMultiplier;
     double damagePerSecond;
     double duration;
+    double[] accel;
     //bool isNew; // true for the first tick and false after that
     //System.Collections.Generic.Dictionary<Explosion, Stun> stuns;
 };
