@@ -12,6 +12,19 @@ public
         switch (type)
         {
             case 0:
+                startingImage = ImageLoader.loadImage("archer.png");
+                this.setCenter(location);
+                this.setShape(new GameRectangle(26, 41));
+                accel = new double[2]; accel[0] = 540; accel[1] = 0;
+                this.setMaxAccel(accel);
+                this.setDragCoefficient(3);
+                this.enemyType = type;
+                this.setGravity(1000);
+                this.initializeHitpoints(15);
+                this.setJumpSpeed(950);
+                this.setContactDamagePerSecond(0);
+                break;
+            case 1:
                 startingImage = ImageLoader.loadImage("horseman.png");
 	            this.setCenter(location);
                 this.setShape(new GameRectangle(80, 93));
@@ -22,8 +35,9 @@ public
                 this.setGravity(1000);
                 this.initializeHitpoints(11);
                 this.setJumpSpeed(1000);
+                this.setContactDamagePerSecond(0);
                 break;
-            case 1:
+            case 2:
                 startingImage = ImageLoader.loadImage("eagle.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(56, 43));
@@ -34,8 +48,9 @@ public
                 this.setGravity(75);
                 this.initializeHitpoints(9);
                 this.setJumpSpeed(500);
+                this.setContactDamagePerSecond(0);
                 break;
-            case 2:
+            case 3:
                 startingImage = ImageLoader.loadImage("swarm.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(16, 9));
@@ -46,8 +61,9 @@ public
                 this.setGravity(1000);
                 this.initializeHitpoints(5);
                 this.setJumpSpeed(500);
+                this.setContactDamagePerSecond(0);
                 break;
-            case 3:
+            case 4:
                 startingImage = ImageLoader.loadImage("armadillo.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(157, 79));
@@ -59,8 +75,22 @@ public
                 this.initializeHitpoints(30);
                 this.setJumpSpeed(550);
                 this.setArmor(1);
+                this.setContactDamagePerSecond(0);
                 break;
-            case 4:
+            case 5:
+                startingImage = ImageLoader.loadImage("chariot.png");
+                this.setCenter(location);
+                this.setShape(new GameRectangle(102, 61));
+                accel = new double[2]; accel[0] = 220; accel[1] = 0;
+                this.setMaxAccel(accel);
+                this.setDragCoefficient(.5);
+                this.enemyType = type;
+                this.setGravity(1000);
+                this.initializeHitpoints(11);
+                this.setJumpSpeed(500);
+                this.setContactDamagePerSecond(0);
+                break;
+            case 6:
                 startingImage = ImageLoader.loadImage("goblin2.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(18, 51));
@@ -71,11 +101,11 @@ public
                 this.setGravity(1000);
                 this.initializeHitpoints(15);
                 this.setJumpSpeed(950);
+                this.setContactDamagePerSecond(2);
                 break;
             default:
                 break;
         }
-        this.setContactDamagePerSecond(2);
         this.setBitmap(startingImage);
         this.setImageOffset(new double[2]);
         this.setBrain(new AI());

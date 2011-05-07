@@ -15,13 +15,20 @@ public class ImageLoader
         {
             fileName = "../../../Images/" + fileName;
         }
-        BitmapImage image = new BitmapImage();
-        image.BeginInit();
-        image.UriSource = new Uri(fileName, UriKind.Relative);
-        image.CacheOption = BitmapCacheOption.OnLoad;
-        //image.Width = image.PixelWidth;
-        //image.Height = image.PixelHeight;
-        image.EndInit();
-        return image;
+        if (!System.IO.File.Exists(fileName))
+        {
+            return null;
+        }
+        else
+        {
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            image.UriSource = new Uri(fileName, UriKind.Relative);
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            //image.Width = image.PixelWidth;
+            //image.Height = image.PixelHeight;
+            image.EndInit();
+            return image;
+        }
     }
 }

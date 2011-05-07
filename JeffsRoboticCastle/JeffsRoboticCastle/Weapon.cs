@@ -45,55 +45,8 @@ class Weapon
         // #define DESIGN_HERE
         switch (premadeType)
         {
+
             case 0:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 5;
-                ammoPerBox = 0;
-                ammoRechargeRate = 3;
-                this.setWarmupTime(0.001);
-                cooldownTime = 0.2;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = true;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = false;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                templateProjectile.setShape(new GameRectangle(4, 25));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Sword.png"));
-                tempVector[0] = 600; tempVector[1] = 10;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(100);
-                templateProjectile.setDragCoefficient(0);
-                templateProjectile.setRemainingFlightTime(0.1);
-                templateProjectile.setPenetration(0);
-                templateProjectile.setNumExplosionsRemaining(1);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(2000);
-                templateExplosion.setShape(new GameRectangle(25, 25));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Sparks.png"));
-                //templateExplosion.setStunFraction(0.4);
-                templateExplosion.setDuration(0.4);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(12);
-                templateStun.setTimeMultiplier(0.7);
-                templateStun.setDuration(0);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-
-            case 1:
 
                 // Attributes about when you may own the item
                 cost = 1600;
@@ -115,12 +68,12 @@ class Weapon
                 // Attributes of the projectile it launches, to determine when it hits
                 templateProjectile = new Projectile();
                 templateProjectile.setShape(new GameCircle(20));
-                templateProjectile.setBitmap(ImageLoader.loadImage("bomb.png"));
+                templateProjectile.setBitmap(ImageLoader.loadImage("Bomb2.png"));
                 tempVector[0] = 0; tempVector[1] = 0;
                 templateProjectile.setVelocity(tempVector);
                 templateProjectile.setGravity(500);
-                templateProjectile.setHomingAccel(3);
-                templateProjectile.setDragCoefficient(3);
+                templateProjectile.setHomingAccel(120);
+                templateProjectile.setDragCoefficient(1);
                 templateProjectile.setRemainingFlightTime(10);
                 templateProjectile.setPenetration(0.5);
                 templateProjectile.setNumExplosionsRemaining(1);
@@ -141,265 +94,168 @@ class Weapon
                 templateStun.setDuration(0);
                 templateExplosion.setTemplateStun(templateStun);
                 break;
-            case 2:
 
+            case 1:
                 // Attributes about when you may own the item
                 cost = 1600;
 
                 // Attributes about when you may fire
-                maxAmmo = 4;
-                ammoPerBox = 4;
-                ammoRechargeRate = .05;
-                this.setWarmupTime(0.01);
-                cooldownTime = 3;
+                maxAmmo = 12;
+                ammoPerBox = 5;
+                ammoRechargeRate = 0.05;
+                this.setWarmupTime(0);
+                cooldownTime = 2.5;
                 switchToTime = 1;
                 switchFromTime = 2;
                 automatic = false;
                 this.addOwnersVelocity = false;
-                fireWhileInactive = false;
+                fireWhileInactive = true;
                 cooldownWhileInactive = true;
                 rechargeWhileInactive = true;
 
                 // Attributes of the projectile it launches, to determine when it hits
                 templateProjectile = new Projectile();
-                templateProjectile.setShape(new GameRectangle(60, 75));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Fire.png"));
-                tempVector[0] = 466; tempVector[1] = 50;
-                templateProjectile.setVelocity(tempVector);
-                tempVector[0] = 60; tempVector[1] = 0;
+                tempVector[0] = 0; tempVector[1] = 0;
                 templateProjectile.setCenter(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(1);
-                templateProjectile.setDragCoefficient(0.1);
-                templateProjectile.setRemainingFlightTime(0.3);
+                templateProjectile.setShape(new GameCircle(10));
+                templateProjectile.setBitmap(ImageLoader.loadImage("Toxic2.png"));
+                tempVector[0] = 0; tempVector[1] = 0;
+                templateProjectile.setVelocity(tempVector);
+                templateProjectile.setGravity(1);
+                templateProjectile.setHomingAccel(300);
+                templateProjectile.setBoomerangAccel(1);
+                templateProjectile.setDragCoefficient(1);
+                templateProjectile.setRemainingFlightTime(30);
                 templateProjectile.setPenetration(1);
-                templateProjectile.setNumExplosionsRemaining(1);
+                templateProjectile.setNumExplosionsRemaining(2);
                 templateProjectile.initializeHitpoints(70);
 
                 // Attributes of the explosions that are created
                 templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(0.1);
-                templateExplosion.setShape(new GameRectangle(120, 150));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Fire.png"));
-                //templateExplosion.setStunFraction(0.1);
-                templateExplosion.setDuration(16);
-                templateExplosion.setFriendlyFireEnabled(true);
+                templateExplosion.setShape(new GameCircle(11));
+                templateExplosion.setBitmap(ImageLoader.loadImage("Toxic.png"));
+                templateExplosion.setDuration(0);
                 templateProjectile.setTemplateExplosion(templateExplosion);
 
                 templateStun = new Stun();
-                templateStun.setDamagePerSecond(1.6);
-                templateStun.setTimeMultiplier(0.99);
-                templateStun.setDuration(0);
+                templateStun.setDamagePerSecond(.5);
+                templateStun.setTimeMultiplier(0.9);
+                templateStun.setDuration(7);
                 templateExplosion.setTemplateStun(templateStun);
                 break;
-            case 3:
+
+            case 2:
                 // Attributes about when you may own the item
                 cost = 1600;
 
                 // Attributes about when you may fire
-                maxAmmo = 5;
-                ammoPerBox = 4;
-                ammoRechargeRate = 0.1;
-                this.setWarmupTime(0.01);
-                cooldownTime = 3.5;
+                maxAmmo = 10;
+                ammoPerBox = 10;
+                ammoRechargeRate = 0.4;
+                this.setWarmupTime(0);
+                cooldownTime = 0.5;
                 switchToTime = 1;
                 switchFromTime = 2;
                 automatic = false;
-                this.addOwnersVelocity = true;
+                this.addOwnersVelocity = false;
                 fireWhileInactive = true;
                 cooldownWhileInactive = true;
-                rechargeWhileInactive = false;
+                rechargeWhileInactive = true;
 
                 // Attributes of the projectile it launches, to determine when it hits
                 templateProjectile = new Projectile();
-                templateProjectile.setShape(new GameCircle(70));
-                templateProjectile.setBitmap(ImageLoader.loadImage("BlackHole.png"));
-                tempVector[0] = 0; tempVector[1] = 1000;
+                templateProjectile.setShape(new GameCircle(10));
+                templateProjectile.setBitmap(ImageLoader.loadImage("wasp2.png"));
+                tempVector[0] = 100; tempVector[1] = 30;
                 templateProjectile.setVelocity(tempVector);
-                tempVector[0] = -100; tempVector[1] = 0;
-                templateProjectile.setCenter(tempVector);
                 templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(0);
-                templateProjectile.setBoomerangAccel(10000);
-                templateProjectile.setDragCoefficient(0);
-                templateProjectile.setRemainingFlightTime(0.2 * 3.14159265);
+                templateProjectile.setHomingAccel(1500);
+                templateProjectile.enableHomingOnProjectiles(true);
+                templateProjectile.setBoomerangAccel(0);
+                templateProjectile.setDragCoefficient(0.35);
+                templateProjectile.setRemainingFlightTime(5);
                 templateProjectile.setPenetration(1);
-                templateProjectile.setNumExplosionsRemaining(20);
+                templateProjectile.setNumExplosionsRemaining(4);
                 templateProjectile.initializeHitpoints(70);
+
 
                 // Attributes of the explosions that are created
                 templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(6);
-                templateExplosion.setShape(new GameCircle(70));
-                templateExplosion.setBitmap(ImageLoader.loadImage("BlackHole.png"));
-                //templateExplosion.setStunFraction(0.3);
-                templateExplosion.setDuration(1);
+                //templateExplosion.setDamagePerSec(0.04);
+                templateExplosion.setShape(new GameCircle(50));
+                templateExplosion.setBitmap(ImageLoader.loadImage("explosion.png"));
+                //templateExplosion.setStunFraction(0.05);
+                templateExplosion.setDuration(.7);
                 templateProjectile.setTemplateExplosion(templateExplosion);
 
                 templateStun = new Stun();
-                templateStun.setDamagePerSecond(0.6);
-                templateStun.setTimeMultiplier(0.7);
+                templateStun.setDamagePerSecond(0.5);
+                templateStun.setTimeMultiplier(0.9);
                 templateStun.setDuration(0);
                 templateExplosion.setTemplateStun(templateStun);
                 break;
-            case 4:
 
+            case 3:
                 // Attributes about when you may own the item
                 cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 10;
                 ammoPerBox = 8;
-                ammoRechargeRate = .2;
-                this.setWarmupTime(0.01);
-                cooldownTime = 2;
+                ammoRechargeRate = .25;
+                this.setWarmupTime(0);
+                cooldownTime = .7;
                 switchToTime = 1;
                 switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = false;
-                cooldownWhileInactive = false;
+                automatic = true;
+                this.addOwnersVelocity = true;
+                fireWhileInactive = true;
+                cooldownWhileInactive = true;
                 rechargeWhileInactive = false;
 
                 // Attributes of the projectile it launches, to determine when it hits
                 templateProjectile = new Projectile();
                 templateProjectile.setShape(new GameCircle(20));
-                templateProjectile.setBitmap(ImageLoader.loadImage("boomerang.png"));
-                tempVector[0] = 1500; tempVector[1] = 0;
+                templateProjectile.setBitmap(ImageLoader.loadImage("BlackHole.png"));
+                tempVector[0] = 0; tempVector[1] = 0;
                 templateProjectile.setVelocity(tempVector);
+                tempVector[0] = 0; tempVector[1] = 0;
+                templateProjectile.setCenter(tempVector);
                 templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(15);
-                templateProjectile.setBoomerangAccel(1515);
-                templateProjectile.setDragCoefficient(0.01);
-                templateProjectile.setRemainingFlightTime(2);
-                templateProjectile.setPenetration(.8);
-                templateProjectile.setNumExplosionsRemaining(2);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(8);
-                templateExplosion.setShape(new GameCircle(21));
-                templateExplosion.setBitmap(ImageLoader.loadImage("explosion.png"));
-                //templateExplosion.setStunFraction(0.35);
-                templateExplosion.setDuration(.1);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(16);
-                templateStun.setTimeMultiplier(0.1);
-                templateStun.setDuration(0);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-
-            case 5:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 36;
-                ammoPerBox = 20;
-                ammoRechargeRate = 1.1;
-                this.setWarmupTime(0.01);
-                cooldownTime = 0.02;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = true;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = false;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                templateProjectile.setShape(new GameRectangle(35, 5));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Laser.png"));
-                tempVector[0] = 1200; tempVector[1] = 0;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(0);
+                templateProjectile.setHomingAccel(1000);
                 templateProjectile.setBoomerangAccel(0);
-                templateProjectile.setDragCoefficient(0.01);
-                templateProjectile.setRemainingFlightTime(2);
-                templateProjectile.setPenetration(0);
-                templateProjectile.setNumExplosionsRemaining(1);
+                templateProjectile.setDragCoefficient(0);
+                templateProjectile.setRemainingFlightTime(1);
+                templateProjectile.setPenetration(1.414);
+                templateProjectile.setNumExplosionsRemaining(5);
                 templateProjectile.initializeHitpoints(70);
 
                 // Attributes of the explosions that are created
                 templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(10);
-                templateExplosion.setShape(new GameCircle(20));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Sparks.png"));
-                //templateExplosion.setStunFraction(0);
-                templateExplosion.setDuration(.2);
+                //templateExplosion.setDamagePerSec(6);
+                templateExplosion.setShape(new GameCircle(50));
+                templateExplosion.setBitmap(ImageLoader.loadImage("BlackHole.png"));
+                //templateExplosion.setStunFraction(0.3);
+                templateExplosion.setDuration(1);
                 templateProjectile.setTemplateExplosion(templateExplosion);
 
                 templateStun = new Stun();
-                templateStun.setDamagePerSecond(5);
+                templateStun.setDamagePerSecond(.5);
                 templateStun.setTimeMultiplier(1);
                 templateStun.setDuration(0);
                 templateExplosion.setTemplateStun(templateStun);
                 break;
-            case 6:
-                // Attributes about when you may own the item
-                cost = 1600;
 
-                // Attributes about when you may fire
-                maxAmmo = 5;
-                ammoPerBox = 3;
-                ammoRechargeRate = .4;
-                this.setWarmupTime(0.01);
-                cooldownTime = 1;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = true;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                tempVector[0] = 0; tempVector[1] = 1000;
-                templateProjectile.setCenter(tempVector);
-                templateProjectile.setShape(new GameRectangle(4, 25));
-                templateProjectile.setBitmap(ImageLoader.loadImage("PIKA!.png"));
-                tempVector[0] = 0; tempVector[1] = -2000;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(10);
-                templateProjectile.setDragCoefficient(0);
-                templateProjectile.setRemainingFlightTime(1);
-                templateProjectile.setPenetration(0);
-                templateProjectile.setNumExplosionsRemaining(1);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(25);
-                templateExplosion.setShape(new GameRectangle(30, 30));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Sparks.png"));
-                //templateExplosion.setStunFraction(0.4);
-                templateExplosion.setDuration(0.4);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(12);
-                templateStun.setTimeMultiplier(0.6);
-                templateStun.setDuration(0);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-
-            case 7:
+            case 4:
                 // Attributes about when you may own the item
                 cost = 1600;
 
                 // Attributes about when you may fire
                 maxAmmo = 7;
-                ammoPerBox = 2;
+                ammoPerBox = 3;
                 ammoRechargeRate = 0.2;
                 this.setWarmupTime(0.01);
-                cooldownTime = 0.1;
+                cooldownTime = 0.2;
                 switchToTime = 1;
                 switchFromTime = 2;
                 automatic = false;
@@ -411,11 +267,11 @@ class Weapon
                 // Attributes of the projectile it launches, to determine when it hits
                 templateProjectile = new Projectile();
                 templateProjectile.setShape(new GameCircle(20));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Fireball.png"));
+                templateProjectile.setBitmap(ImageLoader.loadImage("Fireball2.png"));
                 tempVector[0] = 200; tempVector[1] = 10;
                 templateProjectile.setVelocity(tempVector);
                 templateProjectile.setGravity(2);
-                templateProjectile.setHomingAccel(7);
+                templateProjectile.setHomingAccel(280);
                 templateProjectile.setDragCoefficient(0);
                 templateProjectile.setRemainingFlightTime(10);
                 templateProjectile.setPenetration(0.5);
@@ -425,7 +281,7 @@ class Weapon
                 // Attributes of the explosions that are created
                 templateExplosion = new Explosion();
                 //templateExplosion.setDamagePerSec(6);
-                templateExplosion.setShape(new GameCircle(55));
+                templateExplosion.setShape(new GameCircle(70));
                 templateExplosion.setBitmap(ImageLoader.loadImage("explosion2.png"));
                 //templateExplosion.setStunFraction(0.3);
                 templateExplosion.setDuration(0.667);
@@ -437,401 +293,10 @@ class Weapon
                 templateStun.setDuration(0);
                 templateExplosion.setTemplateStun(templateStun);
                 break;
-            case 8:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 4;
-                ammoPerBox = 1;
-                ammoRechargeRate = 0.02;
-                this.setWarmupTime(3);
-                cooldownTime = 3;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                tempVector[0] = -400; tempVector[1] = 800;
-                templateProjectile.setCenter(tempVector);
-                templateProjectile.setShape(new GameRectangle(50, 25));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Missile.png"));
-                tempVector[0] = 400; tempVector[1] = -10;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(40);
-                templateProjectile.setHomingAccel(360);
-                templateProjectile.setBoomerangAccel(0);
-                templateProjectile.setDragCoefficient(4);
-                templateProjectile.setRemainingFlightTime(5);
-                templateProjectile.setPenetration(0);
-                templateProjectile.setNumExplosionsRemaining(1);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                templateExplosion.setShape(new GameCircle(100));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Explosion2.png"));
-                templateExplosion.setDuration(3);
-                templateExplosion.setFriendlyFireEnabled(true);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(3.5);
-                templateStun.setTimeMultiplier(0.5);
-                templateStun.setDuration(0);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-            case 9:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 9;
-                ammoPerBox = 3;
-                ammoRechargeRate = 0.01;
-                this.setWarmupTime(0.01);
-                cooldownTime = 2;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                tempVector[0] = 0; tempVector[1] = 0;
-                templateProjectile.setCenter(tempVector);
-                templateProjectile.setShape(new GameCircle(12.5));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Toxic.png"));
-                tempVector[0] = 0; tempVector[1] = 0;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(1);
-                templateProjectile.setHomingAccel(3.7);
-                templateProjectile.setBoomerangAccel(1);
-                templateProjectile.setDragCoefficient(1);
-                templateProjectile.setRemainingFlightTime(30);
-                templateProjectile.setPenetration(1);
-                templateProjectile.setNumExplosionsRemaining(2);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                templateExplosion.setShape(new GameCircle(30));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Toxic.png"));
-                templateExplosion.setDuration(0);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(1);
-                templateStun.setTimeMultiplier(0.9);
-                templateStun.setDuration(9);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-
-            case 10:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 8;
-                ammoPerBox = 8;
-                ammoRechargeRate = 0.3;
-                this.setWarmupTime(0.01);
-                cooldownTime = 0.01;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                templateProjectile.setShape(new GameCircle(10));
-                templateProjectile.setBitmap(ImageLoader.loadImage("wasp.png"));
-                tempVector[0] = 300; tempVector[1] = 30;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(25);
-                templateProjectile.setBoomerangAccel(0);
-                templateProjectile.setDragCoefficient(0.3);
-                templateProjectile.setRemainingFlightTime(5);
-                templateProjectile.setPenetration(.9);
-                templateProjectile.setNumExplosionsRemaining(4);
-                templateProjectile.initializeHitpoints(70);
 
 
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(0.04);
-                templateExplosion.setShape(new GameCircle(50));
-                templateExplosion.setBitmap(ImageLoader.loadImage("explosion.png"));
-                //templateExplosion.setStunFraction(0.05);
-                templateExplosion.setDuration(.5);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(0.31);
-                templateStun.setTimeMultiplier(0.95);
-                templateStun.setDuration(0);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
 
 
-            case 11:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 5;
-                ammoPerBox = 3;
-                ammoRechargeRate = 0.01;
-                this.setWarmupTime(0.01);
-                cooldownTime = 3;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = true;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                tempVector[0] = 0; tempVector[1] = 0;
-                templateProjectile.setCenter(tempVector);
-                templateProjectile.setShape(new GameCircle(35));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Shield.png"));
-                tempVector[0] = 10; tempVector[1] = 0;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(-30);
-                templateProjectile.setHomingAccel(40);
-                templateProjectile.enableHomingOnCharacters(false);
-                templateProjectile.enableHomingOnProjectiles(true);
-                templateProjectile.setBoomerangAccel(90);
-                templateProjectile.setDragCoefficient(2);
-                templateProjectile.setRemainingFlightTime(60);
-                templateProjectile.setPenetration(1);
-                templateProjectile.setNumExplosionsRemaining(120);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(25);
-                templateExplosion.setShape(new GameCircle(45));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Shield.png"));
-                //templateExplosion.setStunFraction(0.4);
-                templateExplosion.setDuration(0);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(0);
-                templateStun.setTimeMultiplier(0.8);
-                templateStun.setDuration(0);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-
-            case 12:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 4;
-                ammoPerBox = 2;
-                ammoRechargeRate = .05;
-                this.setWarmupTime(0.001);
-                cooldownTime = 1;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = true;
-                fireWhileInactive = false;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                templateProjectile.setShape(new GameCircle(10));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Banana.png"));
-                tempVector[0] = 480; tempVector[1] = 200;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(1000);
-                templateProjectile.setHomingAccel(1);
-                templateProjectile.setBoomerangAccel(0);
-                templateProjectile.setDragCoefficient(0.01);
-                templateProjectile.setRemainingFlightTime(100);
-                templateProjectile.setPenetration(0);
-                templateProjectile.setNumExplosionsRemaining(1);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(1);
-                templateExplosion.setShape(new GameCircle(25));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Banana.png"));
-                //templateExplosion.setStunFraction(2);
-                templateExplosion.setDuration(9.6);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(0.4);
-                templateStun.setTimeMultiplier(-.9);
-                templateStun.setDuration(1);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-            case 13:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 10;
-                ammoPerBox = 10;
-                ammoRechargeRate = 0.005;
-                this.setWarmupTime(0.01);
-                cooldownTime = 1;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                tempVector[0] = 0; tempVector[1] = 0;
-                templateProjectile.setCenter(tempVector);
-                templateProjectile.setShape(new GameRectangle(5, 5));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Syringe.png"));
-                tempVector[0] = 0; tempVector[1] = 0;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(0);
-                templateProjectile.setBoomerangAccel(0);
-                templateProjectile.setDragCoefficient(0);
-                templateProjectile.setRemainingFlightTime(0);
-                templateProjectile.setPenetration(0);
-                templateProjectile.setNumExplosionsRemaining(1);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                templateExplosion.setShape(new GameRectangle(25, 25));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Syringe.png"));
-                templateExplosion.setDuration(0);
-                templateExplosion.setFriendlyFireEnabled(true);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(0.05);
-                templateStun.setTimeMultiplier(2);
-                templateStun.setDuration(10);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-            case 14:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 10;
-                ammoPerBox = 3;
-                ammoRechargeRate = 0.1;
-                this.setWarmupTime(0.01);
-                cooldownTime = 0;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = true;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = false;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                tempVector[0] = 0; tempVector[1] = 0;
-                templateProjectile.setCenter(tempVector);
-                templateProjectile.setShape(new GameRectangle(5, 5));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Heart.png"));
-                tempVector[0] = 0; tempVector[1] = 0;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(0);
-                templateProjectile.setBoomerangAccel(0);
-                templateProjectile.setDragCoefficient(0);
-                templateProjectile.setRemainingFlightTime(0);
-                templateProjectile.setPenetration(0);
-                templateProjectile.setNumExplosionsRemaining(1);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                templateExplosion.setShape(new GameRectangle(25, 25));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Heart.png"));
-                templateExplosion.setDuration(0);
-                templateExplosion.setFriendlyFireEnabled(true);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(-1);
-                templateStun.setTimeMultiplier(1);
-                templateStun.setDuration(2.5);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
-            case 15:
-                // Attributes about when you may own the item
-                cost = 1600;
-
-                // Attributes about when you may fire
-                maxAmmo = 3;
-                ammoPerBox = 1;
-                ammoRechargeRate = .01;
-                this.setWarmupTime(1);
-                cooldownTime = 3;
-                switchToTime = 1;
-                switchFromTime = 2;
-                automatic = false;
-                this.addOwnersVelocity = false;
-                fireWhileInactive = false;
-                cooldownWhileInactive = true;
-                rechargeWhileInactive = true;
-
-                // Attributes of the projectile it launches, to determine when it hits
-                templateProjectile = new Projectile();
-                templateProjectile.setShape(new GameRectangle(25, 40));
-                templateProjectile.setBitmap(ImageLoader.loadImage("Hourglass.png"));
-                tempVector[0] = 0; tempVector[1] = -30;
-                templateProjectile.setVelocity(tempVector);
-                templateProjectile.setGravity(0);
-                templateProjectile.setHomingAccel(0);
-                templateProjectile.setDragCoefficient(0);
-                templateProjectile.setRemainingFlightTime(0);
-                templateProjectile.setPenetration(.9);
-                templateProjectile.setNumExplosionsRemaining(1);
-                templateProjectile.initializeHitpoints(70);
-
-                // Attributes of the explosions that are created
-                templateExplosion = new Explosion();
-                //templateExplosion.setDamagePerSec(0);
-                templateExplosion.setShape(new GameRectangle(1500, 1500));
-                templateExplosion.setBitmap(ImageLoader.loadImage("Hourglass.png"));
-                //templateExplosion.setStunFraction(1);
-                templateExplosion.setDuration(1);
-                templateProjectile.setTemplateExplosion(templateExplosion);
-
-                templateStun = new Stun();
-                templateStun.setDamagePerSecond(0);
-                templateStun.setTimeMultiplier(0.06);
-                templateStun.setDuration(6);
-                templateExplosion.setTemplateStun(templateStun);
-                break;
             default:
                 System.Diagnostics.Trace.WriteLine("Weapon type does not exist");
                 break;
@@ -1186,12 +651,12 @@ class Weapon
     // simulate firing the weapon and calculate by how far it will miss
     public double[] simulateShooting(GameObject target)
     {
-        double[] offset = new double[2];
         // compute the expected minimum offset (x,y) of the projectile compared to the target
         if (this.owner == null)
-            return offset;
+            return null;
         if (target == null)
-            return offset;
+            return null;
+        double[] offset = new double[2];
         // compute what the attributes of the projectile would be if it were created now
         Projectile currentProjectile = this.makeProjectile(false);
         // simulate it in .2sec intervals for 30 iterations
@@ -1202,7 +667,7 @@ class Weapon
         double numSeconds = 0.2;
         int count = Math.Min(30, (int)(currentProjectile.getRemainingFlightTime() / numSeconds));
         currentProjectile.setTarget(target);
-        for (i = 0; i <= count; i++)
+        for (i = 0; i < count; i++)
         {
             currentProjectile.updateVelocity(numSeconds);
             // figure out how far the projectile wants to move

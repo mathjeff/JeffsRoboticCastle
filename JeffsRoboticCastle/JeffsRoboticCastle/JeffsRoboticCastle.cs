@@ -288,24 +288,6 @@ class JeffsRoboticCastle
         double[] location = new double[2]; location[0] = 30; location[1] = 30;
         this.player = new Player(location);
         //this.player.addMoney(1600);
-#if false
-        this.player.addWeapon(new Weapon(0));
-        this.player.addWeapon(new Weapon(1));
-        this.player.addWeapon(new Weapon(2));
-        this.player.addWeapon(new Weapon(3));
-        this.player.addWeapon(new Weapon(4));
-        this.player.addWeapon(new Weapon(5));
-        this.player.addWeapon(new Weapon(6));
-        this.player.addWeapon(new Weapon(7));
-        this.player.addWeapon(new Weapon(8));
-        this.player.addWeapon(new Weapon(9));
-        this.player.addWeapon(new Weapon(10));
-        this.player.addWeapon(new Weapon(11));
-        this.player.addWeapon(new Weapon(12));
-        this.player.addWeapon(new Weapon(13));
-        this.player.addWeapon(new Weapon(14));
-        this.player.addWeapon(new Weapon(15));
-#endif
         this.player.gotoWeaponTreeRoot();
     }
 	void setupWorld(int levelNum)

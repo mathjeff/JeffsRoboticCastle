@@ -5,12 +5,35 @@ class Character : GameObject
 //public
     public Character()
     {
+        this.initialize();
+    }
+    public void copyFrom(Character original)
+    {
+        // initialize
+        base.copyFrom(original);
+        // copy attributes from the original
+        this.brain = original.brain;
+        this.world = original.world;
+        this.setMaxAccel(original.getMaxAccel());
+        this.setArmor(original.getArmor());
+        this.money = original.getMoney();
+        this.setTargetVelocity(original.getTargetVelocity());
+        this.setJumpVelocity(original.jumpVelocity);
+        // for each weapon, copy it and add it
+        foreach (Weapon currentWeapon in original.weapons)
+        {
+            this.addWeapon(new Weapon(currentWeapon));
+        }
+        this.contactDamagePerSecond = original.contactDamagePerSecond;
+    }
+    public void initialize()
+    {
+        this.initializeHitpoints(10);
+        this.setJumpSpeed(1000);
         this.weapons = new System.Collections.Generic.List<Weapon>();
         this.targetVelocity = new double[2];
-        this.initializeHitpoints(10);
         this.activeWeapons = new System.Collections.Generic.List<Weapon>();
         this.money = 0;
-        this.setJumpSpeed(1000);
     }
     public override bool isACharacter()
     {
@@ -72,6 +95,9 @@ class Character : GameObject
     // accelerate toward the desired velocity
     public override void updateVelocity(double numSeconds)
     {
+        // First update velocity based on the physics of a projectile
+        base.updateVelocity(numSeconds);
+        // Now update velocity based on any accelerations from within the character
 	    // Compute desired acceleration
 	    double[] v = this.getVelocity();
 	    double accelX = this.targetVelocity[0] - v[0];
@@ -102,8 +128,6 @@ class Character : GameObject
 	    }
 	    this.setVelocity(v);
 
-	    // After having accelerated according to the character's intent, now apply the physics of a projectile
-	    base.updateVelocity(numSeconds);
     }
     // keep track of something that it is colliding with
     public override void setColliding(GameObject other)
@@ -316,6 +340,8 @@ class Character : GameObject
     // do whatever the AI requires
     public virtual void think()
     {
+        if (this.brain != null)
+            this.brain.think(this);
     }
     public void adjustBehavior()
     {

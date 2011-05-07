@@ -24,7 +24,7 @@ class WorldLoader
         // setup machinery to make it fast to run
         this.blockSize = new double[2];
         blockSize[0] = screenSize[0] / 8;
-        blockSize[1] = screenSize[1] / 8;
+        blockSize[1] = screenSize[1] / 4;
         double[] characterActiveDimensions = new double[2];
         characterActiveDimensions[0] = screenSize[0];
         characterActiveDimensions[1] = screenSize[1];
@@ -32,7 +32,7 @@ class WorldLoader
         terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 4;
         terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 4;
         this.worldDimensions = new double[2];
-        worldDimensions[0] = 4500 + 3000 * levelNumber;
+        worldDimensions[0] = 6000 + 4500 * levelNumber;
         worldDimensions[1] = 1200;
         //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
@@ -101,18 +101,18 @@ class WorldLoader
         {
             // add an enemy
             // choose the enemy's location
-            x += 4 / 3 * (500 * generator.NextDouble() + 1100) / (levelNumber + 1);
+            x += (800 * generator.NextDouble() + 1700) / (levelNumber + 1);
             y = worldDimensions[1] * generator.NextDouble();
             location = new double[2]; location[0] = x; location[1] = y;
             // choose the enemy's type
-            type = generator.Next(5);
+            type = generator.Next(levelNumber + 1);
             // make the enemy
             Enemy tempEnemy = new Enemy(location, type);
             // give the enemy a bunch of weapons
             numWeapons = (int)((levelNumber + 1) / 2);
             for (i = 0; i < numWeapons; i++)
             {
-                tempEnemy.addWeapon(new Weapon(generator.Next(16)));
+                tempEnemy.addWeapon(new Weapon(generator.Next(5)));
             }
             this.addItem(tempEnemy);
             // give the enemy a painting to look at
@@ -128,7 +128,7 @@ class WorldLoader
         this.addItem(exit);
 #if true
         // add platforms
-        double spacing = 21;
+        double spacing = 40;
         for (i = 0; i < 4; i++)
         {
             if (generator.Next(2) == 0)

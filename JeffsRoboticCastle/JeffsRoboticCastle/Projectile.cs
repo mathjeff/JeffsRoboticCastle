@@ -232,7 +232,7 @@ class Projectile : GameObject
             if (dist > 0)
             {
                 // accelerate as much as possible toward the target
-                double scale = this.homingAccel / dist;
+                double scale = this.homingAccel * numSeconds / dist;
                 for (i = 0; i < accel.Length; i++)
                 {
                     newVelocity[i] += accel[i] * scale;

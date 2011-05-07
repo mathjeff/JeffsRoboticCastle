@@ -5,26 +5,37 @@ class Player : Character
 {
 // public
     // constructor
-	public Player(double[] location)
+    public Player(double[] location)
     {
-	    BitmapImage startingImage = ImageLoader.loadImage("player1.png");
-	    this.setCenter(location);
+        this.initialize();
+        this.setCenter(location);
+    }
+    public Player(Player original)
+    {
+        this.initialize();
+        this.copyFrom(original);
+    }
+    public new void initialize()
+    {
         double[] offset = new double[2]; offset[0] = 0; offset[1] = 0;
-	    this.setImageOffset(offset);
-	    this.setGravity(1000);
-#if true
-	    this.setShape(new GameRectangle(30, 43));
-#else
-	    this.setShape(new GameCircle(21));
-#endif
+        this.setImageOffset(offset);
+        this.setShape(new GameRectangle(30, 43));
+        BitmapImage startingImage = ImageLoader.loadImage("player1.png");
+        this.setGravity(1000);
         this.setBitmap(startingImage);
         double[] accel = new double[2]; accel[0] = 600; accel[1] = 0;
-	    this.setMaxAccel(accel);
-	    this.setDragCoefficient(3);
-	    this.setTeamNum(2);
-        this.initializeHitpoints(40);
+        this.setMaxAccel(accel);
+        this.setDragCoefficient(3);
+        this.setTeamNum(2);
+        this.initializeHitpoints(100);
         this.weaponTreeBranchFactor = 3;
         this.weaponSubTrees = new List<List<Weapon>>();
+    }
+    public void copyFrom(Player original)
+    {
+        base.copyFrom(original);
+        this.lowWeaponIndex = original.lowWeaponIndex;
+        this.highWeaponIndex = original.highWeaponIndex;
     }
     public void selectWeaponSubtreeAtIndex(int index)
     {
@@ -79,7 +90,9 @@ class Player : Character
         for (i = 0; i < this.weaponTreeBranchFactor; i++)
         {
             this.weaponSubTrees.Add(new List<Weapon>());
-            if (highWeaponIndex >= 0)
+            // make sure that there is at least one weapon selected
+            // Also, if there is exactly one weapon selected, only show the selected weapon once
+            if ((highWeaponIndex >= 0) && ((highWeaponIndex > lowWeaponIndex) || (i == 0)))
             {
                 tempLowIndex = ((highWeaponIndex + 1) * i + lowWeaponIndex * (weaponTreeBranchFactor - i)) / weaponTreeBranchFactor;
                 //tempHighIndex = (highWeaponIndex * (i + 1) + lowWeaponIndex * (weaponTreeBranchFactor - (i + 1))) / weaponTreeBranchFactor;

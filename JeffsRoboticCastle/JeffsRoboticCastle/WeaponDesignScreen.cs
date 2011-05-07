@@ -73,6 +73,8 @@ class WeaponDesignScreen : MenuScreen
     {
         // make a screen to show the world
         WorldScreen newScreen = new WorldScreen(this.getParentCanvas(), new double[2], this.getSize());
+        // enable the escape button for this world
+        newScreen.setEscapeEnabled(true);
         // tell the world screen to return to this one when done
         newScreen.setExitScreen(this);
 
@@ -83,7 +85,7 @@ class WeaponDesignScreen : MenuScreen
         double[] location = new double[2];
         location[0] = 100;
         location[1] = 30;
-        this.demoPlayer = new Player(location);
+        this.demoPlayer = new Player(player);
         this.demoPlayer.addWeapon(new Weapon(this.templateWeapon));
         this.demoPlayer.gotoWeaponTreeRoot();
         
@@ -536,7 +538,7 @@ class WeaponDesignScreen : MenuScreen
         this.prebuildWeapon(this.quickbuildWeaponIndex);
         this.weaponCost.Content = templateWeapon.getCost().ToString();
         this.quickbuildWeaponIndex++;
-        if (this.quickbuildWeaponIndex > 15)
+        if (this.quickbuildWeaponIndex > 4)
             quickbuildWeaponIndex = 0;
     }
     // this gets called when the user requests to try out the weapon

@@ -26,6 +26,7 @@ class WorldScreen : Screen
         this.player = newPlayer;
         this.statusDisplay.followCharacter(newPlayer);
         this.world = newWorld;
+        this.levelIsOver = false;
         // scroll before showing the screen so that the screen doesn't suddenly move after the first frame
         this.world.scrollTo(this.player);
     }
@@ -68,6 +69,8 @@ class WorldScreen : Screen
         this.statusDisplay.update();
         base.timerTick(numSeconds);
         if (this.world.characterTouchingPortal(this.player))
+            this.levelIsOver = true;
+        if (this.levelIsOver)
             return this.exitScreen;
         else
             return this;
@@ -76,21 +79,83 @@ class WorldScreen : Screen
     {
         this.exitScreen = newScreen;
     }
-    public void playerJump()
+    // player controls
+    public void movePlayerUp()
     {
+        // jump if possible
         this.player.jump();
+        // float upward if possible
+        double[] newV = this.player.getTargetVelocity();
+        newV[1] = 20000;
+        this.player.setTargetVelocity(newV);
+    }
+    public void stopMovingPlayerUp()
+    {
+        double[] v = this.player.getTargetVelocity();
+        if (v[1] > 0)
+        {
+            v[1] = 0;
+            this.player.setTargetVelocity(v);
+        }
+    }
+    public void movePlayerDown()
+    {
+        // float upward if possible
+        double[] newV = this.player.getTargetVelocity();
+        newV[1] = -2000;
+        this.player.setTargetVelocity(newV);
+    }
+    public void stopMovingPlayerDown()
+    {
+        double[] v = this.player.getTargetVelocity();
+        if (v[1] < 0)
+        {
+            v[1] = 0;
+            this.player.setTargetVelocity(v);
+        }
     }
     public void movePlayerLeft()
     {
-        double[] newV = new double[2]; newV[0] = -10000; newV[1] = 0;
+        double[] newV = this.player.getTargetVelocity();
+        newV[0] = -10000;
         this.player.setTargetVelocity(newV);
+    }
+    public void stopMovingPlayerLeft()
+    {
+        double[] v = this.player.getTargetVelocity();
+        if (v[0] < 0)
+        {
+            v[0] = 0;
+            this.player.setTargetVelocity(v);
+        }
+    }
+    public void movePlayerRight()
+    {
+        double[] newV = this.player.getTargetVelocity();
+        newV[0] = 10000;
+        this.player.setTargetVelocity(newV);
+    }
+    public void stopMovingPlayerRight()
+    {
+        double[] v = this.player.getTargetVelocity();
+        if (v[0] > 0)
+        {
+            v[0] = 0;
+            this.player.setTargetVelocity(v);
+        }
     }
     public override void KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         // #define DESIGN_HERE
         if (e.Key == Key.W)
         {
-            this.playerJump();
+            //this.playerJump();
+            this.movePlayerUp();
+        }
+        if (e.Key == Key.S)
+        {
+            //this.playerJump();
+            this.movePlayerDown();
         }
         if (e.Key == Key.A)
         {
@@ -126,11 +191,23 @@ class WorldScreen : Screen
             this.resetPlayerWeapon();
             //this.game.playerPressTrigger(true);
         }
+        if ((e.Key == Key.Escape) && (this.isEscapeEnabled()))
+        {
+            this.levelIsOver = true;
+        }
         base.KeyDown(sender, e);
     }
     public override void KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
     {
         // #define DESIGN_HERE
+        if (e.Key == Key.W)
+        {
+            this.stopMovingPlayerUp();
+        }
+        if (e.Key == Key.W)
+        {
+            this.stopMovingPlayerDown();
+        }
         if (e.Key == Key.A)
         {
             this.stopMovingPlayerLeft();
@@ -146,22 +223,14 @@ class WorldScreen : Screen
         }
         base.KeyUp(sender, e);
     }
- 
-    public void movePlayerRight()
-    {
-        double[] newV = new double[2]; newV[0] = 10000; newV[1] = 0;
-        this.player.setTargetVelocity(newV);
-    }
 
-    public void stopMovingPlayerLeft()
+    public void setEscapeEnabled(bool enabled)
     {
-        if (this.player.getTargetVelocity()[0] < 0)
-            this.player.setTargetVelocity(new double[2]);
+        this.escapeEnabled = enabled;
     }
-    public void stopMovingPlayerRight()
+    public bool isEscapeEnabled()
     {
-        if (this.player.getTargetVelocity()[0] > 0)
-            this.player.setTargetVelocity(new double[2]);
+        return this.escapeEnabled;
     }
     // weapons
     public void selectWeapon1()
@@ -211,8 +280,16 @@ class WorldScreen : Screen
     double[] worldWindowPosition;
     */
     CharacterStatusDisplay statusDisplay;
+    // the canvas to draw the world on
     Canvas worldCanvas;
+    // the character that the user controls
     Character player;
+    // the world that the player is in
     WorldLoader world;
+    // the screen that will be shown when the level exits
     Screen exitScreen;
+    // whether the user has satisfied the criteria to exit the level
+    bool levelIsOver;
+    // whether the pushing the escape button should exit the level
+    bool escapeEnabled;
 }
