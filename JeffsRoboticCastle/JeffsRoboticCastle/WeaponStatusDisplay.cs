@@ -50,7 +50,7 @@ class WeaponStatusDisplay
         {
             // update the weapon image
             Projectile templateProjectile = newWeapon.getTemplateProjectile();
-            BitmapImage bitmap = templateProjectile.getBitmap();
+            ImageSource bitmap = templateProjectile.getBitmap();
             this.weaponImage.Source = bitmap;
             //this.weaponImage.Width = templateProjectile.getShape().getWidth();
             //this.weaponImage.Height = templateProjectile.getShape().getHeight();

@@ -35,7 +35,21 @@ class WorldBox
     }
     public double getSize(int index)
     {
-	    return this.highCoordinates[index] - this.lowCoordinates[index];
+        return this.highCoordinates[index] - this.lowCoordinates[index];
+    }
+    public double getCenter(int index)
+    {
+        return (this.highCoordinates[index] + this.lowCoordinates[index]) / 2;
+    }
+    public double[] getCenter()
+    {
+        double[] center = new double[this.lowCoordinates.Length];
+        int i;
+        for (i = 0; i < center.Length; i++)
+        {
+            center[i] = this.getCenter(i);
+        }
+        return center;
     }
     public void shift(int dimension, double value)
     {
@@ -670,26 +684,20 @@ class GameObject
     {
 	    this.imageOffset = newOffset;
     }
-    public BitmapImage getBitmap()
+    public ImageSource getBitmap()
     {
 	    return this.bitmap;
     }
-    public void setBitmap(BitmapImage newBitmap)
+    public void setBitmap(ImageSource newBitmap)
     {
         // save the bitmap in case we need it later
 	    this.bitmap = newBitmap;
         this.image.Source = bitmap;
-#if false
-        this.image.Width = newBitmap.PixelWidth;
-        this.image.Height = newBitmap.PixelHeight;
-#else
         if (this.shape != null)
         {
             this.image.Width = this.shape.getWidth();
             this.image.Height = this.shape.getHeight();
         }
-
-#endif
         this.updateImageCoordinates();
     }
     public System.Windows.Controls.Image getImage()
@@ -1013,6 +1021,10 @@ class GameObject
     {
         return false;
     }
+    public virtual bool isAPainting()
+    {
+        return false;
+    }
     public virtual bool isAGhost()
     {
         return false;
@@ -1134,7 +1146,7 @@ class GameObject
 	double[] center;
     int zIndex;
 	// image
-	BitmapImage bitmap;
+	ImageSource bitmap;
 	System.Windows.Controls.Image image;
 	// image positioning
 	double[] imageOffset;

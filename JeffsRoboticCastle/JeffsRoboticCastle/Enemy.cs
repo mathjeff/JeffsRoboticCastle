@@ -34,7 +34,7 @@ public
 	            this.enemyType = type;
                 this.setGravity(1000);
                 this.initializeHitpoints(11);
-                this.setJumpSpeed(1000);
+                this.setJumpSpeed(800);
                 this.setContactDamagePerSecond(0);
                 break;
             case 2:
@@ -108,7 +108,7 @@ public
         }
         this.setBitmap(startingImage);
         this.setImageOffset(new double[2]);
-        this.setBrain(new AI());
+        this.setBrain(new AI(1));
     }
 
 // Have the AI decide what the enemy should do

@@ -89,7 +89,7 @@ class Weapon
                 templateProjectile.setTemplateExplosion(templateExplosion);
 
                 templateStun = new Stun();
-                templateStun.setDamagePerSecond(4);
+                templateStun.setDamagePerSecond(5);
                 templateStun.setTimeMultiplier(0.5);
                 templateStun.setDuration(0);
                 templateExplosion.setTemplateStun(templateStun);
@@ -737,7 +737,7 @@ class Weapon
         else
             tempCost *= (templateProjectile.getNumExplosionsRemaining() * 5 + 
                 (1 - Math.Pow(penetration, templateProjectile.getNumExplosionsRemaining())) / (1 - penetration));
-        tempCost *= (1 + (1 + templateProjectile.getHomingAccel()) * (1 + 3 * templateProjectile.getRemainingFlightTime()) / 300);
+        tempCost *= (1 + (1 + Math.Abs(templateProjectile.getHomingAccel())) * (1 + 3 * Math.Sqrt(Math.Abs(templateProjectile.getRemainingFlightTime()))) / 300);
         // attributes of the explosion that affect the cost
         Explosion templateExplosion = templateProjectile.getTemplateExplosion();
         tempCost *= (1 + templateExplosion.getShape().getWidth() / 50);

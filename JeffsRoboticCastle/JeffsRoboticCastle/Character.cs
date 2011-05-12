@@ -378,7 +378,12 @@ class Character : GameObject
         if (!this.nearestEnemyCharacterUpToDate)
         {
             // find the nearest enemy character, using the one from the previous tick as a hint
-            this.nearestEnemyCharacter = (Character)(this.getWorld().findNearestObject(this, false, false, true, this.nearestEnemyCharacter, true, false, false, false));
+            CollisionRequest request = new CollisionRequest();
+            request.setObject(this);
+            request.setRequestEnemies(true);
+            request.setRequestCharacters(true);
+            request.growToTouch(this.nearestEnemyCharacter);
+            this.nearestEnemyCharacter = (Character)(this.getWorld().findNearestObject(request));
             this.nearestEnemyCharacterUpToDate = true;
         }
         return this.nearestEnemyCharacter;
@@ -389,7 +394,12 @@ class Character : GameObject
         if (!this.nearestEnemyProjectileUpToDate)
         {
             // find the nearest enemy projectile, using the one from the previous tick as a hint
-            this.nearestEnemyProjectile = (Projectile)(this.getWorld().findNearestObject(this, false, false, true, this.nearestEnemyProjectile, false, true, false, false));
+            CollisionRequest request = new CollisionRequest();
+            request.setObject(this);
+            request.setRequestEnemies(true);
+            request.setRequestProjectiles(true);
+            request.growToTouch(this.nearestEnemyProjectile);
+            this.nearestEnemyProjectile = (Projectile)(this.getWorld().findNearestObject(request));
             this.nearestEnemyProjectileUpToDate = true;
         }
         return this.nearestEnemyProjectile;
@@ -400,7 +410,12 @@ class Character : GameObject
         if (!this.nearestObstacleUpToDate)
         {
             // find the nearest non-ally, non-enemy object, using the one from the previous tick as a hint
-            this.nearestObstacle = this.getWorld().findNearestObject(this, false, true, false, this.nearestObstacle, true, false, false, false);
+            CollisionRequest request = new CollisionRequest();
+            request.setObject(this);
+            request.setRequestGaia(true);
+            request.setRequestCharacters(true);
+            request.growToTouch(this.nearestObstacle);
+            this.nearestObstacle = this.getWorld().findNearestObject(request);
             this.nearestObstacleUpToDate = true;
         }
         return this.nearestObstacle;

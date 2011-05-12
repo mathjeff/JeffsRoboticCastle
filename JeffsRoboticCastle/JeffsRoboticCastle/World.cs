@@ -431,7 +431,10 @@ class World
         this.unloadObject(item);
     }
 
-
+    public int getNumExplosions()
+    {
+        return this.explosions.Count;
+    }
     // RemoveObject gets rid of the object forever, but only gets rid of attributes pertaining specific to the GameObject class
     public void removeObject(GameObject o)
     {
@@ -488,7 +491,11 @@ class World
     // this function tells whether the chararacter is touching a portal, to determine when the character leaves the world
     public bool characterTouchingPortal(Character character)
     {
-        List<GameObject> collisions = this.findCollisions(character, false, true, false, null, false, false, false, true);
+        CollisionRequest request = new CollisionRequest();
+        request.setObject(character);
+        request.setRequestGaia(true);
+        request.setRequestGhosts(true);
+        List<GameObject> collisions = this.findCollisions(request);
         if (collisions.Count > 0)
         {
             foreach (GameObject collision in collisions)
@@ -512,42 +519,35 @@ class World
         }
     }
     // Find the closest object to a certain object
-    public GameObject findNearestObject(GameObject o, bool includeAllies, bool includeGaia, bool includeEnemies, GameObject hint, bool includeCharacters, bool includeProjectiles, bool includeExplosions, bool includeGhosts)
+    public GameObject findNearestObject(CollisionRequest request)
     {
         System.Collections.Generic.List<GameObject> candidates = null;
-        if (hint != null)
+        GameObject o = request.getObject();
+        bool hasAHint = request.hasASizeHint();
+        if (hasAHint)
         {
             // If there is a hint, then we know the closest object can not be any further than the hint is
-            // So, make a box with radius equal to the distance and search for things inside it
-            // First find the distance to the current hit
-            GameObject collisionBox = new GameObject();
-            collisionBox.setCenter(o.getCenter());
-            collisionBox.setShape(new GameRectangle(0, 0));
-            collisionBox.setTeamNum(o.getTeamNum());
-            double dist = collisionBox.distanceTo(hint);
-            // Increase the radius appropriately
-            collisionBox.setShape(new GameRectangle(o.getShape().getWidth() + 2 * dist, o.getShape().getHeight() + 2 * dist));
             // Search for all the collisions in this box
-            //candidates = this.findEnemyCollisions(collisionBox);
-            candidates = this.findCollisions(collisionBox, includeAllies, includeGaia, includeEnemies, null, includeCharacters, includeProjectiles, includeExplosions, includeGhosts);
+            candidates = this.findCollisions(request);
             if (candidates.Count == 0)
             {
                 // It's possible that the object was recently removed from the world, and that now there are no relevant object in the world.
                 // We didn't want to ignore the hint because it still gives a good idea about the size to search.
                 // However, if we didn't find anything inside this box, then we should now search the rest of the world for something
-                // Setting the hint to null will cause us to go back and search a much larger area
-                hint = null;
+                // Setting the hint to false will cause us to go back and search a much larger area
+                hasAHint = false;
             }
         }
         // If we have no idea where to find it, then search all over
-        if (hint == null)
+        if (!hasAHint)
         {
             GameObject collisionBox = new GameObject();
             collisionBox.setCenter(o.getCenter());
             collisionBox.setShape(new GameRectangle(5000, 5000));
             collisionBox.setTeamNum(o.getTeamNum());
+            request.setObject(collisionBox);
             // find all objects of the appropriate type
-            candidates = this.findCollisions(collisionBox, includeAllies, includeGaia, includeEnemies, null, includeCharacters, includeProjectiles, includeExplosions, includeGhosts);
+            candidates = this.findCollisions(request);
         }
         return o.findClosest(candidates);
     }
@@ -605,7 +605,13 @@ class World
         {
             if (p.needsATarget())
             {
-                target = (this.findNearestObject(p, false, false, true, p.getTarget(), p.shouldHomeOnCharacters(), p.shouldHomeOnProjectiles(), false, false));
+                CollisionRequest request = new CollisionRequest();
+                request.setObject(p);
+                request.setRequestEnemies(true);
+                request.setRequestCharacters(p.shouldHomeOnCharacters());
+                request.setRequestProjectiles(p.shouldHomeOnProjectiles());
+                request.growToTouch(p.getTarget());
+                target = this.findNearestObject(request);
                 if ((target != null) && target.isACharacter())
                 {
                     // tell the character that it's doing a good job for not being hit by the projectile
@@ -715,7 +721,13 @@ class World
         for (i = explosions.Count - 1; i >= 0; i--)
         {
             // find all enemy characters and platforms
-            collisions = this.findCollisions(explosions[i], explosions[i].isFriendlyFireEnabled(), false, true, null, true, false, false, false);
+            CollisionRequest request = new CollisionRequest();
+            request.setObject(explosions[i]);
+            request.setRequestAllies(explosions[i].isFriendlyFireEnabled());
+            request.setRequestGaia(true);
+            request.setRequestEnemies(true);
+            request.setRequestCharacters(true);
+            collisions = this.findCollisions(request);
             //collisions = this.findEnemyCharacters(explosions[i]);
             for (j = 0; j < collisions.Count; j++)
             {
@@ -729,11 +741,16 @@ class World
                         this.explodeProjectile((Projectile)collisions[j]);*/
                 }
             }
-            // when the explosion first appears, it can trigger other explosions
+            // when the explosion first appears, it can trigger other projectiles to explode
             if (explosions[i].isNew())
             {
-                //collisions = this.findEnemyProjectiles(explosions[i], null);
-                collisions = this.findCollisions(explosions[i], explosions[i].isFriendlyFireEnabled(), false, true, null, false, true, false, false);
+                request = new CollisionRequest();
+                request.setObject(explosions[i]);
+                request.setRequestAllies(explosions[i].isFriendlyFireEnabled());
+                request.setRequestEnemies(true);
+                request.setRequestProjectiles(true);
+                collisions = this.findCollisions(request);
+                //collisions = this.findCollisions(explosions[i], explosions[i].isFriendlyFireEnabled(), false, true, null, false, true, false, false);
                 for (j = 0; j < collisions.Count; j++)
                 {
                     if (explosions[i].intersects(collisions[j]))
@@ -801,7 +818,13 @@ class World
         System.Collections.Generic.List<GameObject> collisions;
         foreach (Character character in this.characters)
         {
-            collisions = this.findCollisions(character, true, true, false, null, false, false, false, true);
+            CollisionRequest request = new CollisionRequest();
+            request.setObject(character);
+            request.setRequestAllies(true);
+            request.setRequestGaia(true);
+            request.setRequestGhosts(true);
+            //collisions = this.findCollisions(character, true, true, false, null, false, false, false, true);
+            collisions = this.findCollisions(request);
             foreach (GameObject collision in collisions)
             {
                 if (collision.isAPickupItem() && character.intersects(collision))
@@ -863,7 +886,15 @@ class World
                 // The current object isn't a projectile.
                 // Look for characters and platforms that collide
                 //collisions = this.getObjectsInTheWay(o, move);
-                collisions = this.findCollisions(o, true, true, true, move, true, false, false, false);
+                CollisionRequest request = new CollisionRequest();
+                request.setObject(o);
+                request.setCollisionMove(move);
+                request.setRequestAllies(true);
+                request.setRequestGaia(true);
+                request.setRequestEnemies(true);
+                request.setRequestCharacters(true);
+                //collisions = this.findCollisions(o, true, true, true, move, true, false, false, false);
+                collisions = this.findCollisions(request);
                 GameObject collision = null;
                 // make sure that there actually are collisions to check
                 if (collisions.Count > 0)
@@ -910,7 +941,13 @@ class World
                 }
                 // Now look for enemy projectiles that are colliding. We can travel through them, but they still need to know about it so they can explode
                 //collisions = this.findEnemyProjectiles(o, move);
-                collisions = this.findCollisions(o, false, false, true, move, false, true, false, false);
+                request = new CollisionRequest();
+                request.setObject(o);
+                request.setCollisionMove(move);
+                request.setRequestEnemies(true);
+                request.setRequestProjectiles(true);
+                //collisions = this.findCollisions(o, false, false, true, move, false, true, false, false);
+                collisions = this.findCollisions(request);
                 foreach (GameObject other in collisions)
                 {
                     newMove = this.movementForCollision(o, other, move);
@@ -944,7 +981,15 @@ class World
     void checkDetonationForMove(Projectile p, double[] move)
     {
         // find any enemy object that collides with it
-        List<GameObject> collisions = this.findCollisions(p, false, false, true, move, true, true, true, false);
+        CollisionRequest request = new CollisionRequest();
+        request.setObject(p);
+        request.setCollisionMove(move);
+        request.setRequestEnemies(true);
+        request.setRequestCharacters(true);
+        request.setRequestProjectiles(true);
+        request.setRequestExplosions(true);
+        //List<GameObject> collisions = this.findCollisions(p, false, false, true, move, true, true, true, false);
+        List<GameObject> collisions = this.findCollisions(request);
         double[] newMove;
         foreach (GameObject other in collisions)
         {
@@ -969,7 +1014,13 @@ class World
         {
             // if it didn't hit any enemies, we still have to check whether it hit any terrain
             //collisions = this.findTerrainCollisions(o, move);
-            collisions = this.findCollisions(p, false, true, false, move, true, false, false, false);
+            request = new CollisionRequest();
+            request.setObject(p);
+            request.setCollisionMove(move);
+            request.setRequestGaia(true);
+            request.setRequestCharacters(true);
+            //collisions = this.findCollisions(p, false, true, false, move, true, false, false, false);
+            collisions = this.findCollisions(request);
             foreach (GameObject other in collisions)
             {
                 newMove = this.movementForCollision(p, other, move);    // check that it actually collides
@@ -992,7 +1043,14 @@ class World
     void checkDetonation(Projectile p)
     {
         // find any enemy object that collides with it
-        List<GameObject> collisions = this.findCollisions(p, false, false, true, null, true, true, true, false);
+        CollisionRequest request = new CollisionRequest();
+        request.setObject(p);
+        request.setRequestEnemies(true);
+        request.setRequestCharacters(true);
+        request.setRequestProjectiles(true);
+        request.setRequestExplosions(true);
+        List<GameObject> collisions = this.findCollisions(request);
+        //List<GameObject> collisions = this.findCollisions(p, false, false, true, null, true, true, true, false);
         //double[] newMove = new double[2];
         foreach (GameObject other in collisions)
         {
@@ -1011,8 +1069,11 @@ class World
         if (!p.isColliding())
         {
             // if it didn't hit any enemies, we still have to check whether it hit any terrain
-            //collisions = this.findTerrainCollisions(o, move);
-            collisions = this.findCollisions(p, false, true, false, null, true, false, false, false);
+            request = new CollisionRequest();
+            request.setObject(p);
+            request.setRequestGaia(true);
+            request.setRequestCharacters(true);
+            collisions = this.findCollisions(request);
             foreach (GameObject other in collisions)
             {
                 if (p.intersects(other))
@@ -1029,6 +1090,7 @@ class World
     // given that the mover wants to make the desiredMove and obstacle may be in the way, return the actual move that we will allow
 	double[] movementForCollision(GameObject mover, GameObject obstacle, double[] desiredMove)
     {
+        /*
 	    // figure out how far it wants to move
 	    double desiredDist = 0;
 	    int i;
@@ -1037,6 +1099,7 @@ class World
 		    desiredDist += desiredMove[i] * desiredMove[i];
 	    }
 	    desiredDist = Math.Sqrt(desiredDist);
+        */
 
 	    // figure out how far it can go before colliding
 	    double[] allowedMove = mover.moveTo(obstacle, desiredMove);
@@ -1103,8 +1166,12 @@ class World
 	    }
     }
     // finds all potential collisions of the desired type for the given item
-    System.Collections.Generic.List<GameObject> findCollisions(GameObject item, bool includeAllies, bool includeGaia, bool includeEnemies, double[] move, bool includeCharacters, bool includeProjectiles, bool includeExplosions, bool includeGhosts)
+    //System.Collections.Generic.List<GameObject> findCollisions(GameObject item, bool includeAllies, bool includeGaia, bool includeEnemies, double[] move, bool includeCharacters, bool includeProjectiles, bool includeExplosions, bool includeGhosts)
+    System.Collections.Generic.List<GameObject> findCollisions(CollisionRequest request)
     {
+        // open up some of the data in the request
+        GameObject item = request.getObject();
+        double[] move = request.getCollisionMove();
         // create an empty list to save in
         System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
         System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
@@ -1114,24 +1181,24 @@ class World
             // first make sure that we care about this team
             if (team == 0)
             {
-                if (!includeGaia)
+                if (!request.shouldRequestGaia())
                     continue;
             }
             else
             {
                 if (team == item.getTeamNum())
                 {
-                    if (!includeAllies)
+                    if (!request.shouldRequestAllies())
                         continue;
                 }
                 else
                 {
-                    if (!includeEnemies)
+                    if (!request.shouldRequestEnemies())
                         continue;
                 }
             }
             // now search for the types that we care about
-            if (includeCharacters)
+            if (request.shouldRequestCharacters())
             {
                 temp = this.searchers[team, 0].getCollisions(item, move);   // find characters and platforms
                 foreach (GameObject g in temp)
@@ -1139,7 +1206,7 @@ class World
                     collisions.Add(g);
                 }
             }
-            if (includeProjectiles)
+            if (request.shouldRequestProjectiles())
             {
                 temp = this.searchers[team, 1].getCollisions(item, move);   // find projectiles
                 foreach (GameObject g in temp)
@@ -1147,7 +1214,7 @@ class World
                     collisions.Add(g);
                 }
             }
-            if (includeExplosions)
+            if (request.shouldRequestExplosions())
             {
                 temp = this.searchers[team, 2].getCollisions(item, move);   // find explosions
                 foreach (GameObject g in temp)
@@ -1155,9 +1222,9 @@ class World
                     collisions.Add(g);
                 }
             }
-            if (includeGhosts)
+            if (request.shouldRequestGhosts())
             {
-                temp = this.searchers[team, 3].getCollisions(item, move);   // find explosions
+                temp = this.searchers[team, 3].getCollisions(item, move);   // find ghosts
                 foreach (GameObject g in temp)
                 {
                     collisions.Add(g);

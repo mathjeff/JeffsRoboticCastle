@@ -79,7 +79,7 @@ class WeaponDesignScreen : MenuScreen
         newScreen.setExitScreen(this);
 
         // make the world
-        this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 0);
+        this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 1);
         
         // make the player
         double[] location = new double[2];

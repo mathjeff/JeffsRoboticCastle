@@ -95,6 +95,8 @@
     <Compile Include="Camera.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="CharacterStatusDisplay.cs" />
+    <Compile Include="CollisionRequest.cs" />
+    <Compile Include="Critter.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="Explosion.cs" />
     <Compile Include="GameObject.cs" />
