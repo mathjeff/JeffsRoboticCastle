@@ -403,7 +403,7 @@ class WorldLoader
             numWeapons = (int)((levelNumber + 1) / 2);
             for (i = 0; i < numWeapons; i++)
             {
-                tempEnemy.addWeapon(new Weapon(generator.Next(levelNumber)));
+                tempEnemy.addWeapon(new Weapon(generator.Next(levelNumber * 2)));
             }
             this.addItem(tempEnemy);
             // give the enemy a painting to look at

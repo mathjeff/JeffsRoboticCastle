@@ -538,7 +538,7 @@ class WeaponDesignScreen : MenuScreen
         this.prebuildWeapon(this.quickbuildWeaponIndex);
         this.weaponCost.Content = templateWeapon.getCost().ToString();
         this.quickbuildWeaponIndex++;
-        if (this.quickbuildWeaponIndex > 4)
+        if (this.quickbuildWeaponIndex > 9)
             quickbuildWeaponIndex = 0;
     }
     // this gets called when the user requests to try out the weapon
