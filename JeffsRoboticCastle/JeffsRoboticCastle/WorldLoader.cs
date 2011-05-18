@@ -38,7 +38,7 @@ class WorldLoader
         terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 4;
         this.worldDimensions = new double[2];
         worldDimensions[0] = 6000 + 4500 * levelNumber;
-        worldDimensions[1] = 1200;
+        worldDimensions[1] = 1600;
         //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
         this.world = new World(worldCanvas, screenSize, terrainActiveDimensions);
@@ -389,26 +389,29 @@ class WorldLoader
         while (x < worldDimensions[0])
         {
             // choose the enemy's location
-            x += (800 * generator.NextDouble() + 1700) / (levelNumber + 1);
-            y = worldDimensions[1] * generator.NextDouble();
-            location = new double[2]; location[0] = x; location[1] = y;
-            // choose the enemy's type
-            if (levelNumber > 0)
-                type = generator.Next(levelNumber);
-            else
-                type = 0;
-            // make the enemy
-            Enemy tempEnemy = new Enemy(location, type);
-            // give the enemy a bunch of weapons
-            numWeapons = (int)((levelNumber + 1) / 2);
-            for (i = 0; i < numWeapons; i++)
+            x += (4500 * generator.NextDouble() * generator.NextDouble() + 600) / (levelNumber + 1);
+            //y = worldDimensions[1] * generator.NextDouble();
+            for (y = blockSize[1] * generator.NextDouble(); y < worldDimensions[1]; y += 1000)
             {
-                tempEnemy.addWeapon(new Weapon(generator.Next(levelNumber * 2)));
+                location = new double[2]; location[0] = x; location[1] = y;
+                // choose the enemy's type
+                if (levelNumber > 0)
+                    type = generator.Next(levelNumber);
+                else
+                    type = 0;
+                // make the enemy
+                Enemy tempEnemy = new Enemy(location, type);
+                // give the enemy a bunch of weapons
+                numWeapons = (int)((levelNumber + 1) / 2);
+                for (i = 0; i < numWeapons; i++)
+                {
+                    tempEnemy.addWeapon(new Weapon(generator.Next(levelNumber * 2)));
+                }
+                this.addItem(tempEnemy);
+                // give the enemy a painting to look at
+                //location = new double[2]; location[0] = x; location[1] = y;
+                //this.addItem(new Painting(location, 0));
             }
-            this.addItem(tempEnemy);
-            // give the enemy a painting to look at
-            //location = new double[2]; location[0] = x; location[1] = y;
-            //this.addItem(new Painting(location, 0));
         }
 #endif
         // add decoratory critters
@@ -436,17 +439,18 @@ class WorldLoader
         this.addItem(exit);
 #if true
         // add platforms
-        double spacing = 40;
+        double spacing = 30;
         for (i = 0; i < 4; i++)
         {
             if (generator.Next(2) == 0)
                 spacing *= 2;
         }
+        double roofAltitude = worldDimensions[1] * .75;
         int count = (int)(worldDimensions[0] / spacing);
         for (i = 0; i < count; i++)
         {
             x = generator.NextDouble() * worldDimensions[0] + 100;
-            y = worldDimensions[1] * generator.NextDouble() * .5;
+            y = generator.NextDouble() * roofAltitude;
             location = new double[2]; location[0] = x; location[1] = y;
             type = (int)(generator.NextDouble() * 2);
             this.addItem(new Platform(location, type));
@@ -539,7 +543,7 @@ class WorldLoader
         x = 0;
         while (x < worldDimensions[0])
         {
-            location = new double[2]; location[0] = x; location[1] = worldDimensions[1];
+            location = new double[2]; location[0] = x; location[1] = roofAltitude;
             topWall = new Platform(location, 0);
             this.addItem(topWall);
             x += topWall.getShape().getWidth();
