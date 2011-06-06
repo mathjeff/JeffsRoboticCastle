@@ -15,7 +15,7 @@ class WorldLoader
 {
 // Public
     // Constructor
-    public WorldLoader(Canvas canvas, double[] screenSize, int levelNumber)
+    public WorldLoader(Canvas canvas, double[] screenSize, int levelNumber, List<Weapon> possibleEnemyWeapons)
     {
         // setup a canvas to put the world on, for the purpose of cropping
         this.worldCanvas = canvas;
@@ -26,16 +26,17 @@ class WorldLoader
         this.worldCanvas.ClipToBounds = true;
         this.gameCanvas.Children.Add(worldCanvas);
         */
+        this.enemyWeaponChoices = possibleEnemyWeapons;
         // setup machinery to make it fast to run
         this.blockSize = new double[2];
         blockSize[0] = screenSize[0] / 8;
         blockSize[1] = screenSize[1] / 4;
         double[] characterActiveDimensions = new double[2];
         characterActiveDimensions[0] = screenSize[0];
-        characterActiveDimensions[1] = screenSize[1];
+        characterActiveDimensions[1] = screenSize[1] * 1.5;
         double[] terrainActiveDimensions = new double[2];
-        terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 4;
-        terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 4;
+        terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 2;
+        terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 2;
         this.worldDimensions = new double[2];
         worldDimensions[0] = 6000 + 4500 * levelNumber;
         worldDimensions[1] = 1600;
@@ -64,7 +65,18 @@ class WorldLoader
         this.populate(levelNumber);
 
     }
-
+    public void pause()
+    {
+        this.paused = true;
+    }
+    public void unPause()
+    {
+        this.paused = false;
+    }
+    public void togglePause()
+    {
+        this.paused = !(this.paused);
+    }
     public void scrollTo(GameObject o)
     {
         // Now remove anything from the previous tick that fell off the edge of the world
@@ -124,26 +136,29 @@ class WorldLoader
     }
     public void timerTick(double numSeconds)
     {
-        // it's not really so awesome to save screenshots, and it does slow things down substantially
+        if (!this.paused)
+        {
+            // it's not really so awesome to save screenshots, and it does slow things down substantially
 #if SAVE_SCREENSHOTS
-        screenshotTimer += numSeconds;
-        // count the number of explosions in the world so we can save screenshots with lots of explosions
-        int numExplosions = world.getNumExplosions();
-        // if it's been a while since the last screenshot, save another one once there's an explosion
-        if (screenshotTimer >= 10)
-        {
-            this.bestNumExplosions = 0;
-        }
-        // players like to see screenshots with lots of explosions
-        if (numExplosions > this.bestNumExplosions)
-        {
-            this.saveScreenshotInWorld();
-            screenshotTimer = 0;
-            this.bestNumExplosions = numExplosions;
-        }
+            screenshotTimer += numSeconds;
+            // count the number of explosions in the world so we can save screenshots with lots of explosions
+            int numExplosions = world.getNumExplosions();
+            // if it's been a while since the last screenshot, save another one once there's an explosion
+            if (screenshotTimer >= 10)
+            {
+                this.bestNumExplosions = 0;
+            }
+            // players like to see screenshots with lots of explosions
+            if (numExplosions > this.bestNumExplosions)
+            {
+                this.saveScreenshotInWorld();
+                screenshotTimer = 0;
+                this.bestNumExplosions = numExplosions;
+            }
 #endif
-        // advance the world
-        this.world.timerTick(numSeconds);
+            // advance the world
+            this.world.timerTick(numSeconds);
+        }
     }
     public void addItemAndDisableUnloading(GameObject o)
     {
@@ -391,7 +406,7 @@ class WorldLoader
             // choose the enemy's location
             x += (4500 * generator.NextDouble() * generator.NextDouble() + 600) / (levelNumber + 1);
             //y = worldDimensions[1] * generator.NextDouble();
-            for (y = blockSize[1] * generator.NextDouble(); y < worldDimensions[1]; y += 1000)
+            for (y = blockSize[1] * generator.NextDouble(); y < worldDimensions[1] / 2; y += 1000)
             {
                 location = new double[2]; location[0] = x; location[1] = y;
                 // choose the enemy's type
@@ -405,7 +420,12 @@ class WorldLoader
                 numWeapons = (int)((levelNumber + 1) / 2);
                 for (i = 0; i < numWeapons; i++)
                 {
-                    tempEnemy.addWeapon(new Weapon(generator.Next(levelNumber * 2)));
+                    int index = generator.Next(enemyWeaponChoices.Count);
+                    Weapon newWeapon = new Weapon(enemyWeaponChoices[index]);
+                    //Weapon newWeapon = new Weapon(9);
+                    tempEnemy.addWeapon(newWeapon);
+                    //Weapon newWeapon = new Weapon(generator.Next(
+                    //tempEnemy.addWeapon(new Weapon(generator.Next(levelNumber * 2)));
                 }
                 this.addItem(tempEnemy);
                 // give the enemy a painting to look at
@@ -603,4 +623,6 @@ class WorldLoader
     double screenshotTimer;
     int bestNumExplosions;
 #endif
+    bool paused;
+    List<Weapon> enemyWeaponChoices;
 };

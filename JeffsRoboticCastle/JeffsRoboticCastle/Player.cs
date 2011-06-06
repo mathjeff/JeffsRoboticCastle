@@ -67,8 +67,7 @@ class Player : Character
         for (i = 0; i < count; i++)
         {
             currentWeapon = this.getWeaponAtIndex(i);
-            currentWeapon.resetCooldown();
-            currentWeapon.refillAmmo();
+            currentWeapon.resetForLevel();
         }
         // return to the starting location
         double[] position = new double[2];

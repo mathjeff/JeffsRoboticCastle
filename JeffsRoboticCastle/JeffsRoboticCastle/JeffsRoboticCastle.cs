@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Collections.Generic;
 
 class JeffsRoboticCastle
 {
@@ -14,6 +15,13 @@ class JeffsRoboticCastle
         //newCanvas.Children.Add(mediaPlayer);
 
         this.mainCanvas = newCanvas;
+        this.allEnemyWeaponChoices = new List<Weapon>();
+        int i;
+        for (i = 0; i < 10; i++)
+        {
+            this.allEnemyWeaponChoices.Add(new Weapon(i));
+        }
+        this.currentEnemyWeaponChoices = new List<Weapon>();
         this.setupPlayer();
 	    this.setupDrawing(screenWidth, screenHeight);
 	    //this.userCamera = new Camera(RectangleF(0, 0, (float)windowWidth, (float)windowHeight), RectangleF(0, 0, (float)windowWidth, (float)windowHeight));
@@ -54,68 +62,6 @@ class JeffsRoboticCastle
         //if (this.isWorldRunning())
         //    this.worldKeyUp(sender, e);
     }
-    // this function handles any necessary action that the world must take due to a keypress
-    /*
-    public void worldKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-    {
-        // #define DESIGN_HERE
-        if (e.Key == Key.W)
-        {
-            this.playerJump();
-        }
-        if (e.Key == Key.A)
-        {
-            this.movePlayerLeft();
-        }
-        if (e.Key == Key.D)
-        {
-            this.movePlayerRight();
-        }
-        if (e.Key == Key.OemSemicolon)
-        {
-            //this.game.selectWeapon1();
-            this.playerPressTrigger(true);
-        }
-        if (e.Key == Key.L)
-        {
-            //this.game.cyclePlayerWeaponBackward();
-            this.selectWeapon1();
-        }
-        if (e.Key == Key.P)
-        {
-            //System.Diagnostics.Trace.WriteLine("trigger pressed");
-            //this.game.playerPressTrigger(true);
-            this.selectWeapon2();
-        }
-        if (e.Key == Key.OemQuotes)
-        {
-            //this.game.cyclePlayerWeaponForward();
-            this.selectWeapon3();
-        }
-        if (e.Key == Key.Space)
-        {
-            this.resetPlayerWeapon();
-            //this.game.playerPressTrigger(true);
-        }
-    }
-    public void worldKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-    {
-        // #define DESIGN_HERE
-        if (e.Key == Key.A)
-        {
-            this.stopMovingPlayerLeft();
-        }
-        if (e.Key == Key.D)
-        {
-            this.stopMovingPlayerRight();
-        }
-        if (e.Key == Key.OemSemicolon)
-        {
-            //System.Diagnostics.Trace.WriteLine("trigger released");
-            this.playerPressTrigger(false);
-        }
-    }
-    */
     // image drawing
     // advance the game by one time unit
 	public void timerTick(double numSeconds)
@@ -124,15 +70,6 @@ class JeffsRoboticCastle
         Screen newScreen;
         if (this.isWorldRunning())
         {
-            /*
-            if (numSeconds > 0)
-            {
-                // advance the world
-                this.worldLoader.timerTick(numSeconds);
-                // scroll the screen
-                this.worldLoader.scrollTo(this.player);
-            }
-            */
             newScreen = this.currentScreen.timerTick(numSeconds);
             // check whether they just came from the level selection screen
             if (newScreen != worldScreen)
@@ -292,27 +229,30 @@ class JeffsRoboticCastle
     }
 	void setupWorld(int levelNum)
     {
-        //System.Windows.Shapes.Rectangle worldRect = new System.Windows.Shapes.Rectangle();
-        /*Canvas worldCanvas = new Canvas();
-        worldCanvas.Width = worldWindowSize[0];
-        worldCanvas.Height = worldWindowSize[1];
-        worldCanvas.ClipToBounds = true;
-        worldCanvas.RenderTransform = new System.Windows.Media.TranslateTransform(worldWindowPosition[0], worldWindowPosition[1]);
-        this.canvas.Children.Add(worldCanvas);
-        */
-        //worldCanvas.
-        //worldCanvas.
         // create an object to keep track of the world
-        //this.worldLoader = new WorldLoader(worldCanvas, worldWindowPosition, worldWindowSize);
         if (this.worldLoader != null)
         {
             this.worldLoader.destroy();
         }
-        this.worldLoader = new WorldLoader(this.worldScreen.getWorldCanvas(), this.worldScreen.getWorldWindowSize(), levelNum);
+        // create a list of all of the weapons that enemies haven't been allowed to use yet
+        List<Weapon> newWeaponChoices = new List<Weapon>();
+        foreach (Weapon currentWeapon in this.allEnemyWeaponChoices)
+        {
+            if (!currentEnemyWeaponChoices.Contains(currentWeapon))
+                newWeaponChoices.Add(currentWeapon);
+        }
+        // add a few new weapons for the enemies to use
+        Random generator = new Random();
+        while (currentEnemyWeaponChoices.Count < levelNum * 2)
+        {
+            int index = generator.Next(newWeaponChoices.Count);
+            currentEnemyWeaponChoices.Add(newWeaponChoices[index]);
+            newWeaponChoices.RemoveAt(index);
+        }
+        this.worldLoader = new WorldLoader(this.worldScreen.getWorldCanvas(), this.worldScreen.getWorldWindowSize(), levelNum, currentEnemyWeaponChoices);
 
         this.worldLoader.addItemAndDisableUnloading(this.player);
         this.worldScreen.followCharacter(this.player, this.worldLoader);
-        //this.worldLoader.addItem(this.player);
     }
     void setCurrentScreen(Screen newScreen)
     {
@@ -345,6 +285,8 @@ class JeffsRoboticCastle
     double[] screenSize;
     //Camera userCamera;
 	WorldLoader worldLoader;
+    List<Weapon> currentEnemyWeaponChoices;
+    List<Weapon> allEnemyWeaponChoices;
 	Player player;
     AudioPlayer audioPlayer;
     WorldScreen worldScreen;

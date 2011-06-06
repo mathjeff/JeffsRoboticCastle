@@ -188,12 +188,26 @@ class WorldScreen : Screen
         }
         if (e.Key == Key.Space)
         {
+            //this.togglePause();
             this.resetPlayerWeapon();
             //this.game.playerPressTrigger(true);
         }
         if ((e.Key == Key.Escape) && (this.isEscapeEnabled()))
         {
             this.levelIsOver = true;
+        }
+        if (e.Key == Key.Enter)
+        {
+            this.togglePause();
+            //this.resetPlayerWeapon();
+        }
+        if (e.Key == Key.RightShift)
+        {
+            this.pause();
+        }
+        if (e.Key == Key.LeftShift)
+        {
+            this.unPause();
         }
         base.KeyDown(sender, e);
     }
@@ -222,6 +236,18 @@ class WorldScreen : Screen
             this.playerPressTrigger(false);
         }
         base.KeyUp(sender, e);
+    }
+    public void pause()
+    {
+        this.world.pause();
+    }
+    public void unPause()
+    {
+        this.world.unPause();
+    }
+    public void togglePause()
+    {
+        this.world.togglePause();
     }
 
     public void setEscapeEnabled(bool enabled)

@@ -79,7 +79,10 @@ class WeaponDesignScreen : MenuScreen
         newScreen.setExitScreen(this);
 
         // make the world
-        this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 1);
+        List<Weapon> demoWeapons = new List<Weapon>();
+        demoWeapons.Add(new Weapon(0));
+        demoWeapons.Add(new Weapon(1));
+        this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 1, demoWeapons);
         
         // make the player
         double[] location = new double[2];
@@ -141,17 +144,17 @@ class WeaponDesignScreen : MenuScreen
         weaponCost = new Label();
         addControl(weaponCost, getLeft(weaponCostLabel), getBottom(weaponCostLabel), labelWidth, labelHeight);
 
-        Label addOwnersVelocityLabel = new Label();
-        addOwnersVelocityLabel.Content = "Add owner's velocity";
-        addControl(addOwnersVelocityLabel, getLeft(weaponCostLabel), getBottom(weaponCostLabel) + verticalSpacing, labelWidth, labelHeight);
-        addOwnersVelocity = new CheckBox();
-        addControl(addOwnersVelocity, getLeft(weaponCost), getBottom(weaponCost) + verticalSpacing, labelWidth, labelHeight);
+        Label ownersVelocityScaleLabel = new Label();
+        ownersVelocityScaleLabel.Content = "Scale for owner's velocity";
+        addControl(ownersVelocityScaleLabel, getLeft(weaponCostLabel), getBottom(weaponCostLabel) + verticalSpacing, labelWidth, labelHeight);
+        ownersVelocityScale = new TextBox();
+        addControl(ownersVelocityScale, getLeft(weaponCost), getBottom(weaponCost) + verticalSpacing, labelWidth, labelHeight);
 
         Label warmupTimeLabel = new Label();
         warmupTimeLabel.Content = "Warmup (sec)";
-        addControl(warmupTimeLabel, getLeft(weaponCostLabel), getBottom(addOwnersVelocityLabel) + verticalSpacing, labelWidth, labelHeight);
+        addControl(warmupTimeLabel, getLeft(weaponCostLabel), getBottom(ownersVelocityScaleLabel) + verticalSpacing, labelWidth, labelHeight);
         warmupTime = new TextBox();
-        addControl(warmupTime, getLeft(weaponCost), getBottom(addOwnersVelocity) + verticalSpacing, labelWidth, labelHeight);
+        addControl(warmupTime, getLeft(weaponCost), getBottom(ownersVelocityScale) + verticalSpacing, labelWidth, labelHeight);
 
 
         Label cooldownTimeLabel = new Label();
@@ -166,6 +169,13 @@ class WeaponDesignScreen : MenuScreen
         automatic = new CheckBox();
         addControl(automatic, getLeft(weaponCost), getBottom(cooldownTime) + verticalSpacing, labelWidth, labelHeight);
 
+        Label stickyTriggerLabel = new Label();
+        stickyTriggerLabel.Content = "Sticky Trigger";
+        addControl(stickyTriggerLabel, getLeft(weaponCostLabel), getBottom(automaticLabel) + verticalSpacing, labelWidth, labelHeight);
+        stickyTrigger = new CheckBox();
+        addControl(stickyTrigger, getLeft(weaponCost), getBottom(automatic) + verticalSpacing, labelWidth, labelHeight);
+
+#if SWITCH_TIMES
         Label switchToTimeLabel = new Label();
         switchToTimeLabel.Content = "Switch-to-Time";
         switchToTime = new TextBox();
@@ -173,7 +183,7 @@ class WeaponDesignScreen : MenuScreen
         Label switchFromTimeLabel = new Label();
         switchFromTimeLabel.Content = "Switch-from-Time";
         switchFromTime = new TextBox();
-#if SWITCH_TIMES
+
         addControl(switchToTimeLabel, getLeft(weaponCostLabel), getBottom(automaticLabel) + verticalSpacing, labelWidth, labelHeight);
         addControl(switchToTime, getLeft(weaponCost), getBottom(automatic) + verticalSpacing, labelWidth, labelHeight);
         addControl(switchFromTimeLabel, getLeft(weaponCostLabel), getBottom(switchToTimeLabel) + verticalSpacing, labelWidth, labelHeight);
@@ -186,8 +196,8 @@ class WeaponDesignScreen : MenuScreen
         addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(switchFromTimeLabel) + verticalSpacing, labelWidth, labelHeight);
         addControl(maxAmmo, getLeft(weaponCost), getBottom(switchFromTime) + verticalSpacing, labelWidth, labelHeight);
 #else
-        addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(automaticLabel) + verticalSpacing, labelWidth, labelHeight);
-        addControl(maxAmmo, getLeft(weaponCost), getBottom(automatic) + verticalSpacing, labelWidth, labelHeight);
+        addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(stickyTriggerLabel) + verticalSpacing, labelWidth, labelHeight);
+        addControl(maxAmmo, getLeft(weaponCost), getBottom(stickyTrigger) + verticalSpacing, labelWidth, labelHeight);
 #endif
 
         Label ammoRechargeRateLabel = new Label();
@@ -479,11 +489,12 @@ class WeaponDesignScreen : MenuScreen
             warmupTime.Text = ".1";
         if (cooldownTime.Text == "")
             cooldownTime.Text = ".9";
+#if SWITCH_TIMES
         if (switchToTime.Text == "")
             switchToTime.Text = "1";
         if (switchFromTime.Text == "")
             switchFromTime.Text = "1";
-
+#endif
 
         // attributes of the projectile
         if (projectileImage.Text == "")
@@ -586,10 +597,13 @@ class WeaponDesignScreen : MenuScreen
         templateWeapon.setAmmoPerBox(parseDouble(ammoPerBox));
         templateWeapon.setWarmupTime(parseDouble(warmupTime));
         templateWeapon.setCooldownTime(parseDouble(cooldownTime));
+#if SWITCH_TIMES
         templateWeapon.setSwitchToTime(parseDouble(switchToTime));
         templateWeapon.setSwitchFromTime(parseDouble(switchFromTime));
+#endif
         templateWeapon.setAutomatic(automatic.IsChecked.Value);
-        templateWeapon.startWithOwnersVelocity(addOwnersVelocity.IsChecked.Value);
+        templateWeapon.setTriggerSticky(stickyTrigger.IsChecked.Value);
+        templateWeapon.setOwnersVelocityScale(parseDouble(ownersVelocityScale));
         templateWeapon.enableFiringWhileInactive(fireWhileInactive.IsChecked.Value);
         templateWeapon.enableCooldownWhileInactive(cooldownWhileInactive.IsChecked.Value);
         templateWeapon.enableRechargeWhileInactive(rechargeWhileInactive.IsChecked.Value);
@@ -644,10 +658,13 @@ class WeaponDesignScreen : MenuScreen
         ammoPerBox.Text = templateWeapon.getAmmoPerBox().ToString();
         warmupTime.Text = templateWeapon.getWarmupTime().ToString();
         cooldownTime.Text = templateWeapon.getCooldownTime().ToString();
+#if SWITCH_TIMES
         switchToTime.Text = templateWeapon.getSwitchToTime().ToString();
         switchFromTime.Text = templateWeapon.getSwitchFromTime().ToString();
+#endif
         automatic.IsChecked = templateWeapon.isAutomatic();
-        addOwnersVelocity.IsChecked = templateWeapon.shouldStartWithOwnersVelocity();
+        stickyTrigger.IsChecked = templateWeapon.isTriggerSticky();
+        ownersVelocityScale.Text = templateWeapon.getOwnersVelocityScale().ToString();
         fireWhileInactive.IsChecked = templateWeapon.canFireWhileInactive();
         cooldownWhileInactive.IsChecked = templateWeapon.coolsDownWhileInactive();
         rechargeWhileInactive.IsChecked = templateWeapon.rechargesWhileInactive();
@@ -704,10 +721,13 @@ class WeaponDesignScreen : MenuScreen
     TextBox ammoPerBox;
     TextBox warmupTime;
     TextBox cooldownTime;
+#if SWITCH_TIMES
     TextBox switchToTime;
     TextBox switchFromTime;
+#endif
     CheckBox automatic;
-    CheckBox addOwnersVelocity;
+    CheckBox stickyTrigger;
+    TextBox ownersVelocityScale;
     CheckBox fireWhileInactive; // Tells whether this weapon can fire without being the current weapon
     CheckBox cooldownWhileInactive; // Tells whether this weapon can cooldown without being the current weapon
     CheckBox rechargeWhileInactive; // Tells whether this weapon can recharge ammo without being the current weapon

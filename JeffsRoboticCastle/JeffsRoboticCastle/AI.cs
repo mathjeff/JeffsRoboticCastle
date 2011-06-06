@@ -8,6 +8,7 @@ class AI
 {
     public AI(int intelligence)
     {
+        this.randomGenerator = new Random();
         if (intelligence == 0)
         {
             // every once in a while, change direction
@@ -31,130 +32,68 @@ class AI
         }
         else    // intelligence > 0
         {
-            double[] v;
+            // release the trigger
             AIFireNode fireNode1 = new AIFireNode(false);
-            // check whether the current weapon has any ammo
-            AIAmmoDecisionNode ammoNode1 = new AIAmmoDecisionNode();
-            fireNode1.setNextNode(ammoNode1);
-            // if you do have ammo, check whether we can save some cooldown time by switching weapons now
-            AIFreeSwitchDecisionNode switchNode1 = new AIFreeSwitchDecisionNode();
-            ammoNode1.setLeftChild(switchNode1);
-            // if either event happens, then switch weapons
-            AISelectWeaponNode selectWeaponNode2 = new AISelectWeaponNode();
-            ammoNode1.setRightChild(selectWeaponNode2);
-            switchNode1.setLeftChild(selectWeaponNode2);
-            // else, if we don't want to switch
+
+            // switch to a weapon that has ammo
+            AISmartSwitchNode switchNode1 = new AISmartSwitchNode();
+            fireNode1.setNextNode(switchNode1);
+
             // decide whether it's time to do another collision test
-            AITickDecisionNode scanNode1 = new AITickDecisionNode(.1);
-            switchNode1.setRightChild(scanNode1);
-            // check whether the target is in range and shoot if it is
-            AITargetDecisionNode targetNode1 = new AITargetDecisionNode(0, 0, 0);
-            scanNode1.setLeftChild(targetNode1);
-            // if we're in range, then fire
-            AIFireNode fireNode2 = new AIFireNode(true);
-            targetNode1.setLeftChild(fireNode2);
-            // else
-            // if we're not in range, then move closer
-            AITargetDecisionNode leftTargetNode = new AITargetDecisionNode(-1, 0, 10000);
-            targetNode1.setRightChild(leftTargetNode);
-            // if the user is on the left, go left
-            v = new double[2]; v[0] = -10000; v[1] = 0;
-            AISetVelocityNode goLeftNode1 = new AISetVelocityNode(v);
-            leftTargetNode.setLeftChild(goLeftNode1);
-            // else
-            // if the user is on the left, go right
-            v = new double[2]; v[0] = 10000; v[1] = 0;
-            AISetVelocityNode goRightNode1 = new AISetVelocityNode(v);
-            leftTargetNode.setRightChild(goRightNode1);
-            // since we're not in range, switch to a new weapon if it's been out of range for a while
-            AITickDecisionNode weaponSwitchCounter = new AITickDecisionNode(1);
-            goLeftNode1.setNextNode(weaponSwitchCounter);
-            goRightNode1.setNextNode(weaponSwitchCounter);
-            AISelectWeaponNode selectWeaponNode1 = new AISelectWeaponNode();
-            weaponSwitchCounter.setLeftChild(selectWeaponNode1);
+            AIRandomDecisionNode scanNode1 = new AIRandomDecisionNode(0.3);
+            switchNode1.setNextNode(scanNode1);
+                // if we get here then it is time to do another collision test
+                // check whether the target is in range and shoot if it is
+                AITargetDecisionNode targetNode1 = new AITargetDecisionNode(0, 0, 0);
+                scanNode1.setLeftChild(targetNode1);
+                    // if we get here then we're in range
+                    // So, fire
+                    AIFireNode fireNode2 = new AIFireNode(true);
+                    targetNode1.setLeftChild(fireNode2);
+                // else
+                    // if we get here then we're not in range
+                    // So, chase
+                    AIChaseNode chaseNode1 = new AIChaseNode();
+                    targetNode1.setRightChild(chaseNode1);
+
             // Now check if there is an incoming projectile
             AICollisionDecisionNode dodgeNode1 = new AICollisionDecisionNode(3, 1, 0, 0.3);
-            selectWeaponNode2.setNextNode(dodgeNode1);
-            fireNode2.setNextNode(dodgeNode1);
+            //selectWeaponNode2.setNextNode(dodgeNode1);
             scanNode1.setRightChild(dodgeNode1);
-            selectWeaponNode1.setNextNode(dodgeNode1);
+            fireNode2.setNextNode(dodgeNode1);
+            chaseNode1.setNextNode(dodgeNode1);
+            //selectWeaponNode1.setNextNode(dodgeNode1);
+            //selectWeaponNode2.setNextNode(dodgeNode1);
             // if the projectile is close in time, check whether it will miss laterally
             AICollisionDecisionNode dodgeNode2 = new AICollisionDecisionNode(3, 0, 1, 0);
             dodgeNode1.setLeftChild(dodgeNode2);
-            // If there is an incoming projectile, then dodge
-            {
-                AIPositionDecisionNode dodgeNode3 = new AIPositionDecisionNode(3, 0, 1, 20);
-                dodgeNode2.setLeftChild(dodgeNode3);
-                // If the projectile isn't too high, then jump and go past it
-                {
-                    // Jump
-                    AIJumpNode jumpDodgeNode = new AIJumpNode();
-                    dodgeNode3.setLeftChild(jumpDodgeNode);
-                }
-                // If the projectile is somewhat close run away from it
-                {
-                    AIPositionDecisionNode dodgeNode4 = new AIPositionDecisionNode(3, 1, 0, 0);
-                    dodgeNode3.setRightChild(dodgeNode4);
-                    // If it's on the left, go right
-                    {
-                        v = new double[2]; v[0] = 10000; v[1] = 0;
-                        AISetVelocityNode dodgeLeftNode = new AISetVelocityNode(v);
-                        dodgeNode4.setLeftChild(dodgeLeftNode);
-                    }
-                    // If it's on the right, go left
-                    {
-                        v = new double[2]; v[0] = -10000; v[1] = 0;
-                        AISetVelocityNode dodgeRightNode = new AISetVelocityNode(v);
-                        dodgeNode4.setRightChild(dodgeRightNode);
-                    }
-                }
-            }
+            AIDodgeNode dodgeNode3 = new AIDodgeNode();
+            dodgeNode2.setLeftChild(dodgeNode3);
             // else
-            // If there is no incoming projectile, then chase the opponent
-            // If we're about to bump into a wall, jump
-            AICollisionDecisionNode obstacleDecisionNode1 = new AICollisionDecisionNode(1, 1, 0, 0.01);
-            dodgeNode1.setRightChild(obstacleDecisionNode1);
-            dodgeNode2.setRightChild(obstacleDecisionNode1);
-            AICollisionDecisionNode obstacleDecisionNode2 = new AICollisionDecisionNode(1, 0, 1, 0.01);
-            obstacleDecisionNode1.setLeftChild(obstacleDecisionNode2);
-            AIPositionDecisionNode obstacleDecisionNode3 = new AIPositionDecisionNode(1, 0, -1, 40);
-            obstacleDecisionNode2.setLeftChild(obstacleDecisionNode3);
-            AIJumpNode wallJumpNode = new AIJumpNode();
-            obstacleDecisionNode3.setLeftChild(wallJumpNode);
-            // If jumping would help hit the target, then jump
-            AIPositionDecisionNode jumpCheckNode1 = new AIPositionDecisionNode(2, 0, 1, 250);
-            obstacleDecisionNode1.setRightChild(jumpCheckNode1);
-            obstacleDecisionNode2.setRightChild(jumpCheckNode1);
-            obstacleDecisionNode3.setRightChild(jumpCheckNode1);
-            AITickDecisionNode jumpCheckNode2 = new AITickDecisionNode(0.01);
-            jumpCheckNode1.setLeftChild(jumpCheckNode2);
-            AITargetDecisionNode jumpCheckNode3 = new AITargetDecisionNode(0, 1, 10000);
-            jumpCheckNode2.setLeftChild(jumpCheckNode3);
-            AIJumpNode targetJumpNode = new AIJumpNode();
-            jumpCheckNode3.setLeftChild(targetJumpNode);
-
-            /* // If there is no incoming projectile, then chase the user
             {
-                AIPositionDecisionNode chaseNode = new AIPositionDecisionNode(2, 1, 0, 200);
-                dodgeNode1.setRightChild(chaseNode);
-                dodgeNode2.setRightChild(chaseNode);
-                // if the user is on the left, go left
-                v = new double[2]; v[0] = -100; v[1] = 0;
-                AISetVelocityNode goLeftNode = new AISetVelocityNode(v);
-                chaseNode.setLeftChild(goLeftNode);
-                // if the user is on the right, go right
-                v = new double[2]; v[0] = 100; v[1] = 0;
-                AISetVelocityNode goRightNode = new AISetVelocityNode(v);
-                chaseNode.setRightChild(goRightNode);
+                // If there is no incoming projectile, then chase the opponent
                 // If we're about to bump into a wall, jump
                 AICollisionDecisionNode obstacleDecisionNode1 = new AICollisionDecisionNode(1, 1, 0, 0.01);
-                goLeftNode.setNextNode(obstacleDecisionNode1);
-                goRightNode.setNextNode(obstacleDecisionNode1);
-                AIPositionDecisionNode obstacleDecisionNode2 = new AIPositionDecisionNode(1, 0, -1, 40);
+                dodgeNode1.setRightChild(obstacleDecisionNode1);
+                dodgeNode2.setRightChild(obstacleDecisionNode1);
+                AICollisionDecisionNode obstacleDecisionNode2 = new AICollisionDecisionNode(1, 0, 1, 0.01);
                 obstacleDecisionNode1.setLeftChild(obstacleDecisionNode2);
+                AIPositionDecisionNode obstacleDecisionNode3 = new AIPositionDecisionNode(1, 0, -1, 40);
+                obstacleDecisionNode2.setLeftChild(obstacleDecisionNode3);
                 AIJumpNode wallJumpNode = new AIJumpNode();
-                obstacleDecisionNode2.setLeftChild(wallJumpNode);
-            }*/
+                obstacleDecisionNode3.setLeftChild(wallJumpNode);
+                // If jumping would help hit the target, then jump
+                AITickDecisionNode jumpCheckNode1 = new AITickDecisionNode(0.01);
+                obstacleDecisionNode1.setRightChild(jumpCheckNode1);
+                obstacleDecisionNode2.setRightChild(jumpCheckNode1);
+                obstacleDecisionNode3.setRightChild(jumpCheckNode1);
+                //AIPositionDecisionNode jumpCheckNode2 = new AIPositionDecisionNode(2, 0, 1, 250);
+                //jumpCheckNode1.setRightChild(jumpCheckNode2);
+                AITargetDecisionNode jumpCheckNode2 = new AITargetDecisionNode(0, 1, 10000);
+                jumpCheckNode1.setLeftChild(jumpCheckNode2);
+                AIJumpNode targetJumpNode = new AIJumpNode();
+                jumpCheckNode2.setLeftChild(targetJumpNode);
+            }
 
             // remember the decision tree
             this.firstNeuron = fireNode1;
@@ -202,8 +141,13 @@ class AI
         }
         return shotError;
     }
+    public Random getRandomGenerator()
+    {
+        return this.randomGenerator;
+    }
 // private
     AINode firstNeuron;
+    Random randomGenerator;
     int state;
     double[] shotError;
 }
@@ -797,6 +741,27 @@ class AITickDecisionNode : AIDecisionNode
     double remainingLeftCounts;
     double itsLeftFraction;
 };
+// The AIRandomDecisionNode randomly chooses the left or right child
+class AIRandomDecisionNode : AIDecisionNode
+{
+    public AIRandomDecisionNode(double leftFraction)
+    {
+        this.totalWeight = Int16.MaxValue;
+        this.leftWeight = (int)(this.totalWeight * leftFraction);
+    }
+    public override AINode getNextNode(Character body)
+    {
+        if (this.getBrain().getRandomGenerator().Next(this.totalWeight) < this.leftWeight)
+        {
+            return this.chooseLeftChild();
+        }
+        else
+        {
+            return this.chooseRightChild();
+        }
+    }
+    int leftWeight, totalWeight;
+}
 ////////////////////////////////////////////////////////////////////////// Action Nodes ////////////////////////////////////////////////////////////////////////////
 // An AIActionNode class is like an assignment statement
 class AIActionNode : AINode
@@ -914,4 +879,125 @@ class AISelectWeaponNode : AIActionNode
         base.execute(body);
     }
 // private
+}
+////////////////////////////////////////////////////////////////////////// Grouping Nodes ////////////////////////////////////////////////////////////////////////////
+// An AIGroupNode is a bunch of AINodes that are all put together for convenience
+class AIGroupNode : AIActionNode
+{
+// public
+    public AIGroupNode()
+    {
+    }
+    // To execute this node is to execute all the nodes inside it
+    public override void execute(Character body)
+    {
+        AINode currentNode = this.firstNode;
+        while (currentNode != null)
+        {
+            currentNode.execute(body);
+            currentNode = currentNode.getNextNode(body);
+        }
+    }
+    // To inform this node of its brain is to inform all the nodes inside it of the brain
+    public override void setBrain(AI newBrain)
+    {
+        // set the brain for all the nodes inside this one
+        this.firstNode.setBrain(newBrain);
+        // set the brain for all the nodes after this one
+        base.setBrain(newBrain);
+    }
+
+    public void setFirstNode(AINode node)
+    {
+        this.firstNode = node;
+    }
+    // private
+    AINode firstNode;
+}
+////////////////////////////////////////////////////////////////////// Specific Grouping Nodes ////////////////////////////////////////////////////////////////////////////
+// intelligently determines whether to switch weapons based on current ammo and cooldown
+class AISmartSwitchNode : AIGroupNode
+{
+    public AISmartSwitchNode()
+    {
+        // check whether the current weapon has any ammo
+        AIAmmoDecisionNode ammoNode1 = new AIAmmoDecisionNode();
+        // if we do have ammo, check whether we can save some cooldown time by switching weapons now
+        AIFreeSwitchDecisionNode switchNode1 = new AIFreeSwitchDecisionNode();
+        ammoNode1.setLeftChild(switchNode1);
+        // if either event happens, then switch weapons
+        AISelectWeaponNode selectWeaponNode2 = new AISelectWeaponNode();
+        ammoNode1.setRightChild(selectWeaponNode2);
+        switchNode1.setLeftChild(selectWeaponNode2);
+        // else, if we don't want to switch
+
+
+        // remember the first node
+        this.setFirstNode(ammoNode1);
+    }
+}
+// chase the target
+class AIChaseNode : AIGroupNode
+{
+    public AIChaseNode()
+    {
+        // move closer
+        AITargetDecisionNode leftTargetNode = new AITargetDecisionNode(-1, 0, 10000);
+        // if the user is on the left, go left
+        double[] v = new double[2]; v[0] = -10000; v[1] = 0;
+        AISetVelocityNode goLeftNode1 = new AISetVelocityNode(v);
+        leftTargetNode.setLeftChild(goLeftNode1);
+        // else
+        // if the user is on the left, go right
+        v = new double[2]; v[0] = 10000; v[1] = 0;
+        AISetVelocityNode goRightNode1 = new AISetVelocityNode(v);
+        leftTargetNode.setRightChild(goRightNode1);
+        // since we're not in range, switch to a new weapon if it's been out of range for a while
+        AITickDecisionNode weaponSwitchCounter = new AITickDecisionNode(1);
+        goLeftNode1.setNextNode(weaponSwitchCounter);
+        goRightNode1.setNextNode(weaponSwitchCounter);
+        AISelectWeaponNode selectWeaponNode1 = new AISelectWeaponNode();
+        weaponSwitchCounter.setLeftChild(selectWeaponNode1);
+        this.setFirstNode(leftTargetNode);
+    }
+}
+// run away from the closest projectile
+class AIDodgeNode : AIGroupNode
+{
+    public AIDodgeNode()
+    {
+        // variable declarations
+        AIPositionDecisionNode dodgeNode1;
+        AISetVelocityNode dodgeLeftNode;
+        AISetVelocityNode dodgeRightNode;
+        AIPositionDecisionNode dodgeNode2;
+        AIJumpNode jumpDodgeNode;
+        double[] v;
+        // Decide which direction horizontally to move
+        dodgeNode1 = new AIPositionDecisionNode(3, 1, 0, 0);
+        {
+            // If it's on the left, go right
+            v = new double[2]; v[0] = 10000; v[1] = 0;
+            dodgeLeftNode = new AISetVelocityNode(v);
+            dodgeNode1.setLeftChild(dodgeLeftNode);
+        }
+        // else
+        {
+            // If it's on the right, go left
+            v = new double[2]; v[0] = -10000; v[1] = 0;
+            dodgeRightNode = new AISetVelocityNode(v);
+            dodgeNode1.setRightChild(dodgeRightNode);
+        }
+        // check whether the incoming projectile is too high
+        dodgeNode2 = new AIPositionDecisionNode(3, 0, 1, 20);
+        dodgeLeftNode.setNextNode(dodgeNode2);
+        dodgeRightNode.setNextNode(dodgeNode2);
+        // If the projectile isn't too high, then jump and go past it
+        {
+            // Jump
+            jumpDodgeNode = new AIJumpNode();
+            dodgeNode2.setLeftChild(jumpDodgeNode);
+        }
+        this.setFirstNode(dodgeNode1);
+    }
 }
