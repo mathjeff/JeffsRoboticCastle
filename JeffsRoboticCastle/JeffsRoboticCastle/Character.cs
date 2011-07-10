@@ -1,8 +1,10 @@
 using System;
 using System.Windows.Media;
+using System.Collections.Generic;
 class Character : GameObject
 {
-//public
+    
+    #region Setup
     public Character()
     {
         this.initialize();
@@ -17,7 +19,9 @@ class Character : GameObject
         this.setMaxAccel(original.getMaxAccel());
         this.setArmor(original.getArmor());
         this.money = original.getMoney();
-        this.setTargetVelocity(original.getTargetVelocity());
+        this.setTargetVX(original.getTargetVX());
+        this.setTargetVY(original.getTargetVY());
+        //this.setTargetVelocity(original.getTargetVelocity());
         this.setJumpVelocity(original.jumpVelocity);
         // for each weapon, copy it and add it
         foreach (Weapon currentWeapon in original.weapons)
@@ -31,7 +35,9 @@ class Character : GameObject
         this.initializeHitpoints(10);
         this.setJumpSpeed(1000);
         this.weapons = new System.Collections.Generic.List<Weapon>();
-        this.targetVelocity = new double[2];
+        //this.targetVelocity = new double[2];
+        this.targetVX = 0;
+        this.targetVY = 0;
         this.activeWeapons = new System.Collections.Generic.List<Weapon>();
         this.money = 0;
     }
@@ -39,20 +45,13 @@ class Character : GameObject
     {
         return true;
     }
+    #endregion
+
+    #region Movement
     // tells whether this object can make itself move
     public override bool isMovable()
     {
         return true;
-    }
-
-
-    public double getArmor()
-    {
-        return this.armor;
-    }
-    public void setArmor(double newArmor)
-    {
-        this.armor = newArmor;
     }
     public double[] getMaxAccel()
     {
@@ -62,47 +61,35 @@ class Character : GameObject
     {
         this.maxAccel = newAccel;
     }
-    public void setContactDamagePerSecond(double value)
+    public double? getTargetVX()
     {
-        this.contactDamagePerSecond = value;
+        return this.targetVX;
     }
-    public bool spendMoney(double amount)
+    public void setTargetVX(double? newVelocity)
     {
-        if (this.money >= amount)
-        {
-            this.money -= amount;
-            return true;
-        }
-        return false;
+        this.targetVX = newVelocity;
     }
-    public double getMoney()
+    public double? getTargetVY()
     {
-        return this.money;
+        return this.targetVY;
     }
-    public void addMoney(double amount)
+    public void setTargetVY(double? newVelocity)
     {
-        this.money += amount;
-    }
-    public double[] getTargetVelocity()
-    {
-        return this.targetVelocity;
-    }
-    // express an interest to move at this velocity
-    public void setTargetVelocity(double[] targetV)
-    {
-        this.targetVelocity = targetV;
+        this.targetVY = newVelocity;
     }
     // accelerate toward the desired velocity
     public override void updateVelocity(double numSeconds)
     {
-        // First update velocity based on the physics of a projectile
-        base.updateVelocity(numSeconds);
-        // Now update velocity based on any accelerations from within the character
+        // First update velocity based on any accelerations from within the character
 	    // Compute desired acceleration
 	    double[] v = this.getVelocity();
-	    double accelX = this.targetVelocity[0] - v[0];
-	    double accelY = this.targetVelocity[1] - v[1];
-	    // Determine maximum acceleration
+	    double accelX = 0;
+        if (this.targetVX != null)
+            accelX = (double)this.targetVX - v[0];
+        double accelY = 0;
+        if (this.targetVY != null)
+            accelY = (double)this.targetVY - v[0];
+        // Determine maximum acceleration
 	    double maxAccelX = numSeconds * this.maxAccel[0];
 	    double maxAccelY = numSeconds * this.maxAccel[1];
 	    // Compute ratio of desired to max accelerations
@@ -115,10 +102,10 @@ class Character : GameObject
 	    double magnitude = Math.Sqrt(xAccelFrac * xAccelFrac + yAccelFrac * yAccelFrac);
 	    if (magnitude <= 1)
 	    {
-		    if (maxAccelX != 0)
-			    v[0] = this.targetVelocity[0];
-		    if (maxAccelY != 0)
-			    v[1] = this.targetVelocity[1];
+            if ((maxAccelX != 0) && (this.targetVX != null))
+                v[0] = (double)this.targetVX;
+            if ((maxAccelY != 0) && (this.targetVY != null))
+                v[1] = (double)this.targetVY;
 	    }
 	    else
 	    {
@@ -128,18 +115,20 @@ class Character : GameObject
 	    }
 	    this.setVelocity(v);
 
+        // Now update velocity based on the physics of a projectile
+        base.updateVelocity(numSeconds);
     }
     // keep track of something that it is colliding with
     public override void setColliding(GameObject other)
     {
         this.collision = other;
-        if (this.collision != null)
+        if ((this.collision != null) && (this.targetVX != null))
         {
-            if (this.targetVelocity[0] > 0)
+            if ((double)this.targetVX > 0)
             {
                 this.setFacingRight(true);
             }
-            if (this.targetVelocity[0] < 0)
+            if ((double)this.targetVX < 0)
             {
                 this.setFacingRight(false);
             }
@@ -188,6 +177,29 @@ class Character : GameObject
 	    }
     }
 
+    #endregion
+
+    #region Purchasing
+    public bool spendMoney(double amount)
+    {
+        if (this.money >= amount)
+        {
+            this.money -= amount;
+            return true;
+        }
+        return false;
+    }
+    public double getMoney()
+    {
+        return this.money;
+    }
+    public void addMoney(double amount)
+    {
+        this.money += amount;
+    }
+    #endregion
+
+    #region Weapons
     public void pressTrigger(bool pressed)
     {
 	    if (this.weapons.Count > 0)
@@ -322,6 +334,9 @@ class Character : GameObject
             }
         }
     }
+    #endregion
+
+    #region Combat
     public override void takeDamage(double damagePerSec, double numSeconds)
     {
         // subtract the armor per second and take damage equal to the result
@@ -337,6 +352,44 @@ class Character : GameObject
     {
         return this.contactDamagePerSecond;
     }
+    public double getArmor()
+    {
+        return this.armor;
+    }
+    public void setArmor(double newArmor)
+    {
+        this.armor = newArmor;
+    }
+
+    public void setContactDamagePerSecond(double value)
+    {
+        this.contactDamagePerSecond = value;
+    }
+    public override void processStuns(double numSeconds)
+    {
+        base.processStuns(numSeconds);
+
+        // drain ammo
+        IEnumerable<Stun> stuns = this.getStuns();
+        double currentAmmoDrained;
+        Weapon currentWeapon = this.getCurrentWeapon();
+        if (currentWeapon != null)
+        {
+            foreach (Stun currentStun in stuns)
+            {
+                currentAmmoDrained = currentStun.getAmmoDrain() * numSeconds;
+                if (!(currentWeapon.drainAmmo(currentAmmoDrained)))
+                {
+                    break;
+                }
+            }
+        }
+    }
+    #endregion
+
+
+
+    #region AI
     // do whatever the AI requires
     public virtual void think()
     {
@@ -348,18 +401,14 @@ class Character : GameObject
         if (this.brain != null)
             this.brain.adjustBehavior();
     }
-    public void setWorld(World w)
-    {
-        this.world = w;
-    }
-    public World getWorld()
-    {
-        return this.world;
-    }
 
 
 
     // Stuff that the AI may need
+    public void setBrain(AI newBrain)
+    {
+        this.brain = newBrain;
+    }
     public AI getBrain()
     {
         return this.brain;
@@ -429,29 +478,36 @@ class Character : GameObject
         if (this.brain != null)
             this.brain.reinforce(quantity);
     }
-    public void setBrain(AI newBrain)
+    public void setWorld(World w)
     {
-        this.brain = newBrain;
+        this.world = w;
+    }
+    public World getWorld()
+    {
+        return this.world;
     }
 
-// private
+    
+    #endregion
+
+    #region Private Variables
     AI brain;
     World world;
-	//double hitpoints;
 	double[] maxAccel;
 	double armor;
     double money;
-	double[] targetVelocity;
+    double? targetVX;
+    double? targetVY;
     double[] jumpVelocity;
 	GameObject collision;	// Tells what this object is colliding with, or null.
 	System.Collections.Generic.List<Weapon> weapons;
 	int currentWeaponIndex;
     Character nearestEnemyCharacter; bool nearestEnemyCharacterUpToDate;
     Projectile nearestEnemyProjectile; bool nearestEnemyProjectileUpToDate;
-    //GameObject myGround; //bool myGroundUpToDate;
     GameObject nearestObstacle; bool nearestObstacleUpToDate;
     double contactDamagePerSecond;  // how much damage per second it deals to anything touching it
     System.Collections.Generic.List<Weapon> activeWeapons;
+    #endregion
 };
 
 

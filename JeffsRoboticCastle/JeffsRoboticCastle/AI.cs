@@ -827,7 +827,9 @@ class AISetVelocityNode : AIActionNode
     }
     public override void execute(Character body)
     {
-        body.setTargetVelocity(this.desiredVelocity);
+        //body.setTargetVelocity(this.desiredVelocity);
+        body.setTargetVX(this.desiredVelocity[0]);
+        body.setTargetVY(this.desiredVelocity[1]);
         // run the next line of code
         base.execute(body);
     }
@@ -942,7 +944,7 @@ class AIChaseNode : AIGroupNode
     public AIChaseNode()
     {
         // move closer
-        AITargetDecisionNode leftTargetNode = new AITargetDecisionNode(-1, 0, 10000);
+        AITargetDecisionNode leftTargetNode = new AITargetDecisionNode(-1, 0, 1000000);
         // if the user is on the left, go left
         double[] v = new double[2]; v[0] = -10000; v[1] = 0;
         AISetVelocityNode goLeftNode1 = new AISetVelocityNode(v);

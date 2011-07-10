@@ -134,20 +134,17 @@ class Explosion : GameObject
         double dx = target.getCenter()[0] - this.getCenter()[0];
         double dy = target.getCenter()[1] - this.getCenter()[1];
         double distance = Math.Sqrt(dx * dx + dy * dy);
+        // prevent division by zero
         if (distance <= 0)
             distance = 1;
         double[] accel = new double[2];
         double accelScale = this.getKnockbackAccel() / distance;
         accel[0] = dx * accelScale;
         accel[1] = dy * accelScale;
+        // error checking
         newStun.setAccel(accel);
         // apply the stun
         target.applyStun(newStun);
-        //target.takeDamage(this.damagePerSec, numSeconds);
-        //if (this.stunFraction < 1)
-        //    target.scaleTimeMultiplier(1 - this.stunFraction);
-        //else
-        //    target.scaleTimeMultiplier(0);
         Character myOwner = this.getOwner();
         if (myOwner != null)
         {
@@ -162,6 +159,7 @@ class Explosion : GameObject
     public void degrade(double scale)
     {
         this.duration *= scale;
+        this.knockbackAccel *= scale;
         this.templateStun.degrade(scale);
         //this.damagePerSec *= scale;
         //this.stunFraction *= scale;

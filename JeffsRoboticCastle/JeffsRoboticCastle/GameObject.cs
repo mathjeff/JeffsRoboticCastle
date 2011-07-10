@@ -3,6 +3,7 @@ using System.Windows.Media.Imaging;
 using System;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Collections;
 
 // The WorldBox class represents a multidimensional rectangular prism.
 // Currently, it is two dimensions, which makes it a rectangle.
@@ -605,7 +606,7 @@ class GameObject
         }
         this.center = new double[2];
         this.velocity = new double[2];
-        this.timeMultiplier = 1;
+        this.resetTimeMultiplier();
         if (this.isStunnable())
             this.stuns = new System.Collections.Generic.Dictionary<Explosion, Stun>(1);
         //this.activations = new System.Collections.Generic.List<int>();
@@ -1065,13 +1066,14 @@ class GameObject
             }
         }
     }
-    public void processStuns(double numSeconds)
+    public virtual void processStuns(double numSeconds)
     {
         if (this.stuns != null)
         {
             this.resetTimeMultiplier();
             double duration;
             System.Collections.ArrayList finishedStuns = new System.Collections.ArrayList(1);
+
             // adjust the time multiplier and take damage
             foreach (Stun currentStun in this.stuns.Values)
             {
@@ -1081,9 +1083,10 @@ class GameObject
                 if (currentStun.isFinished(numSeconds))
                     finishedStuns.Add(currentStun);
             }
+
             // accelerate
             double[] velocity = this.getVelocity();
-            double multiplier = this.getTimeMultiplier() * numSeconds;
+            double multiplier = numSeconds;
             foreach (Stun currentStun in this.stuns.Values)
             {
                 velocity[0] += currentStun.getAccel()[0] * multiplier;
@@ -1108,15 +1111,19 @@ class GameObject
     }
     public double getTimeMultiplier()
     {
-        return this.timeMultiplier;
+        return this.slowerTimeMultiplier * this.fasterTimeMultiplier;
+        //return this.timeMultiplier;
     }
     public void scaleTimeMultiplier(double scale)
     {
-        this.timeMultiplier *= scale;
+        this.fasterTimeMultiplier = Math.Max(this.fasterTimeMultiplier, scale);
+        this.slowerTimeMultiplier = Math.Min(this.slowerTimeMultiplier, scale);
+        //this.timeMultiplier *= scale;
     }
     public void resetTimeMultiplier()
     {
-        this.timeMultiplier = 1;
+        this.slowerTimeMultiplier = this.fasterTimeMultiplier = 1;
+        //this.timeMultiplier = 1;
     }
     // finds the object that is closest to this one, among objects in the candidate list
     public GameObject findClosest(System.Collections.Generic.List<GameObject> candidates)
@@ -1140,6 +1147,10 @@ class GameObject
         return 0;
     }
     //public System.Collections.Generic.List<int> activations;
+    public System.Collections.Generic.IEnumerable<Stun> getStuns()
+    {
+        return this.stuns.Values;
+    }
     
 // private
 	// location
@@ -1162,7 +1173,8 @@ class GameObject
     double hitpoints;
     double maxHitpoints;
     // When the GameObject is inside a time bubble, the timeMultiplier gives the ratio of local time to world time. Larger numbers are faster times
-    double timeMultiplier;
+    double fasterTimeMultiplier;
+    double slowerTimeMultiplier;
     System.Collections.Generic.Dictionary<Explosion, Stun> stuns;
     MatrixTransform renderTransform;
     bool facingLeft;

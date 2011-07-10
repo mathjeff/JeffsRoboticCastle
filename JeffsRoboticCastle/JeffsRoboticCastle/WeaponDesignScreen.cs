@@ -13,6 +13,16 @@ class WeaponDesignScreen : MenuScreen
     {
         this.initialize(c, screenSize);
     }
+    public override void initialize(Canvas c, double[] screenSize)
+    {
+        // setup drawing
+        base.initialize(c, screenSize);
+        this.setBackgroundBitmap(ImageLoader.loadImage("blueprint.png"));
+        this.addSubviews();
+        this.setupWeaponFactory();
+        //this.fillInValues();
+        this.quickBuildWeapon();
+    }
     public void setPlayer(Player subject)
     {
         this.player = subject;
@@ -29,18 +39,14 @@ class WeaponDesignScreen : MenuScreen
             this.templateWeapon.resetCooldown();
         }
     }
+    public void setupWeaponFactory()
+    {
+        this.weaponFactory = new WeaponFactory();
+        this.weaponFactory.addDefaultWeapons();
+    }
     public void update()
     {
         this.currentMoney.Content = this.player.getMoney().ToString();
-    }
-    public override void initialize(Canvas c, double[] screenSize)
-    {
-        // setup drawing
-        base.initialize(c, screenSize);
-        this.setBackgroundBitmap(ImageLoader.loadImage("blueprint.png"));
-        this.addSubviews();
-        //this.fillInValues();
-        this.quickBuildWeapon();
     }
     public override void KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
@@ -80,8 +86,8 @@ class WeaponDesignScreen : MenuScreen
 
         // make the world
         List<Weapon> demoWeapons = new List<Weapon>();
-        demoWeapons.Add(new Weapon(0));
-        demoWeapons.Add(new Weapon(1));
+        demoWeapons.Add(this.weaponFactory.makeWeapon(0));
+        demoWeapons.Add(this.weaponFactory.makeWeapon(1));
         this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 1, demoWeapons);
         
         // make the player
@@ -412,6 +418,12 @@ class WeaponDesignScreen : MenuScreen
         timeMultiplier = new TextBox();
         addControl(timeMultiplier, getLeft(damagePerSecond), getBottom(damagePerSecond) + verticalSpacing, labelWidth, labelHeight);
 
+        Label ammoDrainLabel = new Label();
+        ammoDrainLabel.Content = "Ammo Drain per Sec";
+        //addControl(ammoDrainLabel, getLeft(damagePerSecondLabel), getBottom(timeMultiplierLabel) + verticalSpacing, labelWidth, labelHeight);
+        ammoDrain = new TextBox();
+        //addControl(ammoDrain, getLeft(damagePerSecond), getBottom(timeMultiplier) + verticalSpacing, labelWidth, labelHeight);
+
         Label stunDurationLabel = new Label();
         stunDurationLabel.Content = "Duration";
         addControl(stunDurationLabel, getLeft(damagePerSecondLabel), getBottom(timeMultiplierLabel) + verticalSpacing, labelWidth, labelHeight);
@@ -419,13 +431,6 @@ class WeaponDesignScreen : MenuScreen
         addControl(stunDuration, getLeft(damagePerSecond), getBottom(timeMultiplier) + verticalSpacing, labelWidth, labelHeight);
 
 
-
-
-        /*
-        // attributes of the stun
-        TextBox timeMultiplier;
-        TextBox damagePerSecond;
-        TextBox duration;*/
 
         Button quickBuildWeaponButton = new Button();
         quickBuildWeaponButton.Click += new RoutedEventHandler(quickBuildWeapon);
@@ -537,6 +542,8 @@ class WeaponDesignScreen : MenuScreen
             timeMultiplier.Text = "1";
         if (damagePerSecond.Text == "")
             damagePerSecond.Text = "1";
+        if (ammoDrain.Text == "")
+            ammoDrain.Text = "0";
         if (stunDuration.Text == "")
             stunDuration.Text = "0";
     }
@@ -549,7 +556,7 @@ class WeaponDesignScreen : MenuScreen
         this.prebuildWeapon(this.quickbuildWeaponIndex);
         this.weaponCost.Content = templateWeapon.getCost().ToString();
         this.quickbuildWeaponIndex++;
-        if (this.quickbuildWeaponIndex > 9)
+        if (this.quickbuildWeaponIndex >= this.weaponFactory.getNumWeapons())
             quickbuildWeaponIndex = 0;
     }
     // this gets called when the user requests to try out the weapon
@@ -640,13 +647,16 @@ class WeaponDesignScreen : MenuScreen
         Stun templateStun = new Stun();
         templateStun.setTimeMultiplier(parseDouble(timeMultiplier));
         templateStun.setDamagePerSecond(parseDouble(damagePerSecond));
+        templateStun.setAmmoDrain(parseDouble(ammoDrain));
         templateStun.setDuration(parseDouble(stunDuration));
         templateExplosion.setTemplateStun(templateStun);
     }
     // create set text fields' values to the values for the given weapon type
     void prebuildWeapon(int type)
     {
-        this.templateWeapon = new Weapon(type);
+        WeaponFactory factory = new WeaponFactory();
+        factory.addDefaultWeapons();
+        this.templateWeapon = factory.makeWeapon(type);
         this.updateFieldsFromWeapon();
         this.costUpdated = true;
     }
@@ -699,6 +709,7 @@ class WeaponDesignScreen : MenuScreen
         Stun templateStun = templateExplosion.getTemplateStun();
         timeMultiplier.Text = templateStun.getTimeMultiplier().ToString();
         damagePerSecond.Text = templateStun.getDamagePerSecond().ToString();
+        ammoDrain.Text = templateStun.getAmmoDrain().ToString();
         stunDuration.Text = templateStun.getDuration().ToString();
 
         // now update anything else that might need it
@@ -759,8 +770,11 @@ class WeaponDesignScreen : MenuScreen
 
     // attributes of the stun
     TextBox timeMultiplier;
+    TextBox ammoDrain;
     TextBox damagePerSecond;
     TextBox stunDuration;
 
     Weapon templateWeapon;
+
+    WeaponFactory weaponFactory;
 }

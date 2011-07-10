@@ -19,13 +19,6 @@ class WorldLoader
     {
         // setup a canvas to put the world on, for the purpose of cropping
         this.worldCanvas = canvas;
-        /*this.worldCanvas = new Canvas();
-        this.worldCanvas.Width = screenSize[0];
-        this.worldCanvas.Height = screenSize[1];
-        this.worldCanvas.RenderTransform = new TranslateTransform(screenPosition[0], screenPosition[1]);
-        this.worldCanvas.ClipToBounds = true;
-        this.gameCanvas.Children.Add(worldCanvas);
-        */
         this.enemyWeaponChoices = possibleEnemyWeapons;
         // setup machinery to make it fast to run
         this.blockSize = new double[2];
@@ -38,9 +31,8 @@ class WorldLoader
         terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 2;
         terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 2;
         this.worldDimensions = new double[2];
-        worldDimensions[0] = 6000 + 4500 * levelNumber;
+        worldDimensions[0] = 6000 + 2000 * levelNumber;
         worldDimensions[1] = 1600;
-        //this.dimensionsOfRealityBubble = Math.Max(screenSize[0], screenSize[1]) * 2;
         // make the world
         this.world = new World(worldCanvas, screenSize, terrainActiveDimensions);
         // Inform the world who it needs to tell whenever something moves
@@ -404,20 +396,20 @@ class WorldLoader
         while (x < worldDimensions[0])
         {
             // choose the enemy's location
-            x += (4500 * generator.NextDouble() * generator.NextDouble() + 600) / (levelNumber + 1);
+            x += (9000 * generator.NextDouble() * generator.NextDouble() + 300) / (levelNumber + 1);
             //y = worldDimensions[1] * generator.NextDouble();
             for (y = blockSize[1] * generator.NextDouble(); y < worldDimensions[1] / 2; y += 1000)
             {
                 location = new double[2]; location[0] = x; location[1] = y;
                 // choose the enemy's type
                 if (levelNumber > 0)
-                    type = generator.Next(levelNumber);
+                    type = generator.Next(levelNumber / 2 + 1);
                 else
                     type = 0;
                 // make the enemy
                 Enemy tempEnemy = new Enemy(location, type);
                 // give the enemy a bunch of weapons
-                numWeapons = (int)((levelNumber + 1) / 2);
+                numWeapons = (int)((levelNumber + 3) / 4);
                 for (i = 0; i < numWeapons; i++)
                 {
                     int index = generator.Next(enemyWeaponChoices.Count);

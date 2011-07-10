@@ -85,64 +85,91 @@ class WorldScreen : Screen
         // jump if possible
         this.player.jump();
         // float upward if possible
-        double[] newV = this.player.getTargetVelocity();
-        newV[1] = 20000;
-        this.player.setTargetVelocity(newV);
+        this.player.setTargetVY(10000);
+        //double[] newV = this.player.getTargetVelocity();
+        //newV[1] = 20000;
+        //this.player.setTargetVelocity(newV);
     }
     public void stopMovingPlayerUp()
     {
-        double[] v = this.player.getTargetVelocity();
+        double? v = this.player.getTargetVY();
+        if ((v != null) && (v > 0))
+        {
+            this.player.setTargetVY(null);
+        }
+        /*double[] v = this.player.getTargetVelocity();
         if (v[1] > 0)
         {
             v[1] = 0;
             this.player.setTargetVelocity(v);
-        }
+        }*/
     }
     public void movePlayerDown()
     {
-        // float upward if possible
-        double[] newV = this.player.getTargetVelocity();
-        newV[1] = -2000;
-        this.player.setTargetVelocity(newV);
+        this.player.setTargetVY(-2000);
+        // float downward if possible
+        //double[] newV = this.player.getTargetVelocity();
+        //newV[1] = -2000;
+        //this.player.setTargetVelocity(newV);
     }
     public void stopMovingPlayerDown()
     {
-        double[] v = this.player.getTargetVelocity();
+        double? v = this.player.getTargetVY();
+        if ((v != null) && (v < 0))
+        {
+            this.player.setTargetVY(null);
+        }
+        /*double[] v = this.player.getTargetVelocity();
         if (v[1] < 0)
         {
             v[1] = 0;
             this.player.setTargetVelocity(v);
-        }
+        }*/
     }
     public void movePlayerLeft()
     {
+        this.player.setTargetVX(-2000);
+        /*
         double[] newV = this.player.getTargetVelocity();
         newV[0] = -10000;
         this.player.setTargetVelocity(newV);
+        */
     }
     public void stopMovingPlayerLeft()
     {
-        double[] v = this.player.getTargetVelocity();
+        double? v = this.player.getTargetVX();
+        if ((v != null) && (v < 0))
+        {
+            this.player.setTargetVX(0);
+        }
+        /*double[] v = this.player.getTargetVelocity();
         if (v[0] < 0)
         {
             v[0] = 0;
             this.player.setTargetVelocity(v);
-        }
+        }*/
     }
     public void movePlayerRight()
     {
-        double[] newV = this.player.getTargetVelocity();
+        this.player.setTargetVX(2000);
+        /*double[] newV = this.player.getTargetVelocity();
         newV[0] = 10000;
         this.player.setTargetVelocity(newV);
+        */
     }
     public void stopMovingPlayerRight()
     {
-        double[] v = this.player.getTargetVelocity();
+        double? v = this.player.getTargetVX();
+        if ((v != null) && (v > 0))
+        {
+            this.player.setTargetVX(0);
+        }
+        /*double[] v = this.player.getTargetVelocity();
         if (v[0] > 0)
         {
             v[0] = 0;
             this.player.setTargetVelocity(v);
-        }
+        }*/
     }
     public override void KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {

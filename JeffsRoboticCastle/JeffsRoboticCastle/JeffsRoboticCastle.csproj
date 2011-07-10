@@ -124,6 +124,7 @@
     <Compile Include="Stun.cs" />
     <Compile Include="Weapon.cs" />
     <Compile Include="WeaponDesignScreen.cs" />
+    <Compile Include="WeaponFactory.cs" />
     <Compile Include="WeaponGridDisplay.cs" />
     <Compile Include="WeaponStatusDisplay.cs" />
     <Compile Include="World.cs" />

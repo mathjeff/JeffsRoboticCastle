@@ -25,8 +25,10 @@ class Stun
         this.creator = original.creator;
         this.timeMultiplier = original.timeMultiplier;
         this.damagePerSecond = original.damagePerSecond;
+        this.ammoDrainedPerSec = original.ammoDrainedPerSec;
         this.duration = original.duration;
     }
+
     public void setCreator(Explosion value)
     {
         this.creator = value;
@@ -35,6 +37,7 @@ class Stun
     {
         return this.creator;
     }
+
     public void setTimeMultiplier(double value)
     {
         this.timeMultiplier = value;
@@ -71,6 +74,14 @@ class Stun
     {
         return Math.Min(this.duration, numSeconds);
     }
+    public void setAmmoDrain(double ammoPerSec)
+    {
+        this.ammoDrainedPerSec = ammoPerSec;
+    }
+    public double getAmmoDrain()
+    {
+        return this.ammoDrainedPerSec;
+    }
     public bool isFinished(double numSeconds)
     {
         this.duration -= numSeconds;
@@ -91,6 +102,7 @@ class Stun
     double damagePerSecond;
     double duration;
     double[] accel;
+    double ammoDrainedPerSec;
     //bool isNew; // true for the first tick and false after that
     //System.Collections.Generic.Dictionary<Explosion, Stun> stuns;
 };

@@ -38,7 +38,7 @@ class LevelSelectionScreen : MenuScreen
         */
         //System.Windows.Controls.ListView
         Label levelLabel = new Label();
-        levelLabel.Content = "Level (1-5):";
+        levelLabel.Content = "Level (1-9):";
         this.addControl(levelLabel, 140, 100, 100, 25);
         this.levelBox = new TextBox();
         levelBox.Text = "1";

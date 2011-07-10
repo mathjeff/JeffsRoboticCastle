@@ -22,6 +22,7 @@ class Player : Character
         this.setShape(new GameRectangle(30, 43));
         BitmapImage startingImage = ImageLoader.loadImage("player1.png");
         this.setGravity(1000);
+        this.setJumpSpeed(900);
         this.setBitmap(startingImage);
         double[] accel = new double[2]; accel[0] = 600; accel[1] = 0;
         this.setMaxAccel(accel);

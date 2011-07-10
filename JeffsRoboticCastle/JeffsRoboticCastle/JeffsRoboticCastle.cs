@@ -16,19 +16,16 @@ class JeffsRoboticCastle
 
         this.mainCanvas = newCanvas;
         this.allEnemyWeaponChoices = new List<Weapon>();
+        WeaponFactory factory = new WeaponFactory();
+        factory.addDefaultWeapons();
         int i;
-        for (i = 0; i < 10; i++)
+        for (i = 0; i < factory.getNumWeapons(); i++)
         {
-            this.allEnemyWeaponChoices.Add(new Weapon(i));
+            this.allEnemyWeaponChoices.Add(factory.makeWeapon(i));
         }
         this.currentEnemyWeaponChoices = new List<Weapon>();
         this.setupPlayer();
 	    this.setupDrawing(screenWidth, screenHeight);
-	    //this.userCamera = new Camera(RectangleF(0, 0, (float)windowWidth, (float)windowHeight), RectangleF(0, 0, (float)windowWidth, (float)windowHeight));
-	    //this.setupWorld(1);
-        //this.setupCharacterStatusDisplay();
-        //this.audioPlayer = new AudioPlayer(newCanvas);
-        //this.audioPlayer.setSoundFile("09 Who Am I Living For_.m4a");
     }
     // general game control
     public bool isWorldRunning()
@@ -87,7 +84,7 @@ class JeffsRoboticCastle
                 {
                     // if there are still more levels then create the new level
                     this.player.resetForLevel();
-                    this.player.addMoney(1600);
+                    this.player.addMoney(800);
                     this.levelNumber++;
                     this.setupWorld(levelNumber);
                 }
@@ -103,75 +100,16 @@ class JeffsRoboticCastle
                     this.levelNumber = levelSelectionScreen.getChosenLevelNumber();
                     if (levelNumber < 1)
                         levelNumber = 1;
-                    if (levelNumber > 5)
-                        levelNumber = 5;
+                    if (levelNumber > 9)
+                        levelNumber = 9;
                     this.setupWorld(this.levelNumber);
-                    this.player.addMoney(this.levelNumber * 1600);
+                    this.player.addMoney((this.levelNumber + 1) * 800);
                 }
             }
         }
         // transition to the next screen if necessary
         this.setCurrentScreen(newScreen);
     }
-    // user commands
-	// movement
-    // controls for the player
-    /*
-    public void playerJump()
-    {
-        this.player.jump();
-    }
-    public void movePlayerLeft()
-    {
-        double[] newV = new double[2]; newV[0] = -10000; newV[1] = 0;
-        this.player.setTargetVelocity(newV);
-    }
-
-    public void movePlayerRight()
-    {
-        double[] newV = new double[2]; newV[0] = 10000; newV[1] = 0;
-        this.player.setTargetVelocity(newV);
-    }
-
-    public void stopMovingPlayerLeft()
-    {
-	    if (this.player.getTargetVelocity()[0] < 0)
-		    this.player.setTargetVelocity(new double[2]);
-    }
-    public void stopMovingPlayerRight()
-    {
-	    if (this.player.getTargetVelocity()[0] > 0)
-		    this.player.setTargetVelocity(new double[2]);
-    }
-    // weapons
-    public void selectWeapon1()
-    {
-        this.player.selectWeaponSubtreeAtIndex(0);
-    }
-    public void selectWeapon2()
-    {
-        this.player.selectWeaponSubtreeAtIndex(1);
-    }
-    public void selectWeapon3()
-    {
-        this.player.selectWeaponSubtreeAtIndex(2);
-    }
-    public void selectWeapon4()
-    {
-        this.player.selectWeaponSubtreeAtIndex(3);
-    }
-    */
-/*    public void cyclePlayerWeaponForward()
-    {
-	    //this.player.cycleWeaponForward();
-        this.player.selectRightWeaponTree();
-    }
-    public void cyclePlayerWeaponBackward()
-    {
-	    //this.player.cycleWeaponBackward();
-        this.player.selectLeftWeaponTree();
-    }
-*/    
     public void resetPlayerWeapon()
     {
         this.player.gotoWeaponTreeRoot();
@@ -189,18 +127,6 @@ class JeffsRoboticCastle
         screenSize[0] = screenWidth;
         screenSize[1] = screenHeight;
         double[] screenPosition = new double[2];
-        /*
-        // determine the position for the world
-        this.worldWindowPosition = new double[2];
-        this.worldWindowPosition[0] = 0;
-        this.worldWindowPosition[1] = 200;
-        // determine the size for the world
-        this.worldWindowSize = new double[2];
-        this.worldWindowSize[0] = screenWidth - worldWindowPosition[0];
-        this.worldWindowSize[1] = screenHeight - worldWindowPosition[1];
-        // create a screen to hold the world and heads-up-display
-        this.worldCanvas = new Canvas();
-        */
         this.worldScreen = new WorldScreen(this.mainCanvas, screenPosition, screenSize);
         // level selection screen letting the user jump to another level
         levelSelectionScreen = new LevelSelectionScreen(this.mainCanvas, screenSize);
@@ -243,7 +169,7 @@ class JeffsRoboticCastle
         }
         // add a few new weapons for the enemies to use
         Random generator = new Random();
-        while (currentEnemyWeaponChoices.Count < levelNum * 2)
+        while ((currentEnemyWeaponChoices.Count < levelNum) && (newWeaponChoices.Count > 0))
         {
             int index = generator.Next(newWeaponChoices.Count);
             currentEnemyWeaponChoices.Add(newWeaponChoices[index]);
@@ -265,23 +191,7 @@ class JeffsRoboticCastle
                 this.currentScreen.show();
         }
     }
-    /*void setupCharacterStatusDisplay()
-    {
-        double[] statusLocation = new double[2];
-        statusLocation[0] = 0;
-        statusLocation[1] = 0;
-        double[] statusSize = new double[2];
-        statusSize[0] = this.screenSize[0];
-        statusSize[1] = this.worldWindowPosition[1];
-        statusDisplay = new CharacterStatusDisplay(this.worldScreen.getCanvas(), statusLocation, statusSize);
-    }*/
     Canvas mainCanvas;
-    /*
-    double[] worldWindowPosition;
-    double[] worldWindowSize;
-    Canvas worldCanvas;
-    CharacterStatusDisplay statusDisplay;
-    */
     double[] screenSize;
     //Camera userCamera;
 	WorldLoader worldLoader;
