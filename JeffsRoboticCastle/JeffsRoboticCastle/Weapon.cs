@@ -56,6 +56,8 @@ class Weapon
         this.cooldownTime = other.cooldownTime;
         this.switchToTime = other.switchToTime;
         this.switchFromTime = other.switchFromTime;
+        this.reloadTime = other.reloadTime;
+        this.ammoReloadRate = other.ammoReloadRate;
         this.automatic = other.automatic;
         this.triggerIsSticky = other.triggerIsSticky;
         this.fireWhileInactive = other.fireWhileInactive;
@@ -95,26 +97,17 @@ class Weapon
         double warmup = Math.Abs(warmupTime);
         double fireDuration = Math.Abs(warmupTime) + Math.Abs(cooldownTime) + 0.001;
         tempCost *= Math.Pow(.75, warmup / fireDuration);
-        //tempCost *= Math.Pow(.5, warmup / fireDuration);
-        //tempCost *= (1 + 1 / (Math.Abs(warmupTime) + 0.001));
         tempCost *= (1 + 0.3 / fireDuration);
-        //tempCost *= (1 + 0.1 / (Math.Abs(switchToTime) + 0.001));
-        //tempCost *= (1 + 0.1 / (Math.Abs(switchFromTime) + 0.001));
         if (fireWhileInactive)
             tempCost *= 1.2;
         if (cooldownWhileInactive)
-            tempCost *= 1.5;
+            tempCost *= 1.2;
         if (rechargeWhileInactive)
             tempCost *= 1.9;
 
         // attributes of the projectile that affect the cost
         tempCost *= (1 + Math.Abs(templateProjectile.getCenter()[0]) / 400);
         tempCost *= (1 + Math.Abs(templateProjectile.getCenter()[1]) / 400);
-        //tempCost *= (1 + templateProjectile.getShape().getWidth() / 150);
-        //tempCost *= (1 + templateProjectile.getShape().getHeight() / 150);
-        //tempCost *= (1 + templateProjectile.getRemainingFlightTime() / 5);
-        //tempCost *= (1 + 1 / (Math.Abs(templateProjectile.getPenetration() - 1) + 0.001));
-        //tempCost *= (1 + templateProjectile.getNumExplosionsRemaining() * 2);
         double penetration = templateProjectile.getPenetration();
         penetration *= penetration; // square it because it affects both explosion duration and damage
         if (penetration == 1)
@@ -179,15 +172,23 @@ class Weapon
     }
 
     // refills up to maxFraction of a box worth of ammo, and returns what fraction it filled up
-    public double refillAmmo(double maxFraction)
+    public double refillAmmoFraction(double maxFraction)
     {
-        double difference = this.maxAmmo - currentAmmo;
-        double increase = Math.Min(difference, maxFraction * this.ammoPerBox);
-        this.currentAmmo += increase;
+        // refill the ammo
+        double increase = this.refillAmmoAmount(maxFraction * this.ammoPerBox);
+        // figure out how much of the box remains
         if (this.ammoPerBox != 0)
             return increase / this.ammoPerBox;
         else
             return 0;
+    }
+    // refills up to numShotsToAdd units of ammo, and returns how much was added
+    public double refillAmmoAmount(double numShotsToAdd)
+    {
+        double previousAmmo = this.currentAmmo;
+        this.currentAmmo = Math.Min(this.currentAmmo + numShotsToAdd, this.maxAmmo);
+        double difference = this.maxAmmo - previousAmmo;
+        return difference;
     }
     public void resetCooldown()
     {
@@ -223,6 +224,22 @@ class Weapon
     public double getAmmoPerBox()
     {
         return this.ammoPerBox;
+    }
+    public void setReloadTime(double numSeconds)
+    {
+        this.reloadTime = numSeconds;
+    }
+    public double getReloadTime()
+    {
+        return this.reloadTime;
+    }
+    public void setAmmoReloadRate(double numShotsPerSec)
+    {
+        this.ammoReloadRate = numShotsPerSec;
+    }
+    public double getAmmoReloadRate()
+    {
+        return this.ammoReloadRate;
     }
     public void setWarmupTime(double numSeconds)
     {
@@ -429,12 +446,12 @@ class Weapon
 			    }		 
             }
         }
-        if (this.currentAmmo < this.maxAmmo)
+        if (this.currentAmmo < 1)
         {
             if (active || this.rechargeWhileInactive)
             {
                 busy = true;    // keep track of whether the weapon is doing anything
-                this.currentAmmo = Math.Min(this.currentAmmo + numSeconds * this.ammoRechargeRate, this.maxAmmo);
+                this.currentAmmo = Math.Min(this.currentAmmo + numSeconds * this.ammoRechargeRate, 1);
                 if (currentAmmo < 0)
                     currentAmmo = 0;
             }
@@ -571,6 +588,8 @@ class Weapon
 	double cooldownTime;
 	double switchToTime;
 	double switchFromTime;
+    double reloadTime;
+    double ammoReloadRate;
     bool automatic;
     bool triggerIsSticky;
     bool fireWhileInactive; // Tells whether this weapon can fire without being the current weapon

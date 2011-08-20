@@ -204,20 +204,16 @@ class WorldScreen : Screen
         }
         if (e.Key == Key.P)
         {
-            //System.Diagnostics.Trace.WriteLine("trigger pressed");
-            //this.game.playerPressTrigger(true);
             this.selectWeapon2();
         }
         if (e.Key == Key.OemQuotes)
         {
-            //this.game.cyclePlayerWeaponForward();
             this.selectWeapon3();
         }
         if (e.Key == Key.Space)
         {
-            //this.togglePause();
-            this.resetPlayerWeapon();
-            //this.game.playerPressTrigger(true);
+            //this.resetPlayerWeapon();
+            this.reloadPlayerAmmo();
         }
         if ((e.Key == Key.Escape) && (this.isEscapeEnabled()))
         {
@@ -294,27 +290,31 @@ class WorldScreen : Screen
     }
     public void selectWeapon2()
     {
-        Player convertedPlayer = (Player)player;
+        Player convertedPlayer = (Player)(this.player);
         if (convertedPlayer != null)
             convertedPlayer.selectWeaponSubtreeAtIndex(1);
     }
     public void selectWeapon3()
     {
-        Player convertedPlayer = (Player)player;
+        Player convertedPlayer = (Player)(this.player);
         if (convertedPlayer != null)
             convertedPlayer.selectWeaponSubtreeAtIndex(2);
     }
     public void selectWeapon4()
     {
-        Player convertedPlayer = (Player)player;
+        Player convertedPlayer = (Player)(this.player);
         if (convertedPlayer != null)
             convertedPlayer.selectWeaponSubtreeAtIndex(3);
     }
     public void resetPlayerWeapon()
     {
-        Player convertedPlayer = (Player)player;
+        Player convertedPlayer = (Player)(this.player);
         if (convertedPlayer != null)
             convertedPlayer.gotoWeaponTreeRoot();
+    }
+    public void reloadPlayerAmmo()
+    {
+        this.player.startReloadingAmmo();
     }
     public void playerPressTrigger(bool pressed)
     {

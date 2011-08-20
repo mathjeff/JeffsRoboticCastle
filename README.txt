@@ -14,5 +14,6 @@ w-        jump
 l-        select the group of weapons at the top-left of the screen. If there is only one weapon there, then your current weapon will change
 p-        select the group of weapons at the top-middle of the screen. If there is only one weapon there, then your current weapon will change
 '-        select the group of weapons at the the top-right of the screen. If there is only one weapon there, then your current weapon will change
-spacebar- view all weapons so you can choose a new weapon
+spacebar- reload some ammo
+Enter-    pause/unpause
 alt-f4-   quit

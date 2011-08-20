@@ -15,7 +15,7 @@ public
                 startingImage = ImageLoader.loadImage("archer.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(26, 41));
-                accel = new double[2]; accel[0] = 540; accel[1] = 0;
+                accel = new double[2]; accel[0] = 510; accel[1] = 0;
                 this.setMaxAccel(accel);
                 this.setDragCoefficient(3);
                 this.enemyType = type;
@@ -25,19 +25,6 @@ public
                 this.setContactDamagePerSecond(0);
                 break;
             case 1:
-                startingImage = ImageLoader.loadImage("horseman.png");
-	            this.setCenter(location);
-                this.setShape(new GameRectangle(80, 93));
-                accel = new double[2]; accel[0] = 360; accel[1] = 0;
-	            this.setMaxAccel(accel);
-	            this.setDragCoefficient(1);
-	            this.enemyType = type;
-                this.setGravity(1000);
-                this.initializeHitpoints(11);
-                this.setJumpSpeed(800);
-                this.setContactDamagePerSecond(0);
-                break;
-            case 2:
                 startingImage = ImageLoader.loadImage("eagle.png");
                 this.setCenter(location);
                 this.setShape(new GameRectangle(56, 43));
@@ -48,6 +35,19 @@ public
                 this.setGravity(75);
                 this.initializeHitpoints(9);
                 this.setJumpSpeed(500);
+                this.setContactDamagePerSecond(0);
+                break;
+            case 2:
+                startingImage = ImageLoader.loadImage("horseman.png");
+                this.setCenter(location);
+                this.setShape(new GameRectangle(80, 93));
+                accel = new double[2]; accel[0] = 360; accel[1] = 0;
+                this.setMaxAccel(accel);
+                this.setDragCoefficient(1);
+                this.enemyType = type;
+                this.setGravity(1000);
+                this.initializeHitpoints(11);
+                this.setJumpSpeed(800);
                 this.setContactDamagePerSecond(0);
                 break;
             case 3:

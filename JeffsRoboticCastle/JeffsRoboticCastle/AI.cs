@@ -58,24 +58,26 @@ class AI
 
             // Now check if there is an incoming projectile
             AICollisionDecisionNode dodgeNode1 = new AICollisionDecisionNode(3, 1, 0, 0.3);
-            //selectWeaponNode2.setNextNode(dodgeNode1);
             scanNode1.setRightChild(dodgeNode1);
             fireNode2.setNextNode(dodgeNode1);
             chaseNode1.setNextNode(dodgeNode1);
-            //selectWeaponNode1.setNextNode(dodgeNode1);
-            //selectWeaponNode2.setNextNode(dodgeNode1);
             // if the projectile is close in time, check whether it will miss laterally
             AICollisionDecisionNode dodgeNode2 = new AICollisionDecisionNode(3, 0, 1, 0);
             dodgeNode1.setLeftChild(dodgeNode2);
             AIDodgeNode dodgeNode3 = new AIDodgeNode();
             dodgeNode2.setLeftChild(dodgeNode3);
-            // else
             {
-                // If there is no incoming projectile, then chase the opponent
+                // If there is no incoming projectile, then check whether we have enough ammo
+                AIAmmoDecisionNode ammoNode1 = new AIAmmoDecisionNode();
+                dodgeNode1.setRightChild(ammoNode1);
+                dodgeNode2.setRightChild(ammoNode1);
+                AIReloadAmmoNode reloadNode1 = new AIReloadAmmoNode();
+                ammoNode1.setRightChild(reloadNode1);
+                // after checking whether we need to reload, chase the opponent
                 // If we're about to bump into a wall, jump
                 AICollisionDecisionNode obstacleDecisionNode1 = new AICollisionDecisionNode(1, 1, 0, 0.01);
-                dodgeNode1.setRightChild(obstacleDecisionNode1);
-                dodgeNode2.setRightChild(obstacleDecisionNode1);
+                ammoNode1.setLeftChild(obstacleDecisionNode1);
+                reloadNode1.setNextNode(obstacleDecisionNode1);
                 AICollisionDecisionNode obstacleDecisionNode2 = new AICollisionDecisionNode(1, 0, 1, 0.01);
                 obstacleDecisionNode1.setLeftChild(obstacleDecisionNode2);
                 AIPositionDecisionNode obstacleDecisionNode3 = new AIPositionDecisionNode(1, 0, -1, 40);
@@ -877,10 +879,22 @@ class AISelectWeaponNode : AIActionNode
     public override void execute(Character body)
     {
         body.cycleWeaponForward();
-        // run the next line of code
         base.execute(body);
     }
 // private
+}
+// An AIReloadAmmoNode will make the body reload ammo for the current weapon
+class AIReloadAmmoNode : AIActionNode
+{
+// public
+    public AIReloadAmmoNode()
+    {
+    }
+    public override void execute(Character body)
+    {
+        body.startReloadingAmmo();
+        base.execute(body);
+    }
 }
 ////////////////////////////////////////////////////////////////////////// Grouping Nodes ////////////////////////////////////////////////////////////////////////////
 // An AIGroupNode is a bunch of AINodes that are all put together for convenience

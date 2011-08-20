@@ -80,40 +80,44 @@ class Character : GameObject
     // accelerate toward the desired velocity
     public override void updateVelocity(double numSeconds)
     {
-        // First update velocity based on any accelerations from within the character
-	    // Compute desired acceleration
-	    double[] v = this.getVelocity();
-	    double accelX = 0;
-        if (this.targetVX != null)
-            accelX = (double)this.targetVX - v[0];
-        double accelY = 0;
-        if (this.targetVY != null)
-            accelY = (double)this.targetVY - v[0];
-        // Determine maximum acceleration
-	    double maxAccelX = numSeconds * this.maxAccel[0];
-	    double maxAccelY = numSeconds * this.maxAccel[1];
-	    // Compute ratio of desired to max accelerations
-	    double xAccelFrac = 0;
-	    if (maxAccelX != 0)
-		    xAccelFrac = accelX / maxAccelX;
-	    double yAccelFrac = 0;
-	    if (maxAccelY != 0)
-		    yAccelFrac = accelY / maxAccelY;
-	    double magnitude = Math.Sqrt(xAccelFrac * xAccelFrac + yAccelFrac * yAccelFrac);
-	    if (magnitude <= 1)
-	    {
-            if ((maxAccelX != 0) && (this.targetVX != null))
-                v[0] = (double)this.targetVX;
-            if ((maxAccelY != 0) && (this.targetVY != null))
-                v[1] = (double)this.targetVY;
-	    }
-	    else
-	    {
-		    // The set of maximum accelerations may be an oval
-		    v[0] += (float)(xAccelFrac * maxAccelX / magnitude);
-		    v[1] += (float)(yAccelFrac * maxAccelY / magnitude);
-	    }
-	    this.setVelocity(v);
+        // when reloading, the player gets no control
+        if (!this.isReloadingAmmo())
+        {
+            // First update velocity based on any accelerations from within the character
+            // Compute desired acceleration
+            double[] v = this.getVelocity();
+            double accelX = 0;
+            if (this.targetVX != null)
+                accelX = (double)this.targetVX - v[0];
+            double accelY = 0;
+            if (this.targetVY != null)
+                accelY = (double)this.targetVY - v[0];
+            // Determine maximum acceleration
+            double maxAccelX = numSeconds * this.maxAccel[0];
+            double maxAccelY = numSeconds * this.maxAccel[1];
+            // Compute ratio of desired to max accelerations
+            double xAccelFrac = 0;
+            if (maxAccelX != 0)
+                xAccelFrac = accelX / maxAccelX;
+            double yAccelFrac = 0;
+            if (maxAccelY != 0)
+                yAccelFrac = accelY / maxAccelY;
+            double magnitude = Math.Sqrt(xAccelFrac * xAccelFrac + yAccelFrac * yAccelFrac);
+            if (magnitude <= 1)
+            {
+                if ((maxAccelX != 0) && (this.targetVX != null))
+                    v[0] = (double)this.targetVX;
+                if ((maxAccelY != 0) && (this.targetVY != null))
+                    v[1] = (double)this.targetVY;
+            }
+            else
+            {
+                // The set of maximum accelerations may be an oval
+                v[0] += (float)(xAccelFrac * maxAccelX / magnitude);
+                v[1] += (float)(yAccelFrac * maxAccelY / magnitude);
+            }
+            this.setVelocity(v);
+        }
 
         // Now update velocity based on the physics of a projectile
         base.updateVelocity(numSeconds);
@@ -164,15 +168,18 @@ class Character : GameObject
             // make sure we're not hitting the ceiling
             if (this.collision.getCenter()[1] - this.collision.getShape().getHeight() / 2 + 0.00001 < this.getCenter()[1] + this.getShape().getHeight() / 2)
             {
-                // now jump
-                double[] newVelocity = new double[2];
-                if (this.isFacingRight())
-                    newVelocity[0] = this.getVelocity()[0] + this.jumpVelocity[0];
-                else
-                    newVelocity[0] = this.getVelocity()[0] - this.jumpVelocity[0];
-                newVelocity[1] = this.jumpVelocity[1];
-                this.setVelocity(newVelocity);
-                
+                // make sure we're not reloading
+                if (!this.isReloadingAmmo())
+                {
+                    // now jump
+                    double[] newVelocity = new double[2];
+                    if (this.isFacingRight())
+                        newVelocity[0] = this.getVelocity()[0] + this.jumpVelocity[0];
+                    else
+                        newVelocity[0] = this.getVelocity()[0] - this.jumpVelocity[0];
+                    newVelocity[1] = this.jumpVelocity[1];
+                    this.setVelocity(newVelocity);
+                }                
             }
 	    }
     }
@@ -202,26 +209,34 @@ class Character : GameObject
     #region Weapons
     public void pressTrigger(bool pressed)
     {
-	    if (this.weapons.Count > 0)
+        // the trigger cannot move while reloading
+        if (this.isReloadingAmmo())
+        {
+            return;
+        }
+        Weapon currentWeapon = this.getCurrentWeapon();
+	    if (currentWeapon != null)
 	    {
-		    this.weapons[this.currentWeaponIndex].pressTrigger(pressed);
+            currentWeapon.pressTrigger(pressed);
 	    }
     }
     public void cycleWeaponForward()
     {
-        this.currentWeaponIndex++;
-        if (this.currentWeaponIndex >= this.weapons.Count)
+        int newIndex = this.currentWeaponIndex + 1;
+        if (newIndex >= this.weapons.Count)
         {
-            this.currentWeaponIndex = 0;
+            newIndex = 0;
         }
+        this.setWeaponIndex(newIndex);
     }
     public void cycleWeaponBackward()
     {
-        this.currentWeaponIndex--;
-        if (this.currentWeaponIndex < 0)
+        int newIndex = currentWeaponIndex - 1;
+        if (newIndex < 0)
         {
-            this.currentWeaponIndex = this.weapons.Count - 1;
+            newIndex = this.weapons.Count - 1;
         }
+        this.setWeaponIndex(newIndex);
     }
     public Weapon getCurrentWeapon()
     {
@@ -303,6 +318,11 @@ class Character : GameObject
     }
     public void setWeaponIndex(int index)
     {
+        // make sure they're not reloading
+        if (this.isReloadingAmmo())
+        {
+            return;
+        }
         if (this.currentWeaponIndex != index)
         {
             Weapon currentWeapon = this.getCurrentWeapon();
@@ -315,23 +335,76 @@ class Character : GameObject
         }
     }
     // recharge some ammunition due to reaching an ammo box
-    public void refillSomeAmmo()
+    public void refillAmmoFromBox()
     {
         if (this.getNumWeapons() > 0)
         {
             // fill up the current weapon with the contents of the ammo box
             int index = 0;
-            double remainingAmmo = 1;
+            double remainingFraction = 1;
             Weapon weapon;
-            while ((index < this.getNumWeapons()) && (remainingAmmo >= 0))
+            while ((index < this.getNumWeapons()) && (remainingFraction > 0))
             {
                 // get the next weapon to refill
                 weapon = this.getCurrentWeaponShiftedByIndex(index);
                 // refill up to the maximum amount in the box and figure out how much is left over
-                remainingAmmo -= weapon.refillAmmo(remainingAmmo);
+                remainingFraction -= weapon.refillAmmoFraction(remainingFraction);
                 // move to the next weapon
                 index++;
             }
+        }
+    }
+    // update the timer keeping track of when the ammo is done being reloaded
+    public void reloadAmmo(double numSeconds)
+    {
+        Weapon currentWeapon = this.getCurrentWeapon();
+        if (currentWeapon != null)
+        {
+            if (this.reloadTimer > 0)
+            {
+                // figure out how much time we spend reloading
+                double reloadDuration = Math.Min(numSeconds * this.getTimeMultiplier(), reloadTimer);
+                // gain ammo accordingly
+                currentWeapon.refillAmmoAmount(currentWeapon.getAmmoReloadRate() * reloadDuration);
+                // keep track of how much time remains until we're done reloading
+                this.reloadTimer -= reloadDuration;
+            }
+        }
+    }
+    // starts reloading ammo, and when the reload time elapses, some ammo will be replenished
+    public void startReloadingAmmo()
+    {
+        // make sure the character isn't already reloading
+        if (this.isReloadingAmmo())
+        {
+            return;
+        }
+        Weapon currentWeapon = this.getCurrentWeapon();
+        // make sure the weapon exists
+        if (currentWeapon == null)
+        {
+            return;
+        }
+        // make sure the weapon isn't busy
+        if (currentWeapon.isWarmingUp() || currentWeapon.isCoolingDown())
+        {
+            return;
+        }
+        // release the trigger
+        currentWeapon.pressTrigger(false);
+        // keep track of when the reload will be done
+        this.reloadTimer = currentWeapon.getReloadTime();
+    }
+    // returns true iff the player is in the process of reloading ammo
+    public bool isReloadingAmmo()
+    {
+        if (this.reloadTimer > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
     #endregion
@@ -499,6 +572,7 @@ class Character : GameObject
     double? targetVX;
     double? targetVY;
     double[] jumpVelocity;
+    double reloadTimer;
 	GameObject collision;	// Tells what this object is colliding with, or null.
 	System.Collections.Generic.List<Weapon> weapons;
 	int currentWeaponIndex;

@@ -376,9 +376,9 @@ class WorldLoader
             {
                 location = new double[2]; location[0] = x; location[1] = y;
                 this.addItem(new Painting(location, 1));
-                location[1] = 0;
-                this.addItem(new PickupItem(location));
             }
+            //location[1] = 0;
+            //this.addItem(new PickupItem(location));
         }
         // add paintings to display screenshots 
         for (x = 0; x < worldDimensions[0]; x += 500)
@@ -427,7 +427,7 @@ class WorldLoader
         }
 #endif
         // add decoratory critters
-        x = 0;
+        /* x = 0;
         while (x < worldDimensions[0])
         {
             // choose the critter's location
@@ -440,6 +440,7 @@ class WorldLoader
             location[1] = 0;
             this.addItem(new Painting(location, 2));
         }
+        */
 
         
         

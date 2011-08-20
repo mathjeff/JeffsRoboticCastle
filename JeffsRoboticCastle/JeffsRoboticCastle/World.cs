@@ -463,24 +463,24 @@ class World
     }
     public void timerTick(double numSeconds)
     {
-        // Must process AI before clearing collision flags because we only let it jump if it's on the ground
+        // Must process AI before clearing collision flags or after moving because we only let it jump if it's on the ground
         // Must clear collision flags before moving because moving will set the collision flags again
         // Should have projectiles find targets before moving
         // Should process explosions before processing death beacause explosions can cause death
         // Must process explosions before exploding projectiles because the explosions can explode other projectiles
         // Should process explosions before moving characters so that a detonated projectile will always do damage
 
-        this.projectilesFindTargets();
-        this.processAIs();
-       
+        this.projectilesFindTargets();       
         this.clearCollisionFlags();
 
         this.processExplosions(numSeconds);
 
         this.moveCharacters(numSeconds);
         this.moveProjectiles(numSeconds);
+        this.processAIs();
         
-        this.spawnProjectiles(numSeconds);        
+        this.spawnProjectiles(numSeconds);
+        this.reloadAmmo(numSeconds);
         
         this.processDeath(numSeconds);
         this.applyContactDamage(numSeconds);
@@ -696,6 +696,16 @@ class World
             }
 	    }
     }
+    // advance the timers of any Chararacter reloading ammo
+    void reloadAmmo(double numSeconds)
+    {
+	    // spawn new projectiles
+	    System.Collections.ArrayList projectiles = null;
+        foreach (Character tempCharacter in this.characters)
+        {
+            tempCharacter.reloadAmmo(numSeconds);
+        }
+    }
     // Explode any projetiles that are colliding or spent
     void explodeProjectiles(double numSeconds)
     {
@@ -829,7 +839,7 @@ class World
             {
                 if (collision.isAPickupItem() && character.intersects(collision))
                 {
-                    character.refillSomeAmmo();
+                    character.refillAmmoFromBox();
                     this.removePickupItem((PickupItem)collision);
                 }
             }
