@@ -81,7 +81,7 @@ class Character : GameObject
     public override void updateVelocity(double numSeconds)
     {
         // when reloading, the player gets no control
-        if (!this.isReloadingAmmo())
+        if (true) //!this.isReloadingAmmo())
         {
             // First update velocity based on any accelerations from within the character
             // Compute desired acceleration
@@ -169,17 +169,14 @@ class Character : GameObject
             if (this.collision.getCenter()[1] - this.collision.getShape().getHeight() / 2 + 0.00001 < this.getCenter()[1] + this.getShape().getHeight() / 2)
             {
                 // make sure we're not reloading
-                if (!this.isReloadingAmmo())
-                {
-                    // now jump
-                    double[] newVelocity = new double[2];
-                    if (this.isFacingRight())
-                        newVelocity[0] = this.getVelocity()[0] + this.jumpVelocity[0];
-                    else
-                        newVelocity[0] = this.getVelocity()[0] - this.jumpVelocity[0];
-                    newVelocity[1] = this.jumpVelocity[1];
-                    this.setVelocity(newVelocity);
-                }                
+                // now jump
+                double[] newVelocity = new double[2];
+                if (this.isFacingRight())
+                    newVelocity[0] = this.getVelocity()[0] + this.jumpVelocity[0];
+                else
+                    newVelocity[0] = this.getVelocity()[0] - this.jumpVelocity[0];
+                newVelocity[1] = this.jumpVelocity[1];
+                this.setVelocity(newVelocity);
             }
 	    }
     }
@@ -209,11 +206,6 @@ class Character : GameObject
     #region Weapons
     public void pressTrigger(bool pressed)
     {
-        // the trigger cannot move while reloading
-        if (this.isReloadingAmmo())
-        {
-            return;
-        }
         Weapon currentWeapon = this.getCurrentWeapon();
 	    if (currentWeapon != null)
 	    {
@@ -308,6 +300,13 @@ class Character : GameObject
         this.weapons.Add(newWeapon);
         newWeapon.setOwner(this);
     }
+    public IEnumerable<Weapon> Weapons
+    {
+        get
+        {
+            return this.weapons;
+        }
+    }
     public Weapon getWeaponAtIndex(int index)
     {
         return this.weapons[index];
@@ -318,15 +317,10 @@ class Character : GameObject
     }
     public void setWeaponIndex(int index)
     {
-        // make sure they're not reloading
-        if (this.isReloadingAmmo())
-        {
-            return;
-        }
         if (this.currentWeaponIndex != index)
         {
             Weapon currentWeapon = this.getCurrentWeapon();
-            if (currentWeapon.isWarmingUp() && !currentWeapon.canFireWhileInactive())
+            if (currentWeapon.isWarmingUp())
             {
                 // if the weapon can't fire while inactive and it is about to become inactive, cancel the firing
                 currentWeapon.resetCooldown();
@@ -335,78 +329,7 @@ class Character : GameObject
         }
     }
     // recharge some ammunition due to reaching an ammo box
-    public void refillAmmoFromBox()
-    {
-        if (this.getNumWeapons() > 0)
-        {
-            // fill up the current weapon with the contents of the ammo box
-            int index = 0;
-            double remainingFraction = 1;
-            Weapon weapon;
-            while ((index < this.getNumWeapons()) && (remainingFraction > 0))
-            {
-                // get the next weapon to refill
-                weapon = this.getCurrentWeaponShiftedByIndex(index);
-                // refill up to the maximum amount in the box and figure out how much is left over
-                remainingFraction -= weapon.refillAmmoFraction(remainingFraction);
-                // move to the next weapon
-                index++;
-            }
-        }
-    }
-    // update the timer keeping track of when the ammo is done being reloaded
-    public void reloadAmmo(double numSeconds)
-    {
-        Weapon currentWeapon = this.getCurrentWeapon();
-        if (currentWeapon != null)
-        {
-            if (this.reloadTimer > 0)
-            {
-                // figure out how much time we spend reloading
-                double reloadDuration = Math.Min(numSeconds * this.getTimeMultiplier(), reloadTimer);
-                // gain ammo accordingly
-                currentWeapon.refillAmmoAmount(currentWeapon.getAmmoReloadRate() * reloadDuration);
-                // keep track of how much time remains until we're done reloading
-                this.reloadTimer -= reloadDuration;
-            }
-        }
-    }
-    // starts reloading ammo, and when the reload time elapses, some ammo will be replenished
-    public void startReloadingAmmo()
-    {
-        // make sure the character isn't already reloading
-        if (this.isReloadingAmmo())
-        {
-            return;
-        }
-        Weapon currentWeapon = this.getCurrentWeapon();
-        // make sure the weapon exists
-        if (currentWeapon == null)
-        {
-            return;
-        }
-        // make sure the weapon isn't busy
-        if (currentWeapon.isWarmingUp() || currentWeapon.isCoolingDown())
-        {
-            return;
-        }
-        // release the trigger
-        currentWeapon.pressTrigger(false);
-        // keep track of when the reload will be done
-        this.reloadTimer = currentWeapon.getReloadTime();
-    }
-    // returns true iff the player is in the process of reloading ammo
-    public bool isReloadingAmmo()
-    {
-        if (this.reloadTimer > 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    
     #endregion
 
     #region Combat
@@ -572,8 +495,7 @@ class Character : GameObject
     double? targetVX;
     double? targetVY;
     double[] jumpVelocity;
-    double reloadTimer;
-	GameObject collision;	// Tells what this object is colliding with, or null.
+    GameObject collision;	// Tells what this object is colliding with, or null.
 	System.Collections.Generic.List<Weapon> weapons;
 	int currentWeaponIndex;
     Character nearestEnemyCharacter; bool nearestEnemyCharacterUpToDate;

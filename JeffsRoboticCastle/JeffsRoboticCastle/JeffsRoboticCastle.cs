@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using Castle.EventNodes;
 using Castle.EventNodes.Menus;
 using Castle.EventNodes.World;
-using Castle.EventNodes.Editing;
+using Castle.EventNodes.Customization;
 using Castle.Menus;
 using System.Windows;
+using Castle.WeaponDesign;
+using Castle;
 
 class JeffsRoboticCastle
 {
@@ -17,54 +19,105 @@ class JeffsRoboticCastle
     {
         this.screenSize = new Size(screenSize.Width, screenSize.Height);
         this.mainCanvas = newCanvas;
+        this.setupWeapons();
         this.setupEnemies();
         this.setupPlayer();
         this.setupStory();
     }
     public void setupStory()
     {
-        InfoEventNode welcome = InfoEventNode.FromImage("Instructions.png");
+        InfoEventNode welcome = InfoEventNode.FromImage("Welcome.png");
         this.showEvent(welcome);
-        InfoEventNode help = InfoEventNode.FromText("here is some text");
+
+        HelpEventNode help = new HelpEventNode();
         welcome.NextNode = help;
-        WorldEventNode world = this.createWorld(0);
-        help.NextNode = world;
-        RewardEventNode reward = new RewardEventNode(800, this.player);
-        world.SuccessNode = reward;
-        WeaponDesignEventNode designer = new WeaponDesignEventNode(this.player);
-        reward.NextNode = designer;
-        world.SuccessNode = designer;
-        WorldEventNode world2 = this.createWorld(1);
-        designer.NextNode = world2;
+
+
+
+        PatronSelectionEventNode patronNode = new PatronSelectionEventNode(this.player, this.weaponAugmentFactory);
+        help.NextNode = patronNode;
+
+        RewardEventNode resourceNode = new RewardEventNode(1, this.player);
+        patronNode.NextNode = resourceNode;
+
+
+        ShopEventNode designer = new ShopEventNode(this.player);
+        resourceNode.NextNode = designer;
+
+        ShopEventNode currentNode = designer;
+        for (int difficulty = 1; difficulty <= 2; difficulty++)
+        {
+            WorldEventNode world = this.createWorld(difficulty);
+            currentNode.NextNode = world;
+
+            RewardEventNode reward = new RewardEventNode(1, this.player);
+            world.SuccessNode = reward;
+
+            ShopEventNode shop = new ShopEventNode(this.player);
+            reward.NextNode = shop;
+
+            currentNode = shop;
+        }
+
         InfoEventNode success = InfoEventNode.FromImage("victory.png");
-        world2.SuccessNode = success;
+        currentNode.NextNode = success;
+    }
+    private void advanceEnemyWeapons()
+    {
+        List<WeaponAugmentTemplate> augments = new List<WeaponAugmentTemplate>(this.weaponAugmentFactory.All);
+        // Add a new type of weapon
+        this.enemyWeapons.Add(new WeaponConfiguration(this.weaponAugmentFactory.BasicWeapon, new List<WeaponAugment>()));
+
+        // Add a random augment to each weapon type
+        foreach (WeaponConfiguration configuration in this.enemyWeapons)
+        {
+            int index = this.randomGenerator.Next(augments.Count);
+            WeaponAugmentTemplate template = augments[index];
+            configuration.Augments.Add(new WeaponAugment(template));
+        }
+    }
+    private List<WeaponStats> getNewEnemyWeaponStats()
+    {
+        this.advanceEnemyWeapons();
+        List<WeaponStats> stats = new List<WeaponStats>();
+        foreach (WeaponConfiguration configuration in this.enemyWeapons)
+        {
+            stats.Add(configuration.GetStats());
+        }
+        return stats;
     }
     public void setupEnemies()
     {
-        this.allEnemyWeaponChoices = new List<Weapon>();
-        WeaponFactory factory = new WeaponFactory();
-        factory.addDefaultWeapons();
-        int i;
-        for (i = 0; i < factory.getNumWeapons(); i++)
-        {
-            this.allEnemyWeaponChoices.Add(factory.makeWeapon(i));
-        }
-        // reorder the weapon list randomly
+        // Choose the items that the enemies get, and compute the stats of the resultant weapon
+        /*List<WeaponAugmentTemplate> templates = new List<WeaponAugmentTemplate>(){
+            this.weaponAugmentFactory.Damager, this.weaponAugmentFactory.Flier};
+        WeaponStats weaponStats = this.weaponAugmentFactory.BasicWeapon.WithAugments(templates);
+        */
+        //this.allEnemyWeaponChoices = new List<WeaponStats>(){weaponStats};
+        this.enemyWeapons = new List<WeaponConfiguration>();
+
+
+        // reorder the list of WeaponStats randomly
+        /*int i;
         Random generator = new Random();
         for (i = 0; i < this.allEnemyWeaponChoices.Count; i++)
         {
-            int otherIndex = generator.Next(this.allEnemyWeaponChoices.Count);
-            Weapon temp = this.allEnemyWeaponChoices[i];
+            int otherIndex = generator.Next(this.allEnemyWeaponChoices.Count - 1) + i;
+            WeaponStats temp = this.allEnemyWeaponChoices[i];
             this.allEnemyWeaponChoices[i] = this.allEnemyWeaponChoices[otherIndex];
             this.allEnemyWeaponChoices[otherIndex] = temp;
-        }
+        }*/
     }
     private WorldEventNode createWorld(int difficulty)
     {
-        List<Weapon> enemyWeapons = this.allEnemyWeaponChoices.GetRange(0, difficulty / 2 + 1);
-        return new WorldEventNode(this.player, enemyWeapons);
+        //List<WeaponStats> enemyWeapons = this.allEnemyWeaponChoices.GetRange(0, difficulty / 2 + 1);
+        List<WeaponStats> enemyWeapons = this.getNewEnemyWeaponStats();
+        return new WorldEventNode(this.player, difficulty, enemyWeapons);
     }
-
+    private void setupWeapons()
+    {
+        this.weaponAugmentFactory = new WeaponAugmentFactory();
+    }
     public void setupMusic()
     {
         //MediaElement mediaPlayer = new MediaElement();
@@ -97,9 +150,6 @@ class JeffsRoboticCastle
             return;
         }
         newEvent.Show(this.screenSize);
-        Screen newScreen = newEvent.GetScreen();
-        if (newScreen != this.currentScreen)
-            this.setScreen(newScreen);
     }
     private void setScreen(Screen screen)
     {
@@ -108,10 +158,6 @@ class JeffsRoboticCastle
             this.mainCanvas.Children.Remove(this.currentScreen.getCanvas());
         this.currentScreen = screen;
         this.mainCanvas.Children.Add(newCanvas);
-        //UIElement child = newCanvas.Children[0];
-        //newCanvas.Children.Remove(child);
-        //this.mainCanvas.Children.Add(child);
-        //this.mainCanvas.Children.Add(ImageLoader.loadImage("Instructions.png", new Size(300, 300)));
     }
 
     // image drawing
@@ -122,34 +168,33 @@ class JeffsRoboticCastle
         EventNode newEvent = this.currentEvent.TimerTick(numSeconds);
         if (newEvent != currentEvent)
             this.showEvent(newEvent);
+        Screen newScreen = newEvent.GetScreen();
+        if (newScreen != this.currentScreen)
+            this.setScreen(newScreen);
 
     }
-    public void resetPlayerWeapon()
-    {
-        this.player.gotoWeaponTreeRoot();
-    }
-    public void playerPressTrigger(bool pressed)
-    {
-	    this.player.pressTrigger(pressed);
-    }
+    
 
 //private
     void setupPlayer()
     {
         // spawn the player
-        double[] location = new double[2]; location[0] = 30; location[1] = 30;
-        this.player = new Player(location);
-        this.player.addMoney(1600);
-        this.player.gotoWeaponTreeRoot();
+        this.player = new GamePlayer(140);
+        BasicWeapon weapon;
+        weapon = this.weaponAugmentFactory.BasicWeapon;
+        player.WeaponConfigurations.Add(new WeaponConfiguration(weapon, new List<WeaponAugment>()));
     }
 
-    List<Weapon> allEnemyWeaponChoices;
+    //List<WeaponStats> allEnemyWeaponChoices;
+    List<WeaponConfiguration> enemyWeapons;
     Canvas mainCanvas;
     Size screenSize;
-    Player player;
+    GamePlayer player;
     AudioPlayer audioPlayer;
     EventNode currentEvent;
     Screen currentScreen;
+    WeaponAugmentFactory weaponAugmentFactory;
+    Random randomGenerator = new Random();
 
     //LevelSelectionScreen levelSelectionScreen;
     int levelNumber;

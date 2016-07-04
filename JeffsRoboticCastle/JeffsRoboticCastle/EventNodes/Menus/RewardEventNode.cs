@@ -1,25 +1,33 @@
 ﻿using Castle.EventNodes.Menus;
+using Castle.WeaponDesign;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
 
+// Gives the player a reward
 namespace Castle.Menus
 {
     class RewardEventNode : TextInfoEventNode
     {
-        public RewardEventNode(int moneyToGain, Player player)
+        public RewardEventNode(double magnitude, GamePlayer player)
         {
-            this.moneyToGain = moneyToGain;
-            this.Text = "Congratulations! You receive " + moneyToGain + " gold pieces.";
+            this.player = player;
+            this.magnitude = magnitude;
         }
         public override void Show(Size screenSize)
         {
+            Reward reward = new Reward();
+            foreach (Patron patron in this.player.GetPatrons())
+            {
+                reward = reward.Plus(patron.GenerateReward(this.magnitude));
+            }
+            this.Text = "Your family is thinking of you and sent " + reward + ".";
             base.Show(screenSize);
-            this.player.addMoney(this.moneyToGain);
+            reward.ApplyTo(this.player);
         }
-        private Player player;
-        int moneyToGain;
+        private GamePlayer player;
+        double magnitude;
     }
 }

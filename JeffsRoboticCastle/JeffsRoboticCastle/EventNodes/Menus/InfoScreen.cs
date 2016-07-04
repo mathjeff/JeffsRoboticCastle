@@ -15,6 +15,13 @@ namespace Castle.EventNodes.Menus
         {
             this.was_keyDown_pressed = this.done = false;
             base.Initialize(screenPosition, screenSize);
+            Image image = new Image();
+            this.getCanvas().MouseUp += InfoScreen_MouseUp;
+        }
+
+        void InfoScreen_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            this.done = true;
         }
         // public
         
@@ -33,7 +40,6 @@ namespace Castle.EventNodes.Menus
         }
 
         // private
-        System.Windows.Controls.Image backgroundImage;
         bool was_keyDown_pressed;
         bool done;
     }

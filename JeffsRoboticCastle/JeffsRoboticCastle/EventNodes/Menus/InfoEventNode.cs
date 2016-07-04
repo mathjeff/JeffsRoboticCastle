@@ -26,7 +26,7 @@ namespace Castle.EventNodes.Menus
             this.backgroundImageProvider = imageProvider;
         }
         public EventNode NextNode;
-        public void Show(Size screenSize)
+        public virtual void Show(Size screenSize)
         {
             this.screen = new InfoScreen();
             this.screen.Initialize(screenSize);

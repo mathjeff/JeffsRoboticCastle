@@ -29,44 +29,26 @@ Max Number of Explosions
 
 using System.Windows.Media.Imaging;
 using System;
+using Castle.WeaponDesign;
 class Weapon
 {
 //public
     #region Setup
     // constructor
-    public Weapon()
+    public Weapon(WeaponStats stats)
     {
+        this.Stats = stats;
+        this.initialize();
     }
     public Weapon(Weapon original)
     {
         this.copyFrom(original);
+        this.initialize();
     }
     public void copyFrom(Weapon other)
     {
-        this.teamNum = other.teamNum;
-
         // Attributes about when you may own the item
-        this.cost = other.cost;
-
-        // Attributes about when you may fire
-        this.maxAmmo = other.maxAmmo;
-        this.ammoPerBox = other.ammoPerBox;
-        this.ammoRechargeRate = other.ammoRechargeRate;
-        this.setWarmupTime(other.warmupTime);
-        this.cooldownTime = other.cooldownTime;
-        this.switchToTime = other.switchToTime;
-        this.switchFromTime = other.switchFromTime;
-        this.reloadTime = other.reloadTime;
-        this.ammoReloadRate = other.ammoReloadRate;
-        this.automatic = other.automatic;
-        this.triggerIsSticky = other.triggerIsSticky;
-        this.fireWhileInactive = other.fireWhileInactive;
-        this.cooldownWhileInactive = other.cooldownWhileInactive;
-        this.rechargeWhileInactive = other.rechargeWhileInactive;
-
-        // Attributes of the projectile it launches, to determine when it hits
-        this.ownersVelocityScale = other.ownersVelocityScale;
-        this.templateProjectile = new Projectile(other.getTemplateProjectile());
+        this.Stats = other.Stats;
 
         // Attributes about the current state of the weapon
         this.currentAmmo = other.currentAmmo;
@@ -75,15 +57,17 @@ class Weapon
     }
     #endregion
 
-    // Information about when you may own the item
-    public void setCost(double newCost)
+    private void initialize()
     {
-        this.cost = newCost;
+        this.resetCooldown();
+        this.refillAmmo();
     }
-    public double getCost()
+    private void refillAmmo()
     {
-        return this.cost;
+        this.currentAmmo = this.getMaxAmmo();
     }
+    
+    /*
     public double calculateCost()
     {
         double tempCost = 1;
@@ -146,21 +130,7 @@ class Weapon
         this.cost = tempCost;
 
         return cost;
-    }
-    public void setMaxAmmo(double numShots)
-    {
-	    this.maxAmmo = numShots;
-    }
-    public void resetForLevel()
-    {
-        this.resetTrigger();
-        this.resetCooldown();
-        this.refillAmmo();
-    }
-    public void refillAmmo()
-    {
-        this.currentAmmo = this.maxAmmo;
-    }
+    }*/
     public bool drainAmmo(double numShots)
     {
         if (this.currentAmmo > numShots)
@@ -171,28 +141,9 @@ class Weapon
         return false;
     }
 
-    // refills up to maxFraction of a box worth of ammo, and returns what fraction it filled up
-    public double refillAmmoFraction(double maxFraction)
-    {
-        // refill the ammo
-        double increase = this.refillAmmoAmount(maxFraction * this.ammoPerBox);
-        // figure out how much of the box remains
-        if (this.ammoPerBox != 0)
-            return increase / this.ammoPerBox;
-        else
-            return 0;
-    }
-    // refills up to numShotsToAdd units of ammo, and returns how much was added
-    public double refillAmmoAmount(double numShotsToAdd)
-    {
-        double previousAmmo = this.currentAmmo;
-        this.currentAmmo = Math.Min(this.currentAmmo + numShotsToAdd, this.maxAmmo);
-        double difference = this.maxAmmo - previousAmmo;
-        return difference;
-    }
     public void resetCooldown()
     {
-        this.firingTimer = this.warmupTime;
+        this.firingTimer = this.Stats.WarmupTime;
     }
     public void resetTrigger()
     {
@@ -201,127 +152,23 @@ class Weapon
         this.pressedRecently = false;
         this.triggerStuck = false;
     }
-    public double getMaxAmmo()
-    {
-        return this.maxAmmo;
-    }
     public double getCurrentAmmo()
     {
         return this.currentAmmo;
     }
-    public void setAmmoRechargeRate(double ammoPerSecond)
-    {
-	    this.ammoRechargeRate = ammoPerSecond;
-    }
-    public double getAmmoRechargeRate()
-    {
-	    return this.ammoRechargeRate;
-    }
-    public void setAmmoPerBox(double count)
-    {
-        this.ammoPerBox = count;
-    }
-    public double getAmmoPerBox()
-    {
-        return this.ammoPerBox;
-    }
-    public void setReloadTime(double numSeconds)
-    {
-        this.reloadTime = numSeconds;
-    }
-    public double getReloadTime()
-    {
-        return this.reloadTime;
-    }
-    public void setAmmoReloadRate(double numShotsPerSec)
-    {
-        this.ammoReloadRate = numShotsPerSec;
-    }
-    public double getAmmoReloadRate()
-    {
-        return this.ammoReloadRate;
-    }
-    public void setWarmupTime(double numSeconds)
-    {
-	    this.warmupTime = numSeconds;
-	    // when the warmup time is set, we then start the weapon in the nonfiring state
-	    this.firingTimer = this.warmupTime;
-    }
+    
     public double getWarmupTime()
     {
-	    return this.warmupTime;
-    }
-    public void setCooldownTime(double numSeconds)
-    {
-	    this.cooldownTime = numSeconds;
+        return this.Stats.WarmupTime;
     }
     public double getCooldownTime()
     {
-	    return this.cooldownTime;
+        return this.Stats.CooldownTime;
     }
-    public void setSwitchToTime(double numSeconds)
+
+    public double getMaxAmmo()
     {
-	    this.switchToTime = numSeconds;
-    }
-    public double getSwitchToTime()
-    {
-	    return this.switchToTime;
-    }
-    public void setSwitchFromTime(double numSeconds)
-    {
-	    this.switchFromTime = numSeconds;
-    }
-    public double getSwitchFromTime()
-    {
-	    return this.switchFromTime;
-    }
-    public void setAutomatic(bool value)
-    {
-        this.automatic = value;
-    }
-    public bool isAutomatic()
-    {
-        return this.automatic;
-    }
-    public void setTriggerSticky(bool value)
-    {
-        this.triggerIsSticky = value;
-    }
-    public bool isTriggerSticky()
-    {
-        return this.triggerIsSticky;
-    }
-    public void setOwnersVelocityScale(double value)
-    {
-        this.ownersVelocityScale = value;
-    }
-    public double getOwnersVelocityScale()
-    {
-        return this.ownersVelocityScale;
-    }
-    public void enableFiringWhileInactive(bool enable)
-    {
-        this.fireWhileInactive = enable;
-    }
-    public bool canFireWhileInactive()
-    {
-        return this.fireWhileInactive;
-    }
-    public void enableCooldownWhileInactive(bool enable)
-    {
-        this.cooldownWhileInactive = enable;
-    }
-    public bool coolsDownWhileInactive()
-    {
-        return this.cooldownWhileInactive;
-    }
-    public void enableRechargeWhileInactive(bool enable)
-    {
-        this.rechargeWhileInactive = enable;
-    }
-    public bool rechargesWhileInactive()
-    {
-        return this.rechargeWhileInactive;
+        return this.Stats.MaxAmmo;
     }
 
 
@@ -335,9 +182,7 @@ class Weapon
             this.pressedRecently = true;
         // keep track of whether the trigger is currently being pressed
         this.triggerPressed = pressed;
-        // keep track of whether the trigger is stuck down
-        if (this.triggerIsSticky && this.pressedRecently)
-            this.triggerStuck = !this.triggerStuck;
+        
         // keep track of whether the trigger is down
         if (pressed || this.triggerStuck)
             this.triggerDown = true;
@@ -346,7 +191,7 @@ class Weapon
     }
     public bool isWarmingUp()
     {
-	    if (this.firingTimer < this.warmupTime)
+	    if (this.firingTimer < this.getWarmupTime())
 		    return true;
 	    else
 		    return false;
@@ -359,11 +204,11 @@ class Weapon
     // returns the number of seconds 
     public double getRemainingCooldown()
     {
-        return this.firingTimer - this.warmupTime;
+        return this.firingTimer - this.getWarmupTime();
     }
     public bool isCoolingDown()
     {
-	    if (this.firingTimer > this.warmupTime)
+	    if (this.firingTimer > this.getWarmupTime())
 		    return true;
 	    else
 		    return false;
@@ -372,22 +217,11 @@ class Weapon
     public bool wantsToFire()
     {
         bool shouldFire;
-        if (automatic)
-        {
-            // Automatic firing. Shoot if the trigger is currently down (or was pressed sometime during the last tick)
-            if (this.triggerDown || this.pressedRecently)
-                shouldFire = true;
-            else
-                shouldFire = false;
-        }
+        // manual firing
+        if (this.pressedRecently)
+            shouldFire = true;
         else
-        {
-            // manual firing
-            if (this.pressedRecently)
-                shouldFire = true;
-            else
-                shouldFire = false;
-        }
+            shouldFire = false;
         // pressedRecently tells whether the trigger transitioned from released to pressed within the last tick. This flag needs clearing now
         this.pressedRecently = false;
         return shouldFire;
@@ -409,23 +243,23 @@ class Weapon
     {
         bool busy = false;
         // figure out if we need to advance the firing timer
-        if (this.shouldStartFiring() || (this.firingTimer != this.warmupTime))
+        if (this.shouldStartFiring() || (this.firingTimer != this.getWarmupTime()))
         {
 		    // check if it's cooling down
-            if (this.firingTimer > this.warmupTime)
+            if (this.firingTimer > this.getWarmupTime())
             {
                 // If we get here, it's cooling down
-                if (active || this.cooldownWhileInactive)
+                if (active)
                 {
                     busy = true;    // keep track of whether the weapon is doing anything
                     // decrease the cooldown time toward zero, so that only the warmup time remains
-                    this.firingTimer = Math.Max(this.firingTimer - numSeconds, this.warmupTime);
+                    this.firingTimer = Math.Max(this.firingTimer - numSeconds, this.getWarmupTime());
                 }
             }
             else
             {
                 // If we get here, it's warming up
-                if (active || this.fireWhileInactive)
+                if (active)
                 {
                     busy = true;    // keep track of whether the weapon is doing anything
                     this.firingTimer -= numSeconds;
@@ -433,10 +267,10 @@ class Weapon
                     if (this.firingTimer <= 0)
                     {
                         // update the firing timer
-                        firingTimer += (warmupTime + cooldownTime);
+                        firingTimer += (this.getWarmupTime() + this.getCooldownTime());
                         // we can only fire one shot per tick
-                        if (firingTimer < warmupTime)
-                            firingTimer = warmupTime;
+                        if (firingTimer < this.getWarmupTime())
+                            firingTimer = this.getWarmupTime();
 
                         // create the projectile and fill in the information from the template
                         this.shot = this.makeProjectile(true);
@@ -446,23 +280,14 @@ class Weapon
 			    }		 
             }
         }
-        if (this.currentAmmo < 1)
-        {
-            if (active || this.rechargeWhileInactive)
-            {
-                busy = true;    // keep track of whether the weapon is doing anything
-                this.currentAmmo = Math.Min(this.currentAmmo + numSeconds * this.ammoRechargeRate, 1);
-                if (currentAmmo < 0)
-                    currentAmmo = 0;
-            }
-        }
         // tell whether the weapon is doing anything
         return busy;
     }
     // builds a projectile and doesn't count as actually firing
     public Projectile makeProjectile(bool enableRendering)
     {
-        Projectile tempShot = new Projectile(this.templateProjectile, enableRendering);
+        Projectile tempShot = new Projectile(this.Stats.TemplateProjectile, enableRendering);
+        tempShot.setTeamNum(this.owner.getTeamNum());
         double[] newPosition = tempShot.getCenter();
         if (this.owner.isFacingLeft())
         {
@@ -475,8 +300,8 @@ class Weapon
         newPosition[1] += owner.getCenter()[1];
         tempShot.setCenter(newPosition);
         double[] newV = tempShot.getVelocity();
-        newV[0] += owner.getVelocity()[0] * this.ownersVelocityScale;
-        newV[1] += owner.getVelocity()[1] * this.ownersVelocityScale;
+        newV[0] += owner.getVelocity()[0] * this.Stats.OwnersVelocityScale;
+        newV[1] += owner.getVelocity()[1] * this.Stats.OwnersVelocityScale;
         tempShot.setVelocity(newV);
         return tempShot;
     }
@@ -490,24 +315,10 @@ class Weapon
         // return the projectile
         return shot;
     }
-    public void setTemplateProjectile(Projectile newProjectile)
-    {
-        this.templateProjectile = newProjectile;
-        newProjectile.setTeamNum(this.teamNum);
-        newProjectile.setShooter(this);
-        newProjectile.setOwner(this.getOwner());
-    }
-    public Projectile getTemplateProjectile()
-    {
-        return this.templateProjectile;
-    }
     // Purchasing the weapon
     public void setOwner(Character value)
     {
 	    this.owner = value;
-        this.teamNum = owner.getTeamNum();
-        this.templateProjectile.setTeamNum(teamNum);
-        this.templateProjectile.setOwner(this.owner);
     }
     public Character getOwner()
     {
@@ -573,32 +384,12 @@ class Weapon
 
 
     #region Private Variables
-    // Attributes about the type of weapon
-    //BitmapImage projectileImage;
-	int teamNum;
 
-	// Attributes about when you may own the item
-	double cost;
+    WeaponConfiguration design;
+
+    public WeaponStats Stats;
 
 	// Attributes about when you may fire
-	double maxAmmo;
-	double ammoRechargeRate;
-    double ammoPerBox;
-	double warmupTime;
-	double cooldownTime;
-	double switchToTime;
-	double switchFromTime;
-    double reloadTime;
-    double ammoReloadRate;
-    bool automatic;
-    bool triggerIsSticky;
-    bool fireWhileInactive; // Tells whether this weapon can fire without being the current weapon
-    bool cooldownWhileInactive; // Tells whether this weapon can cooldown without being the current weapon
-    bool rechargeWhileInactive; // Tells whether this weapon can recharge ammo without being the current weapon
-
-	// Attributes of the projectile it launches, to determine when it hits
-    double ownersVelocityScale;
-    Projectile templateProjectile;
     Projectile shot;
 
 	// Attributes about the current state of the weapon

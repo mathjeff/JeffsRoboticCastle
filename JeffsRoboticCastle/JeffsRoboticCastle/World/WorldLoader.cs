@@ -10,12 +10,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows;
 
-// The WorldLoader class implements the automatic loading and unloading of objects in the World based on Player location
+// The WorldLoader class implements the automatic loading and unloading of objects in the World based on LevelPlayer location
 class WorldLoader
 {
 // Public
     // Constructor
-    public WorldLoader(Size realityBubbleSize, int difficulty, List<Weapon> enemyWeaponChoices)
+    public WorldLoader(Size realityBubbleSize, int difficulty, List<WeaponStats> enemyWeaponChoices)
     {
         this.enemyWeaponChoices = enemyWeaponChoices;
         // setup machinery to make it fast to run
@@ -384,10 +384,7 @@ class WorldLoader
                 {
                     int index = generator.Next(enemyWeaponChoices.Count);
                     Weapon newWeapon = new Weapon(enemyWeaponChoices[index]);
-                    //Weapon newWeapon = new Weapon(9);
                     tempEnemy.addWeapon(newWeapon);
-                    //Weapon newWeapon = new Weapon(generator.Next(
-                    //tempEnemy.addWeapon(new Weapon(generator.Next(levelNumber * 2)));
                 }
                 this.addItem(tempEnemy);
                 // give the enemy a painting to look at
@@ -564,5 +561,5 @@ class WorldLoader
     int bestNumExplosions;
 #endif
     bool paused;
-    List<Weapon> enemyWeaponChoices;
+    List<WeaponStats> enemyWeaponChoices;
 };

@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+// Shows the status of a single Weapon
 class WeaponStatusDisplay
 {
 // public
@@ -50,8 +51,12 @@ class WeaponStatusDisplay
         if (newWeapon != this.currentWeapon)
         {
             // update the weapon image
-            Projectile templateProjectile = newWeapon.getTemplateProjectile();
+            Projectile templateProjectile = newWeapon.Stats.TemplateProjectile;
             ImageSource bitmap = templateProjectile.getBitmap();
+            if (bitmap == null)
+            {
+                throw new ArgumentException("Weapon image cannot be null");
+            }
             this.weaponImage.Source = bitmap;
             //this.weaponImage.Width = templateProjectile.getShape().getWidth();
             //this.weaponImage.Height = templateProjectile.getShape().getHeight();

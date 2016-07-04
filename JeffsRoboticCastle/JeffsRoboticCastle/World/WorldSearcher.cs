@@ -17,7 +17,7 @@ class WorldSearcher
         this.initialize(dim, typicalObjectSize, worldSize);
     }
 
-    // Put the item into the world. The location of the item usually may not move until it is removed
+    // put the item into the world. The location of the item usually may not move until it is removed
     // There are two ways to move an object:
     // Option 1, which is slower, is to remove it, then move it and re-add it
     // Option 2, which only supports moving one object at a time, is to call itemStartingMove and then move it and call itemEndingMove
@@ -220,14 +220,14 @@ class WorldSearcher
         this.items = new System.Collections.Generic.HashSet<GameObject>();
     }
 
-    // Get a hyper-box that bounds the item in all dimension
+    // newItem a hyper-box that bounds the item in all dimension
     private IndexBox getIndexRange(GameObject item)
     {
 	    WorldBox boundingBox = item.getBoundingBox();
 	    IndexBox indexBox = this.getIndexBoxFromWorldBox(boundingBox);
 	    return indexBox;
     }
-    // Get a hyper-box that bounds the item in all dimension at all points during the given move
+    // newItem a hyper-box that bounds the item in all dimension at all points during the given move
     private IndexBox getIndexRange(GameObject item, double[] move)
     {
 	    WorldBox boundingBox = item.getBoundingBoxForMove(move);

@@ -15,10 +15,10 @@ class WeaponGridDisplay
         this.size = new Size(size.Width, size.Height);
         this.displays = new List<WeaponStatusDisplay>();
     }
-    public void update(System.Collections.Generic.List<Weapon> weaponsList)
+    public void update(IEnumerable<Weapon> weaponsList)
     {
         // rearrange the icons if something changed
-        if (weaponsList != previousWeaponList)
+        if (!weaponsList.Equals(previousWeaponList))
         {
             // remove the previous set of weapon status displays
             foreach (WeaponStatusDisplay display in this.displays)
@@ -27,7 +27,7 @@ class WeaponGridDisplay
             }
             this.displays.Clear();
             // recalculate the spacing for the weapon status displays
-            int numWeapons = weaponsList.Count;
+            int numWeapons = weaponsList.Count();
             if (numWeapons > 0)
             {
                 int xsPerSide = (int)Math.Ceiling(Math.Sqrt((double)numWeapons));
@@ -37,11 +37,9 @@ class WeaponGridDisplay
                 Point position = new Point(this.screenPosition.X, this.screenPosition.Y);
 
                 // add each weapon to the screen
-                Weapon currentWeapon;
                 xIndex = yIndex = 0;
-                for (i = 0; i < weaponsList.Count; i++)
+                foreach (Weapon currentWeapon in weaponsList)
                 {
-                    currentWeapon = weaponsList[i];
                     // add the weapon to the screen
                     this.displays.Add(new WeaponStatusDisplay(this.canvas, position, spacing, currentWeapon));
                     // compute the position of the next one
@@ -56,7 +54,7 @@ class WeaponGridDisplay
                 }
             }
             // save the list of weapons
-            this.previousWeaponList = weaponsList;
+            this.previousWeaponList = new List<Weapon>(weaponsList);
         }
         // make sure each display is up-to-date
         foreach (WeaponStatusDisplay display in this.displays)

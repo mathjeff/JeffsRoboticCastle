@@ -164,6 +164,10 @@ class World
     }
     public void addDisabledObject(GameObject o)
     {
+        if (o.getImage().Source == null)
+        {
+            throw new ArgumentException("Image assigned to " + o + " is null");
+        }
         foreach (WorldScreen worldScreen in this.screensToInformOfObjectAdditions)
         {
             worldScreen.ShowObject(o);
@@ -463,7 +467,6 @@ class World
         this.processAIs();
         
         this.spawnProjectiles(numSeconds);
-        this.reloadAmmo(numSeconds);
         
         this.processDeath(numSeconds);
         this.applyContactDamage(numSeconds);
@@ -684,16 +687,6 @@ class World
             }
 	    }
     }
-    // advance the timers of any Chararacter reloading ammo
-    void reloadAmmo(double numSeconds)
-    {
-	    // spawn new projectiles
-	    System.Collections.ArrayList projectiles = null;
-        foreach (Character tempCharacter in this.characters)
-        {
-            tempCharacter.reloadAmmo(numSeconds);
-        }
-    }
     // Explode any projetiles that are colliding or spent
     void explodeProjectiles(double numSeconds)
     {
@@ -826,8 +819,7 @@ class World
             foreach (GameObject collision in collisions)
             {
                 if (collision.isAPickupItem() && character.intersects(collision))
-                {
-                    character.refillAmmoFromBox();
+                {   
                     this.removePickupItem((PickupItem)collision);
                 }
             }
@@ -1088,6 +1080,10 @@ class World
     // given that the mover wants to make the desiredMove and obstacle may be in the way, return the actual move that we will allow
 	double[] movementForCollision(GameObject mover, GameObject obstacle, double[] desiredMove)
     {
+        if (double.IsNaN(desiredMove[0]) || double.IsNaN(desiredMove[1]))
+        {
+            throw new ArgumentException("Invalid move " + desiredMove);
+        }
         /*
 	    // figure out how far it wants to move
 	    double desiredDist = 0;
@@ -1101,11 +1097,14 @@ class World
 
 	    // figure out how far it can go before colliding
 	    double[] allowedMove = mover.moveTo(obstacle, desiredMove);
+        if (double.IsInfinity(allowedMove[0]) || double.IsInfinity(allowedMove[1]))
+        {
+            throw new ArithmeticException("Move cannot be infinite");
+        }
 	    // If there are no collisions, return the same pointer so that the pointer can simply be compared
 	    if (allowedMove == desiredMove)
 		    return allowedMove;
 	    // Here we make an approximation that deviates from a perfect physics simulation and instead go for the easy solution
-#if true
 	    /*// if you hit an enemy explosion, then you get stuck
 	    if (obstacle.isAnExplosion())
 	    {
@@ -1130,25 +1129,11 @@ class World
 			    allowedMove[0] = desiredMove[0];
 		    }
 	    }
+        if (double.IsInfinity(allowedMove[0]) || double.IsInfinity(allowedMove[1]))
+        {
+            throw new ArithmeticException("Move cannot be infinite");
+        }
 
-#else
-	    if (allowedDist > 0)
-	    {
-		    // Here we cut the move short and don't allow the object to slide laterally until the next time step
-		    // For the moment this is easier to do and faster to run
-		    for (i = 0; i < allowedMove.Length; i++)
-		    {
-			    allowedMove[i] = desiredMove[i] * allowedDist / desiredDist;
-		    }
-	    }
-	    else
-	    {
-		    // If we get here then the object can't move any further in the desired direction
-		    // If the simulation were perfect then this case would be very unlikely
-		    // However, if the first half of the if-statement was executed for this object last tick then this half will probably be executed this tick
-		    // Also, here we assume that both objects are rectangular
-	    }
-#endif
 	    return allowedMove;
     }
     // Make an explosion for this projectile

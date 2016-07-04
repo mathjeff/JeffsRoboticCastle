@@ -6,12 +6,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Castle.EventNodes.Editing
+// This screen lets the user type in the Stats of the weapon they want, and tries to calculate a good cost to charge for it
+// This screen is unused now because users actually don't like just typing in their weapon Stats
+// Users prefer to assemble their weapons out of discrete components instead
+#if false
+namespace Castle.EventNodes.Customization
 {
-    class WeaponDesignScreen : Screen
+    class FullyCustomizableWeaponDesignScreen : Screen
     {
         // public
-        public WeaponDesignScreen(Size screenSize, Player player)
+        public FullyCustomizableWeaponDesignScreen(Size screenSize, Player player)
         {
             // setup drawing
             base.Initialize(screenSize);
@@ -744,3 +748,5 @@ namespace Castle.EventNodes.Editing
         WeaponFactory weaponFactory;
     }
 }
+
+#endif

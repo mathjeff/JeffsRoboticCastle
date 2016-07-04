@@ -8,18 +8,20 @@ namespace Castle.EventNodes.World
 {
     class WorldEventNode : EventNode
     {
-        public WorldEventNode(Player player, List<Weapon> enemyWeapons)
+        public WorldEventNode(GamePlayer player, int difficulty, List<WeaponStats> enemyWeapons)
         {
             this.player = player;
             this.enemyWeapons = enemyWeapons;
+            this.difficulty = difficulty;
         }
         public EventNode SuccessNode;
         //public EventNode FailureNode;
         public void Show(Size size)
         {
-            this.worldLoader = new WorldLoader(size, 1, this.enemyWeapons);
-            this.worldLoader.addItemAndDisableUnloading(this.player);
-            this.screen = new WorldScreen(size, this.player, this.worldLoader);
+            this.worldLoader = new WorldLoader(size, this.difficulty, this.enemyWeapons);
+            LevelPlayer levelPlayer = this.player.PrepareForNewLevel();
+            this.worldLoader.addItemAndDisableUnloading(levelPlayer);
+            this.screen = new WorldScreen(size, levelPlayer, this.worldLoader);
         }
         public Screen GetScreen()
         {
@@ -41,9 +43,10 @@ namespace Castle.EventNodes.World
             this.worldLoader.destroy();
         }
         private WorldScreen screen;
-        private Player player;
-        private List<Weapon> enemyWeapons;
+        private GamePlayer player;
+        private List<WeaponStats> enemyWeapons;
         WorldLoader worldLoader;
+        int difficulty;
 
     }
 }

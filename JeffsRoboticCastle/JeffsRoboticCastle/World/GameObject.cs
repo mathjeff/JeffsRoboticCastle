@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Collections;
 using System.Windows;
+using System.Collections.Generic;
 
 // The WorldBox class represents a multidimensional rectangular prism of floats (an area of the world)
 // Currently, it is two dimensions, which makes it a rectangle.
@@ -975,6 +976,11 @@ class GameObject
 	    double[] move = new double[2];
 	    move[0] = this.velocity[0] * numSeconds;
 	    move[1] = this.velocity[1] * numSeconds;
+        if (double.IsInfinity(move[0]) || double.IsInfinity(move[1]))
+        {
+            throw new ArithmeticException("Move cannot be infinite");
+        }
+
         return move;
     }
     public virtual void setColliding(GameObject other)
@@ -1120,6 +1126,9 @@ class GameObject
     }
     public void scaleTimeMultiplier(double scale)
     {
+        if (double.IsInfinity(scale)) {
+            throw new ArgumentException("time multiplier cannot be infinite");
+        }
         this.fasterTimeMultiplier = Math.Max(this.fasterTimeMultiplier, scale);
         this.slowerTimeMultiplier = Math.Min(this.slowerTimeMultiplier, scale);
         //this.timeMultiplier *= scale;
@@ -1177,9 +1186,9 @@ class GameObject
     double hitpoints;
     double maxHitpoints;
     // When the GameObject is inside a time bubble, the timeMultiplier gives the ratio of local time to world time. Larger numbers are faster times
-    double fasterTimeMultiplier;
-    double slowerTimeMultiplier;
-    System.Collections.Generic.Dictionary<Explosion, Stun> stuns;
+    double fasterTimeMultiplier = 1; // the component of the timeMultiplier that increases speed
+    double slowerTimeMultiplier = 1; // the component of the timeMultiplier that decreases speed
+    Dictionary<Explosion, Stun> stuns;
     MatrixTransform renderTransform;
     bool facingLeft;
     bool renderable;

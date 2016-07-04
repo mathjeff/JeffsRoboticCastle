@@ -194,7 +194,7 @@ class Projectile : GameObject
     	    e.setCenter(this.getCenter());
         if (this.isFacingLeft())
             e.setFacingLeft(true);
-        // Degrade some of our stats for having exploded
+        // Degrade some of our Stats for having exploded
         this.templateExplosion.degrade(this.penetration);
         this.numExplosionsRemaining--;
 	    return e;
@@ -237,7 +237,6 @@ class Projectile : GameObject
                 {
                     newVelocity[i] += accel[i] * scale;
                 }
-                //this.setVelocity(newVelocity);
             }
         }
         // accelerate towards the owner if necessary
@@ -263,7 +262,6 @@ class Projectile : GameObject
                 {
                     newVelocity[i] += accel[i] * scale;
                 }
-                //this.setVelocity(newVelocity);
             }
         }
         this.setVelocity(newVelocity);
@@ -275,11 +273,7 @@ class Projectile : GameObject
         {
             if ((this.target != null) && (this.target.isAlive()))
                 this.target = null;
-            return true;    // recalculate the closest target as often as allowed
-            /*if ((this.target == null) || (this.target.isAlive() == false))
-            {
-                return true;
-            }*/
+            return true;
         }
         return false;
     }

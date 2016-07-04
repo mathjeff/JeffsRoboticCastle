@@ -42,8 +42,8 @@ abstract class Screen
     {
         Canvas c = new Canvas();
         c = new Canvas();
-        c.Width = size.Width;
-        c.Height = size.Height;
+        c.MaxWidth = c.Width = size.Width;
+        c.MaxHeight = c.Height = size.Height;
         c.ClipToBounds = true;
         return c;
     }
@@ -68,23 +68,23 @@ abstract class Screen
     {
         return this.size;
     }
-    public double getTop(Control control)
+    public double getTop(FrameworkElement control)
     {
         return control.RenderTransform.Transform(new System.Windows.Point(0, 0)).Y;
     }
-    public double getLeft(Control control)
+    public double getLeft(FrameworkElement control)
     {
         return control.RenderTransform.Transform(new System.Windows.Point(0, 0)).X;
     }
-    public double getBottom(Control control)
+    public double getBottom(FrameworkElement control)
     {
         return control.RenderTransform.Transform(new System.Windows.Point(0, 0)).Y + control.Height;
     }
-    public double getRight(Control control)
+    public double getRight(FrameworkElement control)
     {
         return control.RenderTransform.Transform(new System.Windows.Point(0, 0)).X + control.Width;
     }
-    public void addControl(Control control, double x, double y, double width, double height)
+    public void addControl(FrameworkElement control, double x, double y, double width, double height)
     {
         control.RenderTransform = new TranslateTransform(x, y);
         control.Width = width;

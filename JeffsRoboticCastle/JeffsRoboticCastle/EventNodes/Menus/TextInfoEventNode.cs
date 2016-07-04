@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Castle.EventNodes.Menus
 {
@@ -16,14 +17,17 @@ namespace Castle.EventNodes.Menus
         {
             this.Text = text;
         }
-        public virtual void Show(Size screenSize)
+        public override void Show(System.Windows.Size screenSize)
         {
-            this.screen = new InfoScreen();
-            this.screen.Initialize(screenSize);
+            base.Show(screenSize);
 
             TextBlock block = new TextBlock();
             block.Text = this.Text;
+            block.FontSize = 24;
+            block.TextWrapping = TextWrapping.Wrap;
+            block.MaxWidth = screenSize.Width;
             this.screen.getCanvas().Children.Add(block);
+            this.screen.getCanvas().Background = new SolidColorBrush(Colors.LightGray);
 
         }
         public String Text;

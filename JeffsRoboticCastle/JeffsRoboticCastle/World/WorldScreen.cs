@@ -10,7 +10,7 @@ using System.Windows.Media;
 class WorldScreen : Screen
 {
 // public
-    public WorldScreen(Size size, Player player, WorldLoader world) : base(size)
+    public WorldScreen(Size size, LevelPlayer player, WorldLoader world) : base(size)
     {
         base.Initialize(new Point(), size);
         this.player = player;
@@ -22,7 +22,6 @@ class WorldScreen : Screen
     }
     public void Show()
     {
-        this.player.resetForLevel();
         this.stopMovingPlayerLeft();
         this.stopMovingPlayerRight();
     }
@@ -147,22 +146,10 @@ class WorldScreen : Screen
             this.movePlayerRight();
         if (e.Key == Key.OemSemicolon)
             this.playerPressTrigger(true);
-        if (e.Key == Key.L)
-            this.selectWeapon1();
-        if (e.Key == Key.P)
-            this.selectWeapon2();
-        if (e.Key == Key.OemQuotes)
-            this.selectWeapon3();
-        if (e.Key == Key.Space)
-            this.reloadPlayerAmmo();
         if ((e.Key == Key.Escape) && (this.isEscapeEnabled()))
             this.levelIsComplete = true;
-        if (e.Key == Key.Enter)
+        if (e.Key == Key.Space)
             this.togglePause();
-        if (e.Key == Key.RightShift)
-            this.pause();
-        if (e.Key == Key.LeftShift)
-            this.unPause();
         base.KeyDown(sender, e);
     }
     public override void KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
@@ -200,41 +187,6 @@ class WorldScreen : Screen
     {
         return this.escapeEnabled;
     }
-    // weapons
-    public void selectWeapon1()
-    {
-        Player convertedPlayer = (Player)player;
-        if (convertedPlayer != null)
-            convertedPlayer.selectWeaponSubtreeAtIndex(0);
-    }
-    public void selectWeapon2()
-    {
-        Player convertedPlayer = (Player)(this.player);
-        if (convertedPlayer != null)
-            convertedPlayer.selectWeaponSubtreeAtIndex(1);
-    }
-    public void selectWeapon3()
-    {
-        Player convertedPlayer = (Player)(this.player);
-        if (convertedPlayer != null)
-            convertedPlayer.selectWeaponSubtreeAtIndex(2);
-    }
-    public void selectWeapon4()
-    {
-        Player convertedPlayer = (Player)(this.player);
-        if (convertedPlayer != null)
-            convertedPlayer.selectWeaponSubtreeAtIndex(3);
-    }
-    public void resetPlayerWeapon()
-    {
-        Player convertedPlayer = (Player)(this.player);
-        if (convertedPlayer != null)
-            convertedPlayer.gotoWeaponTreeRoot();
-    }
-    public void reloadPlayerAmmo()
-    {
-        this.player.startReloadingAmmo();
-    }
     public void playerPressTrigger(bool pressed)
     {
         this.player.pressTrigger(pressed);
@@ -250,7 +202,7 @@ class WorldScreen : Screen
     // the canvas to draw the world on
     Canvas worldCanvas;
     // the character that the user controls
-    Player player;
+    LevelPlayer player;
     // the world that the player is in
     WorldLoader world;
     // the screen that will be shown when the level exits

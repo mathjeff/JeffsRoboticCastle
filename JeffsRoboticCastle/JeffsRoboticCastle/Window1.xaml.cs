@@ -26,8 +26,8 @@ namespace MyGameWindow
     }*/
     public partial class Window1 : Window
     {
-        int windowWidth = 1600;
-        int windowHeight = 1000;
+        double windowWidth = 1600;
+        double windowHeight = 1000;
         long desiredNumTicks = 0;
         JeffsRoboticCastle game;
         DateTime latestTickTime;
@@ -42,8 +42,10 @@ namespace MyGameWindow
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            windowWidth = (int)this.ActualWidth;
-            windowHeight = (int)this.ActualHeight;
+            windowWidth = ((Grid)this.Content).ActualWidth;
+            windowHeight = ((Grid)this.Content).ActualHeight;
+            //windowWidth = (int)this.ActualWidth;
+            //windowHeight = (int)this.ActualHeight;
             game = new JeffsRoboticCastle(canvas1, new Size(windowWidth, windowHeight));
             game.start();
 
@@ -72,7 +74,7 @@ namespace MyGameWindow
         // This function is called repeatedly and makes the world move by a small amount
         private void game_tick(object sender, EventArgs e)
         {
-            // Get the current time
+            // newItem the current time
             DateTime currentTime = DateTime.Now;
             TimeSpan elapsedTime = currentTime.Subtract(latestTickTime);
             // cap the elapsed time to 1 second

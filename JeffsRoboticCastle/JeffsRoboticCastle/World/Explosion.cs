@@ -155,7 +155,7 @@ class Explosion : GameObject
             ((Character)target).reinforce(-1);
         }
     }
-    // Multiply all relevant stats by the given scale
+    // Multiply all relevant Stats by the given scale
     public void degrade(double scale)
     {
         this.duration *= scale;

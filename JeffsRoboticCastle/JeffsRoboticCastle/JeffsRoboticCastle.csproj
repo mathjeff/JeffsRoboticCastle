@@ -75,14 +75,38 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EventNodes\CompositeEventNode.cs" />
-    <Compile Include="EventNodes\Editing\WeaponDesignEventNode.cs" />
+    <Compile Include="EventNodes\Customization\ChoiceBuilder.cs" />
+    <Compile Include="EventNodes\Customization\FullyCustomizableWeaponDesignScreen.cs" />
+    <Compile Include="EventNodes\Customization\ShopEventNode.cs" />
     <Compile Include="EventNodes\EventNode.cs" />
     <Compile Include="EventNodes\Images\StaticImageProvider.cs" />
+    <Compile Include="EventNodes\Menus\BranchEventNode.cs" />
+    <Compile Include="EventNodes\Menus\HelpEventNode.cs" />
     <Compile Include="EventNodes\Menus\InfoEventNode.cs" />
+    <Compile Include="EventNodes\Menus\LinearSelectionEventNode.cs" />
+    <Compile Include="EventNodes\Menus\PatronSelectionEventNode.cs" />
+    <Compile Include="EventNodes\Menus\SelectionEventNode.cs" />
+    <Compile Include="EventNodes\Menus\SelectionScreen.cs" />
     <Compile Include="EventNodes\Menus\TextInfoEventNode.cs" />
     <Compile Include="EventNodes\Menus\RewardEventNode.cs" />
-    <Compile Include="ValueProvider.cs" />
+    <Compile Include="EventNodes\Resources\Trade.cs" />
+    <Compile Include="EventNodes\Resources\TradeScreen.cs" />
+    <Compile Include="EventNodes\Resources\WeaponAugmentProvider.cs" />
+    <Compile Include="EventNodes\Resources\WeaponProvider.cs" />
+    <Compile Include="GamePlayer.cs" />
+    <Compile Include="Generics\ValueProvider.cs" />
+    <Compile Include="Language\LanguageUtils.cs" />
+    <Compile Include="EventNodes\Resources\Patron.cs" />
+    <Compile Include="Generics\ValueConverter.cs" />
     <Compile Include="EventNodes\World\WorldEventNode.cs" />
+    <Compile Include="WeaponDesign\BasicWeapon.cs" />
+    <Compile Include="EventNodes\Resources\Receivable.cs" />
+    <Compile Include="EventNodes\Resources\Reward.cs" />
+    <Compile Include="WeaponDesign\WeaponAugment.cs" />
+    <Compile Include="WeaponDesign\WeaponAugmentFactory.cs" />
+    <Compile Include="WeaponDesign\WeaponAugmentTemplate.cs" />
+    <Compile Include="WeaponDesign\WeaponConfiguration.cs" />
+    <Compile Include="WeaponDesign\WeaponStats.cs" />
     <Compile Include="Window1.xaml.cs">
       <DependentUpon>Window1.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -111,45 +135,45 @@
   <ItemGroup>
     <Compile Include="AI.cs" />
     <Compile Include="AudioPlayer.cs" />
-    <Compile Include="Camera.cs" />
-    <Compile Include="Character.cs" />
-    <Compile Include="CharacterStatusDisplay.cs" />
-    <Compile Include="CollisionRequest.cs" />
-    <Compile Include="Companion.cs" />
-    <Compile Include="Critter.cs" />
-    <Compile Include="Enemy.cs" />
-    <Compile Include="Explosion.cs" />
-    <Compile Include="GameObject.cs" />
-    <Compile Include="Ghost.cs" />
+    <Compile Include="World\Camera.cs" />
+    <Compile Include="World\Character.cs" />
+    <Compile Include="World\CharacterStatusDisplay.cs" />
+    <Compile Include="World\CollisionRequest.cs" />
+    <Compile Include="World\Companion.cs" />
+    <Compile Include="World\Critter.cs" />
+    <Compile Include="World\Enemy.cs" />
+    <Compile Include="World\Explosion.cs" />
+    <Compile Include="World\GameObject.cs" />
+    <Compile Include="World\Ghost.cs" />
     <Compile Include="HitPointBar.cs" />
     <Compile Include="ImageLoader.cs" />
     <Compile Include="JeffsRoboticCastle.cs" />
     <Compile Include="LevelSelectionScreen.cs" />
     <Compile Include="EventNodes\Menus\InfoScreen.cs" />
-    <Compile Include="Painting.cs" />
-    <Compile Include="PickupItem.cs" />
-    <Compile Include="Platform.cs" />
-    <Compile Include="Player.cs" />
-    <Compile Include="Portal.cs" />
-    <Compile Include="Projectile.cs" />
+    <Compile Include="World\Painting.cs" />
+    <Compile Include="World\PickupItem.cs" />
+    <Compile Include="World\Platform.cs" />
+    <Compile Include="World\LevelPlayer.cs" />
+    <Compile Include="World\Portal.cs" />
+    <Compile Include="WeaponDesign\Projectile.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RealityBubble.cs" />
-    <Compile Include="Screen.cs" />
-    <Compile Include="SelectedWeaponsDisplay.cs" />
-    <Compile Include="Stun.cs" />
-    <Compile Include="Weapon.cs" />
-    <Compile Include="EventNodes\Editing\WeaponDesignScreen.cs" />
+    <Compile Include="World\RealityBubble.cs" />
+    <Compile Include="EventNodes\Screen.cs" />
+    <Compile Include="World\SelectedWeaponsDisplay.cs" />
+    <Compile Include="World\Stun.cs" />
+    <Compile Include="World\Weapon.cs" />
+    <Compile Include="EventNodes\Customization\WeaponDesignScreen.cs" />
     <Compile Include="WeaponFactory.cs" />
-    <Compile Include="WeaponGridDisplay.cs" />
-    <Compile Include="WeaponStatusDisplay.cs" />
-    <Compile Include="World.cs" />
-    <Compile Include="WorldLoader.cs" />
-    <Compile Include="WorldScreen.cs" />
-    <Compile Include="WorldSearcher.cs" />
+    <Compile Include="World\WeaponGridDisplay.cs" />
+    <Compile Include="World\WeaponStatusDisplay.cs" />
+    <Compile Include="World\World.cs" />
+    <Compile Include="World\WorldLoader.cs" />
+    <Compile Include="World\WorldScreen.cs" />
+    <Compile Include="World\WorldSearcher.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon.png" />
