@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Windows;
 // The purpose of the WorldSearcher is to quickly find all objects inside an arbitrary region
 class WorldSearcher
 {
@@ -7,15 +8,13 @@ class WorldSearcher
     // constructor, which requires number of dimensions and some estimated sizes
     public WorldSearcher(int dim, double typicalObjectDiameter, double worldSize)
     {
-        double[] diameters = new double[2];
-        diameters[0] = diameters[1] = typicalObjectDiameter;
-        double[] worldDimensions = new double[2];
-        worldDimensions[0] = worldDimensions[1] = worldSize;
+        Size diameters = new Size(typicalObjectDiameter, typicalObjectDiameter);
+        Size worldDimensions = new Size(worldSize, worldSize);
         this.initialize(dim, diameters, worldDimensions);
     }
-    public WorldSearcher(int dim, double[] typicalObjectDiameter, double[] worldSize)
+    public WorldSearcher(int dim, Size typicalObjectSize, Size worldSize)
     {
-        this.initialize(dim, typicalObjectDiameter, worldSize);
+        this.initialize(dim, typicalObjectSize, worldSize);
     }
 
     // Put the item into the world. The location of the item usually may not move until it is removed
@@ -93,10 +92,10 @@ class WorldSearcher
     // Snap the coordinates to multiples of the box size
     public IndexBox getIndexBoxFromWorldBox(WorldBox worldBox)
     {
-	    int x1 = (int)(worldBox.getLowCoordinate(0) / this.blockSize[0]);
-	    int x2 = (int)(worldBox.getHighCoordinate(0) / this.blockSize[0]);
-	    int y1 = (int)(worldBox.getLowCoordinate(1) / this.blockSize[1]);
-        int y2 = (int)(worldBox.getHighCoordinate(1) / this.blockSize[1]);
+	    int x1 = (int)(worldBox.getLowCoordinate(0) / this.blockSize.Width);
+	    int x2 = (int)(worldBox.getHighCoordinate(0) / this.blockSize.Width);
+	    int y1 = (int)(worldBox.getLowCoordinate(1) / this.blockSize.Height);
+        int y2 = (int)(worldBox.getHighCoordinate(1) / this.blockSize.Height);
 	    //Rectangle indexRect(x1, y1, x2 - x1, y2 - y1);
 	    IndexBox indexBox = new IndexBox(x1, x2, y1, y2);
 	    return indexBox;
@@ -192,7 +191,7 @@ class WorldSearcher
     /////////////////////////////////////////////////// Private member functions of WorldSearcher ///////////////////////////////////////////////////////////////////////
 
     // initializer
-    void initialize(int dim, double[] typicalObjectDimensions, double[] worldSize)
+    void initialize(int dim, Size typicalObjectDimensions, Size worldSize)
     {
         if (dim != 2)
         {
@@ -201,14 +200,13 @@ class WorldSearcher
         }
         // figure out how large our array will be to hold everything
         this.numDimensions = dim;
-        this.blockSize = new double[dim];
+        this.blockSize = new Size();
         this.numBlocks = new int[dim];
         int i, j;
-        for (i = 0; i < dim; i++)
-        {
-            this.numBlocks[i] = (int)(Math.Ceiling(worldSize[i] / typicalObjectDimensions[i]));
-            this.blockSize[i] = worldSize[i] / this.numBlocks[i];
-        }
+        this.numBlocks[0] = (int)(Math.Ceiling(worldSize.Width / typicalObjectDimensions.Width));
+        this.blockSize.Width = worldSize.Width / this.numBlocks[0];
+        this.numBlocks[1] = (int)(Math.Ceiling(worldSize.Height / typicalObjectDimensions.Height));
+        this.blockSize.Height = worldSize.Height / this.numBlocks[1];
         // allocate memory for the items in the world
         this.worldBlocks = new System.Collections.Generic.HashSet<GameObject>[numBlocks[0], numBlocks[1]];
         for (i = 0; i < worldBlocks.GetLength(0); i++)
@@ -338,7 +336,7 @@ class WorldSearcher
 
 private
 	int numDimensions;
-	double[] blockSize;
+	Size blockSize;
 	int[] numBlocks;
 	System.Collections.Generic.HashSet<GameObject>[,] worldBlocks; // tells which items are present in each block
     System.Collections.Generic.HashSet<GameObject> items;          // gives all items known to this WorldSearcher

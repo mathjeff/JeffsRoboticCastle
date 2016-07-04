@@ -6,13 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 class SelectedWeaponsDisplay
 {
 // public
-    public SelectedWeaponsDisplay(Canvas newCanvas, double[] position, double[] size)
+    public SelectedWeaponsDisplay(Character subject, Canvas newCanvas, Point position, Size size)
     {
 #if WEAPON_SCROLLWHEEL_VISUAL
         this.weapons = new WeaponStatusDisplay[3];
@@ -20,30 +21,28 @@ class SelectedWeaponsDisplay
         double[] weaponPosition = new double[2];
         position.CopyTo(weaponPosition, 0);
         double[] weaponSize = new double[2];
-        weaponSize[0] = size[0];
-        weaponSize[1] = size[1] / 3;
+        weaponsize.Width = size.Width;
+        weaponsize.Height = size.Height / 3;
         for (i = 0; i < weapons.Length; i++)
         {
             this.weapons[i] = new WeaponStatusDisplay(newCanvas, subject, weaponPosition, weaponSize, i - 1);
-            weaponPosition[1] += size[1] / 3;
+            weaponPosition[1] += size.Height / 3;
         }
 #endif
 #if WEAPON_SEARCH_TREE_VISUAL
-        double[] childPosition = new double[position.Length];
-        position.CopyTo(childPosition, 0);
-        double[] childSize = new double[size.Length];
-        size.CopyTo(childSize, 0);
-        //this.grids = new WeaponGridDisplay[subject.getWeaponTreeBranchFactor()];
+        Point childPosition = new Point(position.X, position.Y);
+        Size childSize = new Size(size.Width, size.Height);
         this.grids = new WeaponGridDisplay[3];
-        childSize[0] /= (1.5 * grids.Length - .5);
+        childSize.Width /= (1.5 * grids.Length - .5);
         int i;
         for (i = 0; i < grids.Length; i++)
         {
             grids[i] = new WeaponGridDisplay(newCanvas, childPosition, childSize);
-            childPosition[0] += 1.5 * childSize[0];
+            childPosition.X += 1.5 * childSize.Width;
         }
         //this.rightGrid = new WeaponGridDisplay(newCanvas, childPosition, childSize);
 #endif
+        this.followCharacter(subject);
     }
     public void followCharacter(Character subject)
     {

@@ -8,7 +8,7 @@
     <ProjectGuid>{05BD96BA-ED14-40F9-8D9F-E827D532F888}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyGameWindow</RootNamespace>
+    <RootNamespace>Castle</RootNamespace>
     <AssemblyName>JeffsRoboticCastle</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -74,6 +74,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="EventNodes\CompositeEventNode.cs" />
+    <Compile Include="EventNodes\Editing\WeaponDesignEventNode.cs" />
+    <Compile Include="EventNodes\EventNode.cs" />
+    <Compile Include="EventNodes\Images\StaticImageProvider.cs" />
+    <Compile Include="EventNodes\Menus\InfoEventNode.cs" />
+    <Compile Include="EventNodes\Menus\TextInfoEventNode.cs" />
+    <Compile Include="EventNodes\Menus\RewardEventNode.cs" />
+    <Compile Include="ValueProvider.cs" />
+    <Compile Include="EventNodes\World\WorldEventNode.cs" />
     <Compile Include="Window1.xaml.cs">
       <DependentUpon>Window1.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -116,7 +125,7 @@
     <Compile Include="ImageLoader.cs" />
     <Compile Include="JeffsRoboticCastle.cs" />
     <Compile Include="LevelSelectionScreen.cs" />
-    <Compile Include="MenuScreen.cs" />
+    <Compile Include="EventNodes\Menus\InfoScreen.cs" />
     <Compile Include="Painting.cs" />
     <Compile Include="PickupItem.cs" />
     <Compile Include="Platform.cs" />
@@ -133,7 +142,7 @@
     <Compile Include="SelectedWeaponsDisplay.cs" />
     <Compile Include="Stun.cs" />
     <Compile Include="Weapon.cs" />
-    <Compile Include="WeaponDesignScreen.cs" />
+    <Compile Include="EventNodes\Editing\WeaponDesignScreen.cs" />
     <Compile Include="WeaponFactory.cs" />
     <Compile Include="WeaponGridDisplay.cs" />
     <Compile Include="WeaponStatusDisplay.cs" />

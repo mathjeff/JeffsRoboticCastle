@@ -1,5 +1,7 @@
 using System.Windows.Media.Imaging;
 using System;
+using System.Windows.Controls;
+using System.Windows;
 
 
 public class ImageLoader
@@ -30,5 +32,17 @@ public class ImageLoader
             image.EndInit();
             return image;
         }
+    }
+
+    public static Image loadImage(String fileName, Size size)
+    {
+        BitmapImage bitmap = loadImage(fileName);
+
+        Image newImage = new Image();
+        newImage.Source = bitmap;
+        newImage.Stretch = System.Windows.Media.Stretch.Fill;
+        newImage.Width = size.Width;
+        newImage.Height = size.Height;
+        return newImage;
     }
 }

@@ -2,82 +2,92 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 class WorldScreen : Screen
 {
 // public
-    public WorldScreen(Canvas c, double[] screenPosition, double[] screenSize)
+    public WorldScreen(Size size, Player player, WorldLoader world) : base(size)
     {
-        this.initialize(c, screenPosition, screenSize);
+        base.Initialize(new Point(), size);
+        this.player = player;
+        this.levelIsComplete = false;
+        this.world = world;
+        this.camera = new Camera(new WorldBox(size), new WorldBox(size));
+        this.createSubviews(new Point(), size);
+        this.world.RegisterForUpdates(this);
     }
-    public override void initialize(Canvas c, double[] screenPosition, double[] screenSize)
+    public void Show()
     {
-        base.initialize(c, screenPosition, screenSize);
-        this.createSubviews(screenPosition, screenSize);
-    }
-    public Canvas getWorldCanvas()
-    {
-        return this.worldCanvas;
-    }
-    public void followCharacter(Character newPlayer, WorldLoader newWorld)
-    {
-        this.player = newPlayer;
-        this.statusDisplay.followCharacter(newPlayer);
-        this.world = newWorld;
-        this.levelIsOver = false;
-        // scroll before showing the screen so that the screen doesn't suddenly move after the first frame
-        this.world.scrollTo(this.player);
-    }
-    public override void show()
-    {
+        this.player.resetForLevel();
         this.stopMovingPlayerLeft();
         this.stopMovingPlayerRight();
-        base.show();
     }
+
+    // Called by the World class to make objects visible
+    public void ShowObject(GameObject o)
+    {
+        Image image = o.getImage();
+        TransformGroup transforms = new TransformGroup();
+        transforms.Children.Add(o.getRenderTransform()); // adjustment of the object compared to the screen
+        transforms.Children.Add(this.camera.Transform); // adjustment of the camera compared to the world
+        image.RenderTransform = transforms;
+        // now add the image to the screen
+        this.worldCanvas.Children.Add(image);
+    }
+
+    // Called by the World class to make objects go away
+    public void HideObject(GameObject o)
+    {
+        this.worldCanvas.Children.Remove(o.getImage());
+    }
+
 // private
-    void createSubviews(double[] position, double[] size)
+    void createSubviews(Point position, Size size)
     {
         // get the canvas on which to put stuff
-        Canvas worldCanvas = this.getCanvas();
+        Canvas screenCanvas = this.getCanvas();
+        
 
         // determine coordinates for the status display
-        double[] statusDisplayPosition = new double[2];
-        double[] statusDisplaySize = new double[2];
-        statusDisplaySize[0] = size[0];
-        statusDisplaySize[1] = 200;
+        Point statusDisplayPosition = new Point();
+        Size statusDisplaySize = new Size();
+        statusDisplaySize.Width = size.Width;
+        double statusHeight = 200;
+        statusDisplaySize.Height = statusHeight;
         // create status display
-        this.statusDisplay = new CharacterStatusDisplay(worldCanvas, statusDisplayPosition, statusDisplaySize);
+        this.statusDisplay = new CharacterStatusDisplay(this.player, screenCanvas, statusDisplayPosition, statusDisplaySize);
         
         // window into the world
-        double[] worldWindowPosition = new double[2];
-        worldWindowPosition[0] = 0;
-        worldWindowPosition[1] = statusDisplayPosition[1] + statusDisplaySize[1];
-        worldWindowSize = new double[2];
-        worldWindowSize[0] = size[0] - worldWindowPosition[0];
-        worldWindowSize[1] = size[1] - worldWindowPosition[1];
+        Point worldWindowPosition = new Point(0, statusDisplayPosition.X + statusDisplaySize.Height);
+        worldWindowSize = new Size(size.Width - worldWindowPosition.X, size.Height - worldWindowPosition.Y);
         // create a canvas to draw on. The game will later ask for it and give it to the WorldLoader
         this.worldCanvas = this.makeCanvas(worldWindowPosition, worldWindowSize);
-        this.getCanvas().Children.Add(this.worldCanvas);
+        screenCanvas.Children.Add(this.worldCanvas);
+        Canvas.SetTop(this.worldCanvas, statusHeight);
+
+        this.camera = new Camera(new WorldBox(0, worldWindowSize.Width, 0, worldWindowSize.Height),
+            new WorldBox(0, worldWindowSize.Width, statusHeight, worldWindowSize.Height));
+
     }
-    public override Screen timerTick(double numSeconds)
+    public Boolean isPlayerSuccessful()
+    {
+        return this.levelIsComplete;
+    }
+    public void TimerTick(double numSeconds)
     {
         if (numSeconds > 0)
+        {
+            this.camera.scrollTo(this.player);
+            this.world.RecenterRealityBubble(this.camera.getWorldBox());
             this.world.timerTick(numSeconds);
-        this.world.scrollTo(this.player);
+        }
         this.statusDisplay.update();
-        base.timerTick(numSeconds);
         if (this.world.characterTouchingPortal(this.player))
-            this.levelIsOver = true;
-        if (this.levelIsOver)
-            return this.exitScreen;
-        else
-            return this;
-    }
-    public void setExitScreen(Screen newScreen)
-    {
-        this.exitScreen = newScreen;
+            this.levelIsComplete = true;
     }
     // player controls
     public void movePlayerUp()
@@ -86,9 +96,6 @@ class WorldScreen : Screen
         this.player.jump();
         // float upward if possible
         this.player.setTargetVY(10000);
-        //double[] newV = this.player.getTargetVelocity();
-        //newV[1] = 20000;
-        //this.player.setTargetVelocity(newV);
     }
     public void stopMovingPlayerUp()
     {
@@ -97,167 +104,79 @@ class WorldScreen : Screen
         {
             this.player.setTargetVY(null);
         }
-        /*double[] v = this.player.getTargetVelocity();
-        if (v[1] > 0)
-        {
-            v[1] = 0;
-            this.player.setTargetVelocity(v);
-        }*/
     }
     public void movePlayerDown()
     {
         this.player.setTargetVY(-2000);
-        // float downward if possible
-        //double[] newV = this.player.getTargetVelocity();
-        //newV[1] = -2000;
-        //this.player.setTargetVelocity(newV);
     }
     public void stopMovingPlayerDown()
     {
         double? v = this.player.getTargetVY();
         if ((v != null) && (v < 0))
-        {
             this.player.setTargetVY(null);
-        }
-        /*double[] v = this.player.getTargetVelocity();
-        if (v[1] < 0)
-        {
-            v[1] = 0;
-            this.player.setTargetVelocity(v);
-        }*/
     }
     public void movePlayerLeft()
     {
         this.player.setTargetVX(-2000);
-        /*
-        double[] newV = this.player.getTargetVelocity();
-        newV[0] = -10000;
-        this.player.setTargetVelocity(newV);
-        */
     }
     public void stopMovingPlayerLeft()
     {
         double? v = this.player.getTargetVX();
         if ((v != null) && (v < 0))
-        {
             this.player.setTargetVX(0);
-        }
-        /*double[] v = this.player.getTargetVelocity();
-        if (v[0] < 0)
-        {
-            v[0] = 0;
-            this.player.setTargetVelocity(v);
-        }*/
     }
     public void movePlayerRight()
     {
         this.player.setTargetVX(2000);
-        /*double[] newV = this.player.getTargetVelocity();
-        newV[0] = 10000;
-        this.player.setTargetVelocity(newV);
-        */
     }
     public void stopMovingPlayerRight()
     {
         double? v = this.player.getTargetVX();
         if ((v != null) && (v > 0))
-        {
             this.player.setTargetVX(0);
-        }
-        /*double[] v = this.player.getTargetVelocity();
-        if (v[0] > 0)
-        {
-            v[0] = 0;
-            this.player.setTargetVelocity(v);
-        }*/
     }
     public override void KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
-        // #define DESIGN_HERE
         if (e.Key == Key.W)
-        {
-            //this.playerJump();
             this.movePlayerUp();
-        }
         if (e.Key == Key.S)
-        {
-            //this.playerJump();
             this.movePlayerDown();
-        }
         if (e.Key == Key.A)
-        {
             this.movePlayerLeft();
-        }
         if (e.Key == Key.D)
-        {
             this.movePlayerRight();
-        }
         if (e.Key == Key.OemSemicolon)
-        {
-            //this.game.selectWeapon1();
             this.playerPressTrigger(true);
-        }
         if (e.Key == Key.L)
-        {
-            //this.game.cyclePlayerWeaponBackward();
             this.selectWeapon1();
-        }
         if (e.Key == Key.P)
-        {
             this.selectWeapon2();
-        }
         if (e.Key == Key.OemQuotes)
-        {
             this.selectWeapon3();
-        }
         if (e.Key == Key.Space)
-        {
-            //this.resetPlayerWeapon();
             this.reloadPlayerAmmo();
-        }
         if ((e.Key == Key.Escape) && (this.isEscapeEnabled()))
-        {
-            this.levelIsOver = true;
-        }
+            this.levelIsComplete = true;
         if (e.Key == Key.Enter)
-        {
             this.togglePause();
-            //this.resetPlayerWeapon();
-        }
         if (e.Key == Key.RightShift)
-        {
             this.pause();
-        }
         if (e.Key == Key.LeftShift)
-        {
             this.unPause();
-        }
         base.KeyDown(sender, e);
     }
     public override void KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
     {
-        // #define DESIGN_HERE
         if (e.Key == Key.W)
-        {
             this.stopMovingPlayerUp();
-        }
         if (e.Key == Key.W)
-        {
             this.stopMovingPlayerDown();
-        }
         if (e.Key == Key.A)
-        {
             this.stopMovingPlayerLeft();
-        }
         if (e.Key == Key.D)
-        {
             this.stopMovingPlayerRight();
-        }
         if (e.Key == Key.OemSemicolon)
-        {
-            //System.Diagnostics.Trace.WriteLine("trigger released");
             this.playerPressTrigger(false);
-        }
         base.KeyUp(sender, e);
     }
     public void pause()
@@ -322,27 +241,23 @@ class WorldScreen : Screen
     }
 
 
-    public double[] getWorldWindowSize()
+    public Size getWorldWindowSize()
     {
         return this.worldWindowSize;
     }
-    double[] worldWindowSize;
-    /*
-    double[] statusDisplayPosition;
-    double[] statusDisplaySize;
-    double[] worldWindowPosition;
-    */
+    Size worldWindowSize;
     CharacterStatusDisplay statusDisplay;
     // the canvas to draw the world on
     Canvas worldCanvas;
     // the character that the user controls
-    Character player;
+    Player player;
     // the world that the player is in
     WorldLoader world;
     // the screen that will be shown when the level exits
     Screen exitScreen;
     // whether the user has satisfied the criteria to exit the level
-    bool levelIsOver;
+    bool levelIsComplete;
     // whether the pushing the escape button should exit the level
     bool escapeEnabled;
+    Camera camera;
 }

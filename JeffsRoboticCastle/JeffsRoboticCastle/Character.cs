@@ -11,7 +11,7 @@ class Character : GameObject
     }
     public void copyFrom(Character original)
     {
-        // initialize
+        // Initialize
         base.copyFrom(original);
         // copy attributes from the original
         this.brain = original.brain;

@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 
 // To make it a feasible task to process the world, only parts of the world exist at at time
-// The RealityBubble tells which parts of the world exist at the moment
+// The RealityBubble gives the coordinates of the area of the world that exists at the moment
 class RealityBubble
 {
 //public:
     // creates a reality bubble
-    public RealityBubble(WorldBox newActiveRegion, WorldBox newExistentRegion)
+    public RealityBubble(WorldBox activeRegion, WorldBox existentRegion)
     {
-        this.activeRegion = newActiveRegion;
-        this.existentRegion = newExistentRegion;
+        this.activeRegion = activeRegion;
+        this.existentRegion = existentRegion;
     }
     public RealityBubble(RealityBubble original)
     {

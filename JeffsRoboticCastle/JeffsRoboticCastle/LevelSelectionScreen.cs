@@ -2,20 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 
-class LevelSelectionScreen : MenuScreen
+/*
+class LevelSelectionScreen : Screen
 {
 // public
-    public LevelSelectionScreen(Canvas c, double[] screenSize)
+    public LevelSelectionScreen()
     {
-        this.initialize(c, screenSize);
     }
-    public override void initialize(System.Windows.Controls.Canvas c, double[] screenSize)
+    public override void Initialize(Point screenLocation, Size screenSize)
     {
-        base.initialize(c, screenSize);
-        this.setBackgroundBitmap(ImageLoader.loadImage("LevelSelectionImage.png"));
+        this.setBackgroundImage(ImageLoader.loadImage("LevelSelectionImage.png", screenSize));
         this.addSubviews();
+    }
+    private int parseInt(TextBox field)
+    {
+        if (field.Text == "")
+            field.Text = "0";
+        return Int32.Parse(field.Text);
     }
     public int getChosenLevelNumber()
     {
@@ -31,11 +37,7 @@ class LevelSelectionScreen : MenuScreen
     // private
     void addSubviews()
     {
-        /*
-        Label levelLabel = new Label();
-        levelLabel.Content = "Choose a level to start at. Level 1 is recommended.";
-        this.addControl(levelLabel, 100, 100, 100, 20);
-        */
+        
         //System.Windows.Controls.ListView
         Label levelLabel = new Label();
         levelLabel.Content = "Level (1-9):";
@@ -51,3 +53,4 @@ class LevelSelectionScreen : MenuScreen
 
     System.Windows.Controls.TextBox levelBox;
 }
+*/

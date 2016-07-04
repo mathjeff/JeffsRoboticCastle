@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -9,25 +10,26 @@ using System.Windows.Shapes;
 class HitPointBar
 {
 // public
-    public HitPointBar(Canvas canvas, double[] position, double[] size)
+    public HitPointBar(Character subject, Canvas canvas, Point position, Size size)
     {
+        if (subject == null)
+            throw new ArgumentException("Character cannot be null");
+        this.character = subject;
+
         this.backgroundBar = new Rectangle();
-        backgroundBar.Width = size[0];
-        backgroundBar.Height = size[1];
+        backgroundBar.Width = size.Width;
+        backgroundBar.Height = size.Height;
         backgroundBar.Fill = Brushes.GhostWhite;
-        backgroundBar.RenderTransform = new TranslateTransform(position[0], position[1]);
+        backgroundBar.RenderTransform = new TranslateTransform(position.X, position.Y);
         canvas.Children.Add(backgroundBar);
 
         this.valueBar = new Rectangle();
-        valueBar.Width = size[0];
-        valueBar.Height = size[1];
+        valueBar.Width = size.Width;
+        valueBar.Height = size.Height;
         valueBar.Fill = Brushes.Red;
-        valueBar.RenderTransform = new TranslateTransform(position[0], position[1]);
+        valueBar.RenderTransform = new TranslateTransform(position.X, position.Y);
         canvas.Children.Add(valueBar);
-    }
-    public void followCharacter(Character subject)
-    {
-        this.character = subject;
+
         this.update();
     }
     public void update()

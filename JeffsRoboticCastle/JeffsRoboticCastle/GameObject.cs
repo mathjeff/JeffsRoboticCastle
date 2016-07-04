@@ -4,8 +4,9 @@ using System;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Collections;
+using System.Windows;
 
-// The WorldBox class represents a multidimensional rectangular prism.
+// The WorldBox class represents a multidimensional rectangular prism of floats (an area of the world)
 // Currently, it is two dimensions, which makes it a rectangle.
 class WorldBox
 {
@@ -25,6 +26,9 @@ class WorldBox
         this.highCoordinates = new double[original.highCoordinates.Length];
         original.lowCoordinates.CopyTo(this.lowCoordinates, 0);
         original.highCoordinates.CopyTo(this.highCoordinates, 0);
+    }
+    public WorldBox(Size size) : this(0, size.Width, 0, size.Height)
+    {
     }
     public double getLowCoordinate(int index)
     {

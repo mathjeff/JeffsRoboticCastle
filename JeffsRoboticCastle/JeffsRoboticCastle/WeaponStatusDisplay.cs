@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -11,35 +12,35 @@ class WeaponStatusDisplay
 {
 // public
     //public WeaponStatusDisplay(Canvas newCanvas, Character subject, double[] position, double[] size, int relativeIndex)
-    public WeaponStatusDisplay(Canvas newCanvas, double[] position, double[] size, Weapon newWeapon)
+    public WeaponStatusDisplay(Canvas newCanvas, Point position, Size size, Weapon newWeapon)
     {
         //this.character = subject;
         //this.indexOffset = relativeIndex;
         // The image of the weapon
         this.weaponImage = new Image();
-        this.weaponImage.Height = size[1];
-        this.weaponImage.Width = Math.Min(size[1], size[0] / 2);
-        this.weaponImage.RenderTransform = new TranslateTransform(position[0], position[1] + (size[1] - weaponImage.Height) / 2);
+        this.weaponImage.Height = size.Height;
+        this.weaponImage.Width = Math.Min(size.Height, size.Width / 2);
+        this.weaponImage.RenderTransform = new TranslateTransform(position.X, position.Y + (size.Height - weaponImage.Height) / 2);
         newCanvas.Children.Add(this.weaponImage);
         // A background for the ammo bar
         this.ammoBarBackground = new Rectangle();
-        this.ammoBarBackground.RenderTransform = new TranslateTransform(position[0] + weaponImage.Width, position[1]);
+        this.ammoBarBackground.RenderTransform = new TranslateTransform(position.X + weaponImage.Width, position.Y);
         this.ammoBarBackground.Fill = Brushes.Gray;
-        this.ammoBarBackground.Width = size[0] - weaponImage.Width;
-        this.ammoBarBackground.Height = size[1];
+        this.ammoBarBackground.Width = size.Width - weaponImage.Width;
+        this.ammoBarBackground.Height = size.Height;
         newCanvas.Children.Add(this.ammoBarBackground);
         // An ammo bar for the weapon
         this.ammoBar = new Rectangle();
-        this.ammoBar.RenderTransform = new TranslateTransform(position[0] + weaponImage.Width, position[1]);
+        this.ammoBar.RenderTransform = new TranslateTransform(position.X + weaponImage.Width, position.Y);
         this.ammoBar.Fill = Brushes.AliceBlue;
-        this.ammoBar.Width = size[0] - weaponImage.Width;
-        this.ammoBar.Height = size[1];
+        this.ammoBar.Width = size.Width - weaponImage.Width;
+        this.ammoBar.Height = size.Height;
         newCanvas.Children.Add(this.ammoBar);
         // a status bar indicating how soon the weapon will fire
         this.firingBar = new Rectangle();
-        this.firingBar.RenderTransform = new TranslateTransform(position[0] + weaponImage.Width, position[1]);
-        this.firingBar.Width = size[0] - weaponImage.Width;
-        this.firingBar.Height = size[1] / 3;
+        this.firingBar.RenderTransform = new TranslateTransform(position.X + weaponImage.Width, position.Y);
+        this.firingBar.Width = size.Width - weaponImage.Width;
+        this.firingBar.Height = size.Height / 3;
         newCanvas.Children.Add(firingBar);
         this.canvas = newCanvas;
         this.setWeapon(newWeapon);

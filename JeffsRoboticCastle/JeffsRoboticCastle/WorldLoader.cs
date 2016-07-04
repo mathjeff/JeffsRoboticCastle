@@ -10,31 +10,22 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows;
 
-
+// The WorldLoader class implements the automatic loading and unloading of objects in the World based on Player location
 class WorldLoader
 {
 // Public
     // Constructor
-    public WorldLoader(Canvas canvas, double[] screenSize, int levelNumber, List<Weapon> possibleEnemyWeapons)
+    public WorldLoader(Size realityBubbleSize, int difficulty, List<Weapon> enemyWeaponChoices)
     {
-        // setup a canvas to put the world on, for the purpose of cropping
-        this.worldCanvas = canvas;
-        this.enemyWeaponChoices = possibleEnemyWeapons;
+        this.enemyWeaponChoices = enemyWeaponChoices;
         // setup machinery to make it fast to run
-        this.blockSize = new double[2];
-        blockSize[0] = screenSize[0] / 8;
-        blockSize[1] = screenSize[1] / 4;
-        double[] characterActiveDimensions = new double[2];
-        characterActiveDimensions[0] = screenSize[0];
-        characterActiveDimensions[1] = screenSize[1] * 1.5;
-        double[] terrainActiveDimensions = new double[2];
-        terrainActiveDimensions[0] = characterActiveDimensions[0] + blockSize[0] * 2;
-        terrainActiveDimensions[1] = characterActiveDimensions[1] + blockSize[1] * 2;
-        this.worldDimensions = new double[2];
-        worldDimensions[0] = 6000 + 2000 * levelNumber;
-        worldDimensions[1] = 1600;
+        this.blockSize = new Size(realityBubbleSize.Width / 8, realityBubbleSize.Height / 4);
+        Size characterActiveDimensions = new Size(realityBubbleSize.Width, realityBubbleSize.Height * 1.5);
+        Size terrainActiveDimensions = new Size(characterActiveDimensions.Width + blockSize.Width * 2,
+            characterActiveDimensions.Height + blockSize.Height * 2);
+        this.worldDimensions = new Size(6000 + 2000 * difficulty, 1600);
         // make the world
-        this.world = new World(worldCanvas, screenSize, terrainActiveDimensions);
+        this.world = new World(terrainActiveDimensions);
         // Inform the world who it needs to tell whenever something moves
         this.world.setLoader(this);
         // Setup to hold the unspawned objects
@@ -42,19 +33,15 @@ class WorldLoader
         this.characterSearcher = new WorldSearcher(2, blockSize, worldDimensions);
 
         // calculate the initial reality bubbles 
-        WorldBox terrainRegion = new WorldBox(0, terrainActiveDimensions[0], 0, terrainActiveDimensions[1]);
-        WorldBox characterRegion = new WorldBox(0, characterActiveDimensions[0], 0, characterActiveDimensions[1]);
-        //int i;
-        //for (i = 0; i < 2; i++)
-        //    existentRegion.enlarge(i, existentRegion.getSize(i));
-        this.initialRealityBubble = new RealityBubble(characterRegion, terrainRegion);
-        this.realityBubble = this.calculateRealityBubble();
+        WorldBox terrainRegion = new WorldBox(0, terrainActiveDimensions.Width, 0, terrainActiveDimensions.Height);
+        WorldBox characterRegion = new WorldBox(0, characterActiveDimensions.Width, 0, characterActiveDimensions.Height);
+        
+        this.realityBubble = this.initialRealityBubble = new RealityBubble(characterRegion, terrainRegion);
         this.objectsToUnspawn = new System.Collections.Generic.HashSet<GameObject>();
         this.objectsToDeactivate = new System.Collections.Generic.HashSet<GameObject>();
         this.loadedObjects = new System.Collections.Generic.HashSet<GameObject>();
 
-
-        this.populate(levelNumber);
+        this.populate(difficulty);
 
     }
     public void pause()
@@ -69,29 +56,19 @@ class WorldLoader
     {
         this.paused = !(this.paused);
     }
-    public void scrollTo(GameObject o)
+    // Moves the reality bubble to be centered on the given box
+    public void RecenterRealityBubble(WorldBox boxToCenterOn)
     {
-        // Now remove anything from the previous tick that fell off the edge of the world
+        // First remove anything from the previous tick that fell off the edge of the world
         foreach (GameObject o2 in this.objectsToUnspawn)
         {
             this.world.unloadItem(o2);
         }
-        // First, deactivate anything from the previous tick that is getting close to the edge of the world
-        // Currently this is not being used
-        /*
-        foreach (GameObject o2 in this.objectsToDeactivate)
-        {
-            this.world.deactivateItem(o2);
-        }*/
-        this.objectsToDeactivate.Clear();
         this.objectsToUnspawn.Clear();
 
-
-        // Now move the world
-        this.world.scrollTo(o);
-        
-        // Compute the new and old reality bubbles so we can load and unload as necessary
-        RealityBubble newRealityBubble = this.calculateRealityBubble();
+        // Determine the location of the new reality bubble
+        RealityBubble newRealityBubble = new RealityBubble(this.initialRealityBubble);
+        newRealityBubble.centerOn(boxToCenterOn);
         WorldBox newExistenceRegion = newRealityBubble.getExistentRegion();
         WorldBox oldExistenceRegion = this.realityBubble.getExistentRegion();
         WorldBox newActiveRegion = newRealityBubble.getActiveRegion();
@@ -100,28 +77,24 @@ class WorldLoader
         System.Collections.Generic.List<GameObject> previouslyActive = this.characterSearcher.getObjectsOnlyInA(oldActiveRegion, newActiveRegion);
         foreach (GameObject o2 in previouslyActive)
         {
-            //this.world.deactivateItem(o2);
             this.world.removeItem(o2);
         }
         // Find everything that is no longer present
         System.Collections.Generic.List<GameObject> oldItems = this.terrainSearcher.getObjectsOnlyInA(oldExistenceRegion, newExistenceRegion);
         foreach (GameObject o2 in oldItems)
         {
-            //this.world.unloadItem(o2);
             this.world.removeItem(o2);
         }
         // Find everything that just became present
         System.Collections.Generic.List<GameObject> newItems = this.terrainSearcher.getObjectsOnlyInA(newExistenceRegion, oldExistenceRegion);
         foreach (GameObject o2 in newItems)
         {
-            //this.world.addDisabledItem(o2);
             this.world.addItem(o2);
         }
         // Find everything that just became active
         System.Collections.Generic.List<GameObject> newlyActive = this.characterSearcher.getObjectsOnlyInA(newActiveRegion, oldActiveRegion);
         foreach (GameObject o2 in newlyActive)
         {
-            //this.world.activateItem(o2);
             this.world.addItem(o2);
         }
         this.realityBubble = newRealityBubble;
@@ -249,17 +222,6 @@ class WorldLoader
                 this.objectsToUnspawn.Add(o);
             }
 
-            /*
-            else
-            {
-                IndexBox activeIndices = this.searcher.getIndexBoxFromWorldBox(this.realityBubble.getActiveRegion());
-                if (!objectIndices.intersects(activeIndices))
-                {
-                    // flag it to deactivate later
-                    this.objectsToDeactivate.Add(o);
-                }
-            }
-            */
         }
     }
     // tells whether this character is touching any portans
@@ -270,6 +232,7 @@ class WorldLoader
     // return an image source with a screenshot of the world
     public ImageSource getScreenshot()
     {
+        // TODO fix this
         double actualWidth = this.worldCanvas.ActualWidth;
         double actualHeight = this.worldCanvas.ActualHeight;
 
@@ -334,10 +297,11 @@ class WorldLoader
         }
         if (bestPainting != null)
         {
+            // TODO fix this
             // get the current screenshot
-            ImageSource source = this.getScreenshot();
+            // ImageSource source = this.getScreenshot();
             // put the screenshot in the painting
-            bestPainting.setBitmap(source);
+            // bestPainting.setBitmap(source);
         }
     }
     // performs cleanup on the world so it is essentially gone
@@ -345,6 +309,12 @@ class WorldLoader
     {
         this.world.destroy();
     }
+
+    public void RegisterForUpdates(WorldScreen screen)
+    {
+        this.world.RegisterForUpdates(screen);
+    }
+
 // Private
     // put stuff in the world
     void populate(int levelNumber)
@@ -370,9 +340,9 @@ class WorldLoader
         int i, type;
         Random generator = new Random();
         // add wallpaper
-        for (x = 0; x < worldDimensions[0]; x += 1024)
+        for (x = 0; x < this.worldDimensions.Width; x += 1024)
         {
-            for (y = 500; y < worldDimensions[1]; y += 1024)
+            for (y = 500; y < this.worldDimensions.Height; y += 1024)
             {
                 location = new double[2]; location[0] = x; location[1] = y;
                 this.addItem(new Painting(location, 1));
@@ -381,9 +351,9 @@ class WorldLoader
             //this.addItem(new PickupItem(location));
         }
         // add paintings to display screenshots 
-        for (x = 0; x < worldDimensions[0]; x += 500)
+        for (x = 0; x < this.worldDimensions.Width; x += 500)
         {
-            for (y = 0; y < worldDimensions[1]; y += 500)
+            for (y = 0; y < this.worldDimensions.Height; y += 500)
             {
                 location = new double[2]; location[0] = x; location[1] = y + generator.Next(500);
                 this.addItem(new Painting(location, 0));
@@ -393,12 +363,12 @@ class WorldLoader
 #if true
         int numWeapons;
         // add enemies
-        while (x < worldDimensions[0])
+        while (x < worldDimensions.Width)
         {
             // choose the enemy's location
             x += (9000 * generator.NextDouble() * generator.NextDouble() + 300) / (levelNumber + 1);
             //y = worldDimensions[1] * generator.NextDouble();
-            for (y = blockSize[1] * generator.NextDouble(); y < worldDimensions[1] / 2; y += 1000)
+            for (y = blockSize.Height * generator.NextDouble(); y < worldDimensions.Height / 2; y += 1000)
             {
                 location = new double[2]; location[0] = x; location[1] = y;
                 // choose the enemy's type
@@ -445,7 +415,7 @@ class WorldLoader
         
         
         // add an exit
-        location[0] = worldDimensions[0] + 100;
+        location[0] = worldDimensions.Width + 100;
         location[1] = 50;
         Portal exit = new Portal();
         exit.setCenter(location);
@@ -458,11 +428,11 @@ class WorldLoader
             if (generator.Next(2) == 0)
                 spacing *= 2;
         }
-        double roofAltitude = worldDimensions[1] * .75;
-        int count = (int)(worldDimensions[0] / spacing);
+        double roofAltitude = worldDimensions.Height * .75;
+        int count = (int)(worldDimensions.Width / spacing);
         for (i = 0; i < count; i++)
         {
-            x = generator.NextDouble() * worldDimensions[0] + 100;
+            x = generator.NextDouble() * worldDimensions.Width + 100;
             y = generator.NextDouble() * roofAltitude;
             location = new double[2]; location[0] = x; location[1] = y;
             type = (int)(generator.NextDouble() * 2);
@@ -554,7 +524,7 @@ class WorldLoader
         // top wall
         GameObject topWall;
         x = 0;
-        while (x < worldDimensions[0])
+        while (x < worldDimensions.Width)
         {
             location = new double[2]; location[0] = x; location[1] = roofAltitude;
             topWall = new Platform(location, 0);
@@ -565,7 +535,7 @@ class WorldLoader
         // left wall
         GameObject leftWall;
         y = 0;
-        while (y < worldDimensions[1])
+        while (y < worldDimensions.Height)
         {
             location = new double[2]; location[0] = 0; location[1] = y;
             leftWall = new Platform(location, 1);
@@ -577,37 +547,14 @@ class WorldLoader
         this.addItem(leftWall);
         // don't need to bother with the right wall, because the exit is there
     }
-    // Using the current values of the world camera, calculate which parts of the world need to be part of reality
-    private RealityBubble calculateRealityBubble()
-    {
-        // First create the smallest possible indexbox containing the camera
-        WorldBox visibleBox = new WorldBox(this.world.getVisibleWorldBox());
 
-        RealityBubble newBubble = new RealityBubble(this.initialRealityBubble);
-        newBubble.centerOn(visibleBox);
-
-
-        // Now increase the size a little for the region where time exists
-        //activeBox.enlarge(0, activeBox.getSize(0));
-        //activeBox.enlarge(1, activeBox.getSize(1));
-
-        // Lastly, increase the size even more for the region where time doesn't exist
-        //WorldBox existentBox = new WorldBox(activeBox);
-        //existentBox.enlarge(0, activeBox.getSize(0) / 3);
-        //existentBox.enlarge(1, activeBox.getSize(1) / 3);
-
-        //RealityBubble newBubble = new RealityBubble(activeBox, existentBox);
-        return newBubble;
-    }
-    //Canvas gameCanvas;
     Canvas worldCanvas;
     World world;
     WorldSearcher characterSearcher;
     WorldSearcher terrainSearcher;
     RealityBubble initialRealityBubble;
-    //double[] dimensionsOfRealityBubble;
-    double[] blockSize;
-    double[] worldDimensions;
+    Size blockSize;
+    Size worldDimensions;
     RealityBubble realityBubble;
     System.Collections.Generic.HashSet<GameObject> objectsToUnspawn;
     System.Collections.Generic.HashSet<GameObject> objectsToDeactivate;

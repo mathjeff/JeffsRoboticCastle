@@ -10,28 +10,29 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 
+// The World class represents the content of the world currently-loaded portion of the world
+// The World class doesn't directly support automatically loading and unloading of objects; that's done by the WorldLoader
+// The World class still needs to know the approximate size of the RealityBubble, however, to optimizing searching params
 class World
 {
 // public
     // constructor
-	public World(Canvas newCanvas, double[] screenSize, double[] sizeOfRealityBubble)
+	public World(Size sizeOfRealityBubble)
     {
-        this.canvas = newCanvas;
-        this.objects = new System.Collections.Generic.List<GameObject>();
-        this.projectiles = new System.Collections.Generic.List<Projectile>();
-        this.explosions = new System.Collections.Generic.List<Explosion>();
-        this.characters = new System.Collections.Generic.List<Character>();
+        this.objects = new List<GameObject>();
+        this.projectiles = new List<Projectile>();
+        this.explosions = new List<Explosion>();
+        this.characters = new List<Character>();
+        this.screensToInformOfObjectAdditions = new List<WorldScreen>();
 
         this.dimensionsOfRealityBubble = sizeOfRealityBubble;
         // the first index into the WorldSearcher array is the team number
         // the second index into the WorldSearcher array is the type: {0 = Characters and platforms, 1 = projectiles, 2 = explosions, 3 = ghost}
         this.searchers = new WorldSearcher[3, 4];
         int i, j;
-        double[] typicalDimensions = new double[2];
-        typicalDimensions[0] = typicalDimensions[1] = 100;
-        // projectiles are usually few in number, so use smaller boxes for optimizing projectiles
-        double[] typicalProjectileDimensions = new double[2];
-        typicalProjectileDimensions[0] = typicalProjectileDimensions[1] = 50;
+        Size typicalDimensions = new Size(100, 100);
+        // projectiles are usually few in number and small in size, so use smaller boxes for optimizing projectiles
+        Size typicalProjectileDimensions = new Size(50, 50);
         for (i = 0; i < 3; i++)
         {
             for (j = 0; j < 4; j++)
@@ -50,17 +51,9 @@ class World
             }
         }
         // terrain is usually spaced out further, so use larger boxes for optimizing terrain
-        double[] typicalTerrainDimensions = new double[2];
-        typicalTerrainDimensions[0] = typicalTerrainDimensions[1] = 200;
+        Size typicalTerrainDimensions = new Size(200, 200);
         this.searchers[0, 0] = new WorldSearcher(2, typicalTerrainDimensions, dimensionsOfRealityBubble);
-        this.worldImageTransform = new MatrixTransform();
-        this.camera = new Camera(new WorldBox(0, screenSize[0], 0, screenSize[1]), new WorldBox(0, screenSize[0], 0, screenSize[1]));
-        this.camera.saveTransformIn(worldImageTransform);
-        //this.worldImageTransform.Matrix.Translate(0, 200);
-        //this.worldImageTransform.Matrix.Skew(0, 30);
-        //this.worldImageTransform.Matrix = new Matrix(1, 0, 2, 1, 0, 800);
-
-        //this.worldImageTransform = new TranslateTransform(0, -200);
+        
     }
     public void setLoader(WorldLoader newLoader)
     {
@@ -171,14 +164,10 @@ class World
     }
     public void addDisabledObject(GameObject o)
     {
-        // add the common transform so we can shift the screen all at once
-        Image image = o.getImage();
-        TransformGroup transforms = new TransformGroup();
-        transforms.Children.Add(o.getRenderTransform());
-        transforms.Children.Add(this.worldImageTransform);
-        image.RenderTransform = transforms;
-        // add the image to the screen
-        canvas.Children.Add(image);
+        foreach (WorldScreen worldScreen in this.screensToInformOfObjectAdditions)
+        {
+            worldScreen.ShowObject(o);
+        }
     }
     public void addDisabledItem(GameObject item)
     {
@@ -349,11 +338,7 @@ class World
         this.unloadItem(item);
     }
 
-    public WorldBox getVisibleWorldBox()
-    {
-        return this.camera.getWorldBox();
-    }
-
+    
     public void removeCharacter(Character c)
     {
         // remove it from the world
@@ -435,7 +420,7 @@ class World
     {
         return this.explosions.Count;
     }
-    // RemoveObject gets rid of the object forever, but only gets rid of attributes pertaining specific to the GameObject class
+    // HideObject gets rid of the object forever, but only gets rid of attributes pertaining specific to the GameObject class
     public void removeObject(GameObject o)
     {
         // remove it from the world
@@ -446,8 +431,10 @@ class World
     public void unloadObject(GameObject o)
     {
         this.objects.Remove(o);
-        //o.activations.Add(2);
-        canvas.Children.Remove(o.getImage());
+        foreach (WorldScreen worldScreen in this.screensToInformOfObjectAdditions)
+        {
+            worldScreen.HideObject(o);
+        }
     }
     // This function gets called when an object is being removed
     public void removingObject(GameObject o)
@@ -456,17 +443,13 @@ class World
         if (this.loader != null)
             this.loader.removingObject(o);
     }
-    public void scrollTo(GameObject o)
-    {
-        if (this.camera.scrollTo(o))
-            this.camera.saveTransformIn(this.worldImageTransform);
-    }
+
     public void timerTick(double numSeconds)
     {
         // Must process AI before clearing collision flags or after moving because we only let it jump if it's on the ground
         // Must clear collision flags before moving because moving will set the collision flags again
         // Should have projectiles find targets before moving
-        // Should process explosions before processing death beacause explosions can cause death
+        // Should process explosions before processing death because explosions can cause death
         // Must process explosions before exploding projectiles because the explosions can explode other projectiles
         // Should process explosions before moving characters so that a detonated projectile will always do damage
 
@@ -496,13 +479,10 @@ class World
         request.setRequestGaia(true);
         request.setRequestGhosts(true);
         List<GameObject> collisions = this.findCollisions(request);
-        if (collisions.Count > 0)
+        foreach (GameObject collision in collisions)
         {
-            foreach (GameObject collision in collisions)
-            {
-                if (collision.isAPortal() && collision.intersects(character))
-                    return true;
-            }
+            if (collision.isAPortal() && collision.intersects(character))
+                return true;
         }
         return false;
     }
@@ -521,7 +501,7 @@ class World
     // Find the closest object to a certain object
     public GameObject findNearestObject(CollisionRequest request)
     {
-        System.Collections.Generic.List<GameObject> candidates = null;
+        List<GameObject> candidates = null;
         GameObject o = request.getObject();
         bool hasAHint = request.hasASizeHint();
         if (hasAHint)
@@ -550,6 +530,14 @@ class World
             candidates = this.findCollisions(request);
         }
         return o.findClosest(candidates);
+    }
+    public void RegisterForUpdates(WorldScreen screen)
+    {
+        this.screensToInformOfObjectAdditions.Add(screen);
+        foreach (GameObject o in this.objects)
+        {
+            screen.ShowObject(o);
+        }
     }
 // private
     void clearCollisionFlags()
@@ -625,7 +613,7 @@ class World
     // search for a target for the given projectile
     /*GameObject findTargetFor(Projectile p)
     {
-        System.Collections.Generic.List<GameObject> candidates;
+        List<GameObject> candidates;
         if (p.getTarget() == null)
         {
             // If it doesn't yet have a target, then we have little idea about where the closest target may be.
@@ -727,7 +715,7 @@ class World
     {
         int i, j;
         // for each explosion, figure out what's nearby
-        System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
+        List<GameObject> collisions = new List<GameObject>();
         for (i = explosions.Count - 1; i >= 0; i--)
         {
             // find all enemy characters and platforms
@@ -825,7 +813,7 @@ class World
     // have each character pick up any powerups that he or she is touching
     void pickupPowerups(double numSeconds)
     {
-        System.Collections.Generic.List<GameObject> collisions;
+        List<GameObject> collisions;
         foreach (Character character in this.characters)
         {
             CollisionRequest request = new CollisionRequest();
@@ -885,7 +873,7 @@ class World
             }
 
 		    // find obstacles that may collide with it
-            System.Collections.Generic.List<GameObject> collisions;
+            List<GameObject> collisions;
             double[] newMove;
             if (o.isAProjectile())
             {
@@ -1176,15 +1164,15 @@ class World
 	    }
     }
     // finds all potential collisions of the desired type for the given item
-    //System.Collections.Generic.List<GameObject> findCollisions(GameObject item, bool includeAllies, bool includeGaia, bool includeEnemies, double[] move, bool includeCharacters, bool includeProjectiles, bool includeExplosions, bool includeGhosts)
-    System.Collections.Generic.List<GameObject> findCollisions(CollisionRequest request)
+    //List<GameObject> findCollisions(GameObject item, bool includeAllies, bool includeGaia, bool includeEnemies, double[] move, bool includeCharacters, bool includeProjectiles, bool includeExplosions, bool includeGhosts)
+    List<GameObject> findCollisions(CollisionRequest request)
     {
         // open up some of the data in the request
         GameObject item = request.getObject();
         double[] move = request.getCollisionMove();
         // create an empty list to save in
-        System.Collections.Generic.List<GameObject> collisions = new System.Collections.Generic.List<GameObject>();
-        System.Collections.Generic.List<GameObject> temp = new System.Collections.Generic.List<GameObject>();
+        List<GameObject> collisions = new List<GameObject>();
+        List<GameObject> temp = new List<GameObject>();
         int team;
         for (team = 0; team < this.searchers.GetLength(0); team++)
         {
@@ -1250,18 +1238,6 @@ class World
     WorldSearcher getSearcherForObject(GameObject item)
     {
         int typeIndex = 0;
-        /*if (typeof(item).IsSubclassOf(typeof(Character)) || typeof(item).IsSubclassOf(typeof(Platform)))
-        {
-            typeIndex = 0;
-        }
-        if (typeof(item).IsSubclassOf(typeof(Projectile)))
-        {
-            typeIndex = 1;
-        }
-        if (typeof(item).IsSubclassOf(typeof(Explosion)))
-        {
-            typeIndex = 2;
-        }*/
         if (item.isAProjectile())
             typeIndex = 1;
         if (item.isAnExplosion())
@@ -1270,16 +1246,15 @@ class World
         
     }
     // variables
-    System.Collections.Generic.List<GameObject> objects;
-	System.Collections.Generic.List<Projectile> projectiles;
-	System.Collections.Generic.List<Explosion> explosions;
-	System.Collections.Generic.List<Character> characters;
-	double[] dimensionsOfRealityBubble;
+    List<GameObject> objects;
+	List<Projectile> projectiles;
+	List<Explosion> explosions;
+	List<Character> characters;
+	Size dimensionsOfRealityBubble;
     // the first index into the WorldSearcher array is the team number
     // the second index into the WorldSearcher array is the type: {0,1,2} = {Character, projectile, explosion}
 	WorldSearcher[,] searchers;
-    Canvas canvas;
-    MatrixTransform worldImageTransform;
-    Camera camera;
+    List<WorldScreen> screensToNotify; // who needs to know when an image gets added or removed
     WorldLoader loader;
+    List<WorldScreen> screensToInformOfObjectAdditions;
 };

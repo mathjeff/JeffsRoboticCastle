@@ -44,7 +44,7 @@ namespace MyGameWindow
         {
             windowWidth = (int)this.ActualWidth;
             windowHeight = (int)this.ActualHeight;
-            game = new JeffsRoboticCastle(canvas1, windowWidth, windowHeight);
+            game = new JeffsRoboticCastle(canvas1, new Size(windowWidth, windowHeight));
             game.start();
 
             latestTickTime = DateTime.Now;
