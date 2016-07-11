@@ -13,7 +13,7 @@ class Character : GameObject
     {
         // Initialize
         base.copyFrom(original);
-        // copy attributes from the original
+        // copy levelAttributes from the original
         this.brain = original.brain;
         this.world = original.world;
         this.setMaxAccel(original.getMaxAccel());

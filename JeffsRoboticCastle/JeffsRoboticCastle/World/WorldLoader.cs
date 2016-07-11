@@ -15,15 +15,14 @@ class WorldLoader
 {
 // Public
     // Constructor
-    public WorldLoader(Size realityBubbleSize, int difficulty, List<WeaponStats> enemyWeaponChoices)
+    public WorldLoader(Size worldDimensions, Size realityBubbleSize)
     {
-        this.enemyWeaponChoices = enemyWeaponChoices;
         // setup machinery to make it fast to run
         this.blockSize = new Size(realityBubbleSize.Width / 8, realityBubbleSize.Height / 4);
         Size characterActiveDimensions = new Size(realityBubbleSize.Width, realityBubbleSize.Height * 1.5);
         Size terrainActiveDimensions = new Size(characterActiveDimensions.Width + blockSize.Width * 2,
             characterActiveDimensions.Height + blockSize.Height * 2);
-        this.worldDimensions = new Size(6000 + 2000 * difficulty, 1600);
+        this.worldDimensions = worldDimensions;
         // make the world
         this.world = new World(terrainActiveDimensions);
         // Inform the world who it needs to tell whenever something moves
@@ -41,7 +40,7 @@ class WorldLoader
         this.objectsToDeactivate = new System.Collections.Generic.HashSet<GameObject>();
         this.loadedObjects = new System.Collections.Generic.HashSet<GameObject>();
 
-        this.populate(difficulty);
+        this.populate();
 
     }
     public void pause()
@@ -176,22 +175,12 @@ class WorldLoader
     // This is to allow the world searcher to update properly
     public void objectStartingMove(GameObject o)
     {
-#if false
-        // Some objects are created by the world, not loaded from the landscape
-        // If an object is created by the world then we don't control it here
-        if (this.loadedObjects.Contains(o))
-        {
-            //this.searcher.removeItem(o);
-            this.searcher.itemStartingMove(o);
-        }
-#else
         // If the object isn't in the searcher then we will never call the itemEndingMove and it won't actually change anything
         // It is slightly worse form to leave out the if statement here but it is slightly faster for runtime
         if (o.isMovable())
             this.characterSearcher.itemStartingMove(o);
         else
             this.terrainSearcher.itemStartingMove(o);
-#endif
     }
     // This function is called when an object just finished moving
     // This is to allow the world searcher to update properly and to let us unspawn anything that fell off the edge of the world
@@ -317,26 +306,14 @@ class WorldLoader
 
 // Private
     // put stuff in the world
-    void populate(int levelNumber)
+    void populate()
     {
-        // #define DESIGN_HERE
         double[] location = new double[2];
         location[0] = 1000;
         location[1] = 400;
         //this.addItem(new Enemy(location, 2, 3, 4));
         double x;
         double y;
-        //return;
-#if false
-        y = 600;
-        for (x = -1000; x < 2000; x += 100)
-        {
-            location[0] = x;
-            location[1] = y;
-            this.addItem(new Platform(location, 0));
-        }
-        return;
-#endif
         int i, type;
         Random generator = new Random();
         // add wallpaper
@@ -347,8 +324,6 @@ class WorldLoader
                 location = new double[2]; location[0] = x; location[1] = y;
                 this.addItem(new Painting(location, 1));
             }
-            //location[1] = 0;
-            //this.addItem(new PickupItem(location));
         }
         // add paintings to display screenshots 
         for (x = 0; x < this.worldDimensions.Width; x += 500)
@@ -360,54 +335,6 @@ class WorldLoader
             }
         }
         x = 1000;
-#if true
-        int numWeapons;
-        // add enemies
-        while (x < worldDimensions.Width)
-        {
-            // choose the enemy's location
-            x += (9000 * generator.NextDouble() * generator.NextDouble() + 300) / (levelNumber + 1);
-            //y = worldDimensions[1] * generator.NextDouble();
-            for (y = blockSize.Height * generator.NextDouble(); y < worldDimensions.Height / 2; y += 1000)
-            {
-                location = new double[2]; location[0] = x; location[1] = y;
-                // choose the enemy's type
-                if (levelNumber > 0)
-                    type = generator.Next(levelNumber / 2 + 1);
-                else
-                    type = 0;
-                // make the enemy
-                Enemy tempEnemy = new Enemy(location, type);
-                // give the enemy a bunch of weapons
-                numWeapons = (int)((levelNumber + 3) / 4);
-                for (i = 0; i < numWeapons; i++)
-                {
-                    int index = generator.Next(enemyWeaponChoices.Count);
-                    Weapon newWeapon = new Weapon(enemyWeaponChoices[index]);
-                    tempEnemy.addWeapon(newWeapon);
-                }
-                this.addItem(tempEnemy);
-                // give the enemy a painting to look at
-                //location = new double[2]; location[0] = x; location[1] = y;
-                //this.addItem(new Painting(location, 0));
-            }
-        }
-#endif
-        // add decoratory critters
-        /* x = 0;
-        while (x < worldDimensions[0])
-        {
-            // choose the critter's location
-            x += (800 * generator.NextDouble() + 1200);
-            y = 200;
-            location = new double[2]; location[0] = x; location[1] = y;
-            this.addItem(new Critter(location, 0));
-            // make a farm too
-            location[0] += 84;
-            location[1] = 0;
-            this.addItem(new Painting(location, 2));
-        }
-        */
 
         
         
@@ -417,7 +344,6 @@ class WorldLoader
         Portal exit = new Portal();
         exit.setCenter(location);
         this.addItem(exit);
-#if true
         // add platforms
         double spacing = 30;
         for (i = 0; i < 4; i++)
@@ -435,87 +361,6 @@ class WorldLoader
             type = (int)(generator.NextDouble() * 2);
             this.addItem(new Platform(location, type));
         }
-#endif
-        /*location = new double[2]; location[0] = 1400; location[1] = 300;
-        this.addItem(new Enemy(location, 0));
-
-        location = new double[2]; location[0] = 1500; location[1] = 300;
-        this.addItem(new Enemy(location, 0));
-
-        location = new double[2]; location[0] = 1600; location[1] = 300;
-        this.addItem(new Enemy(location, 0));
-
-        location = new double[2]; location[0] = 3100; location[1] = 300;
-        this.addItem(new Enemy(location, 0));
-
-
-        location = new double[2]; location[0] = 4000; location[1] = 300;
-        this.addItem(new Enemy(location, 0));
-
-        location = new double[2]; location[0] = 4300; location[1] = 300;
-        this.addItem(new Enemy(location, 0));
-        */
-
-        /*location = new double[2]; location[0] = 1250; location[1] = 500;
-        this.world.addCharacter(new Enemy(location, 0));
-        */
-
-        // make platforms
-        /*location = new double[2]; location[0] = 700; location[1] = 60;
-        this.world.addPlatform(new Platform(location, 0));
-        location = new double[2]; location[0] = 800; location[1] = 120;
-        this.world.addPlatform(new Platform(location, 0));
-        location = new double[2]; location[0] = 700; location[1] = 220;
-        this.world.addPlatform(new Platform(location, 0));
-        */
-
-        /*// back wall
-        location = new double[2]; location[0] = 0; location[1] = 50;
-        this.addItem(new Platform(location, 1));
-        location = new double[2]; location[0] = 0; location[1] = 200;
-        this.addItem(new Platform(location, 1));
-
-        // steps
-        location = new double[2]; location[0] = 400; location[1] = 100;
-        this.addItem(new Platform(location, 0));
-        location = new double[2]; location[0] = 500; location[1] = 250;
-        this.addItem(new Platform(location, 0));
-
-        // a shelter
-        location = new double[2]; location[0] = 700; location[1] = 50;
-        this.addItem(new Platform(location, 1));
-        location = new double[2]; location[0] = 650; location[1] = 105;
-        this.addItem(new Platform(location, 0));
-
-
-        // far forward wall
-        location = new double[2]; location[0] = 2000; location[1] = 70;
-        this.addItem(new Platform(location, 1));
-
-
-        // far backward wall
-        location = new double[2]; location[0] = -2000; location[1] = 70;
-        this.addItem(new Platform(location, 1));
-        */
-        // Paintings
-        /*x = 0;
-        for (i = 0; i < 20; i++)
-        {
-            x += 400 * generator.NextDouble() + 200;
-            location = new double[2]; location[0] = x; location[1] = 200;
-            this.addItem(new Painting(location, 0));
-        }
-        */
-
-        /*int i, j;
-        for (i = 100; i <= 700; i += 200)
-        {
-            for (j = i / 10 + 100; j <= i + 500; j += 100)
-            {
-                location = new double[2]; location[0] = i; location[1] = j;
-                this.world.addPlatform(new Platform(location));
-            }
-        }*/
 
         // create the walls of the world
         // top wall
@@ -556,10 +401,7 @@ class WorldLoader
     System.Collections.Generic.HashSet<GameObject> objectsToUnspawn;
     System.Collections.Generic.HashSet<GameObject> objectsToDeactivate;
     System.Collections.Generic.HashSet<GameObject> loadedObjects;
-#if SAVE_SCREENSHOTS
     double screenshotTimer;
     int bestNumExplosions;
-#endif
     bool paused;
-    List<WeaponStats> enemyWeaponChoices;
 };

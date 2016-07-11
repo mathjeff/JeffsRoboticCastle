@@ -424,7 +424,7 @@ class World
     {
         return this.explosions.Count;
     }
-    // HideObject gets rid of the object forever, but only gets rid of attributes pertaining specific to the GameObject class
+    // HideObject gets rid of the object forever, but only gets rid of levelAttributes pertaining specific to the GameObject class
     public void removeObject(GameObject o)
     {
         // remove it from the world

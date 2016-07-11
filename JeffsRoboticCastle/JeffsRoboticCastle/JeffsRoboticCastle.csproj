@@ -136,6 +136,7 @@
     <Compile Include="AI.cs" />
     <Compile Include="AudioPlayer.cs" />
     <Compile Include="World\Camera.cs" />
+    <Compile Include="World\ChallengeStats.cs" />
     <Compile Include="World\Character.cs" />
     <Compile Include="World\CharacterStatusDisplay.cs" />
     <Compile Include="World\CollisionRequest.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="World\WeaponGridDisplay.cs" />
     <Compile Include="World\WeaponStatusDisplay.cs" />
     <Compile Include="World\World.cs" />
+    <Compile Include="World\WorldFactory.cs" />
     <Compile Include="World\WorldLoader.cs" />
     <Compile Include="World\WorldScreen.cs" />
     <Compile Include="World\WorldSearcher.cs" />

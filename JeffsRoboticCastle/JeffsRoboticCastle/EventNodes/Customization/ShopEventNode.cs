@@ -2,6 +2,7 @@
 using Castle.EventNodes.World;
 using Castle.Language;
 using Castle.WeaponDesign;
+using Castle.World;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -119,7 +120,8 @@ namespace Castle.EventNodes.Customization
             List<WeaponStats> enemyWeapons = new List<WeaponStats>() { weaponStats };
 
             Size size = this.size;
-            WorldLoader worldLoader = new WorldLoader(size, 2, enemyWeapons);
+            WorldFactory worldFactory = new WorldFactory(new Random());
+            WorldLoader worldLoader = worldFactory.Build(2, this.size);
             LevelPlayer levelPlayer = this.player.PrepareForNewLevel();
             worldLoader.addItemAndDisableUnloading(levelPlayer);
             this.worldScreen = new WorldScreen(size, levelPlayer, worldLoader);

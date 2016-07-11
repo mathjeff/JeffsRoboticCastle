@@ -9,7 +9,7 @@ namespace Castle.WeaponDesign
 {
     class WeaponAugmentTemplate
     {
-        // attributes of each individual WeaponAugmentTemplate
+        // levelAttributes of each individual WeaponAugmentTemplate
         public WeaponAugmentTemplate() { }
         public WeaponAugmentTemplate(String name) { this.Name = name; }
         public WeaponAugmentTemplate(WeaponAugmentTemplate original)

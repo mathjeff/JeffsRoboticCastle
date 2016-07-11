@@ -72,7 +72,7 @@ class Weapon
     {
         double tempCost = 1;
 
-        // attributes of the weapon that affect the cost
+        // levelAttributes of the weapon that affect the cost
         tempCost *= (1 + maxAmmo / 10);
         if (ammoRechargeRate > 0)
             tempCost *= 3;
@@ -89,7 +89,7 @@ class Weapon
         if (rechargeWhileInactive)
             tempCost *= 1.9;
 
-        // attributes of the projectile that affect the cost
+        // levelAttributes of the projectile that affect the cost
         tempCost *= (1 + Math.Abs(templateProjectile.getCenter()[0]) / 400);
         tempCost *= (1 + Math.Abs(templateProjectile.getCenter()[1]) / 400);
         double penetration = templateProjectile.getPenetration();
@@ -100,7 +100,7 @@ class Weapon
             tempCost *= (templateProjectile.getNumExplosionsRemaining() * 5 +
                 (1 - Math.Pow(penetration, templateProjectile.getNumExplosionsRemaining())) / (1 - penetration));
         tempCost *= (1 + (1 + Math.Abs(templateProjectile.getHomingAccel() / 5)) * (1 + 3 * Math.Sqrt(Math.Abs(templateProjectile.getRemainingFlightTime()))) / 300);
-        // attributes of the explosion that affect the cost
+        // levelAttributes of the explosion that affect the cost
         Explosion templateExplosion = templateProjectile.getTemplateExplosion();
         tempCost *= (1 + templateExplosion.getShape().getWidth() / 150);
         tempCost *= (1 + templateExplosion.getShape().getHeight() / 150);
@@ -109,7 +109,7 @@ class Weapon
             tempCost /= 2;
         tempCost *= (1 + Math.Abs(templateExplosion.getKnockbackAccel() * templateExplosion.getDuration()) / 100);
 
-        // attributes of the stun that affect the cost
+        // levelAttributes of the stun that affect the cost
         Stun templateStun = templateExplosion.getTemplateStun();
         tempCost *= (1 + 0.1 / (Math.Abs(templateStun.getTimeMultiplier()) + 0.001));
         tempCost *= (1 + 2 * Math.Abs(templateStun.getTimeMultiplier() - 1));
@@ -332,7 +332,7 @@ class Weapon
             return null;
         if (target == null)
             return null;
-        // compute what the attributes of the projectile would be if it were created now
+        // compute what the levelAttributes of the projectile would be if it were created now
         Projectile currentProjectile = this.makeProjectile(false);
         // simulate it in short intervals for a bunch of counts
         int i;

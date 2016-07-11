@@ -45,7 +45,7 @@ class JeffsRoboticCastle
         resourceNode.NextNode = designer;
 
         ShopEventNode currentNode = designer;
-        for (int difficulty = 1; difficulty <= 2; difficulty++)
+        for (int difficulty = 1; difficulty <= 10; difficulty++)
         {
             WorldEventNode world = this.createWorld(difficulty);
             currentNode.NextNode = world;
@@ -112,7 +112,7 @@ class JeffsRoboticCastle
     {
         //List<WeaponStats> enemyWeapons = this.allEnemyWeaponChoices.GetRange(0, difficulty / 2 + 1);
         List<WeaponStats> enemyWeapons = this.getNewEnemyWeaponStats();
-        return new WorldEventNode(this.player, difficulty, enemyWeapons);
+        return new WorldEventNode(this.player, difficulty, this.randomGenerator);
     }
     private void setupWeapons()
     {
@@ -166,6 +166,11 @@ class JeffsRoboticCastle
     {
         EventNode currentEvent = this.currentEvent;
         EventNode newEvent = this.currentEvent.TimerTick(numSeconds);
+        if (newEvent == null)
+        {
+            Application.Current.Shutdown();
+            return;
+        }
         if (newEvent != currentEvent)
             this.showEvent(newEvent);
         Screen newScreen = newEvent.GetScreen();

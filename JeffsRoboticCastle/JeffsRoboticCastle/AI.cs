@@ -12,7 +12,7 @@ class AI
         if (intelligence == 0)
         {
             // every once in a while, change direction
-            AITickDecisionNode turnNode1 = new AITickDecisionNode(0.01);
+            AITickDecisionNode turnNode1 = new AITickDecisionNode(0.005);
             // figure out which direction to turn
             AITickDecisionNode toggleNode1 = new AITickDecisionNode(0.5);
             turnNode1.setLeftChild(toggleNode1);

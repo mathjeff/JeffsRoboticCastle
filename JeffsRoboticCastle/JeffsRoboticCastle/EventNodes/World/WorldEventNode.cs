@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Castle.World;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,17 +9,18 @@ namespace Castle.EventNodes.World
 {
     class WorldEventNode : EventNode
     {
-        public WorldEventNode(GamePlayer player, int difficulty, List<WeaponStats> enemyWeapons)
+        public WorldEventNode(GamePlayer player, int difficulty, Random randomGenerator)
         {
             this.player = player;
-            this.enemyWeapons = enemyWeapons;
             this.difficulty = difficulty;
+            this.randomGenerator = randomGenerator;
         }
         public EventNode SuccessNode;
         //public EventNode FailureNode;
         public void Show(Size size)
         {
-            this.worldLoader = new WorldLoader(size, this.difficulty, this.enemyWeapons);
+            WorldFactory worldFactory = new WorldFactory(this.randomGenerator);
+            this.worldLoader = worldFactory.Build(this.difficulty, size);
             LevelPlayer levelPlayer = this.player.PrepareForNewLevel();
             this.worldLoader.addItemAndDisableUnloading(levelPlayer);
             this.screen = new WorldScreen(size, levelPlayer, this.worldLoader);
@@ -44,9 +46,9 @@ namespace Castle.EventNodes.World
         }
         private WorldScreen screen;
         private GamePlayer player;
-        private List<WeaponStats> enemyWeapons;
         WorldLoader worldLoader;
         int difficulty;
+        Random randomGenerator;
 
     }
 }
