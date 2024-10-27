@@ -9,7 +9,7 @@ class AI
     public AI(int intelligence)
     {
         this.randomGenerator = new Random();
-        if (intelligence == 0)
+        if (intelligence <= 0.5)
         {
             // every once in a while, change direction
             AITickDecisionNode turnNode1 = new AITickDecisionNode(0.005);
