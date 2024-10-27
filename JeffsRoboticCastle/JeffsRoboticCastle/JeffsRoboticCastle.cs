@@ -32,13 +32,16 @@ class JeffsRoboticCastle
         HelpEventNode help = new HelpEventNode();
         welcome.NextNode = help;
 
+        //FullyCustomizableWeaponDesignScreen designScreen = new FullyCustomizableWeaponDesignScreen(this.screenSize, this.player);
+        FullyCustomizableWeaponDesignNode designNode = new FullyCustomizableWeaponDesignNode(this.screenSize, this.player);
+        help.NextNode = designNode;
 
 
         //PatronSelectionEventNode patronNode = new PatronSelectionEventNode(this.player, this.weaponAugmentFactory);
         //help.NextNode = patronNode;
 
         ChooseRewardEventNode rewardNode = new ChooseRewardEventNode(this.player, this.weaponAugmentFactory);
-        help.NextNode = rewardNode;
+        designNode.NextNode = rewardNode;
 
         //RewardEventNode resourceNode = new RewardEventNode(1, this.player);
         //rewardNode.NextNode = resourceNode;

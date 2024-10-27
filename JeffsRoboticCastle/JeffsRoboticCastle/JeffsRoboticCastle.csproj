@@ -76,6 +76,7 @@
     </Compile>
     <Compile Include="EventNodes\CompositeEventNode.cs" />
     <Compile Include="EventNodes\Customization\ChoiceBuilder.cs" />
+    <Compile Include="EventNodes\Customization\FullyCustomizableWeaponDesignNode.cs" />
     <Compile Include="EventNodes\Customization\FullyCustomizableWeaponDesignScreen.cs" />
     <Compile Include="EventNodes\Customization\ShopEventNode.cs" />
     <Compile Include="EventNodes\EventNode.cs" />

@@ -690,11 +690,11 @@ class GameObject
     {
 	    this.imageOffset = newOffset;
     }
-    public ImageSource getBitmap()
+    public BitmapImage getBitmap()
     {
 	    return this.bitmap;
     }
-    public void setBitmap(ImageSource newBitmap)
+    public void setBitmap(BitmapImage newBitmap)
     {
         // save the bitmap in case we need it later
 	    this.bitmap = newBitmap;
@@ -1170,7 +1170,7 @@ class GameObject
 	double[] center;
     int zIndex;
 	// image
-	ImageSource bitmap;
+	BitmapImage bitmap;
 	System.Windows.Controls.Image image;
 	// image positioning
 	double[] imageOffset;

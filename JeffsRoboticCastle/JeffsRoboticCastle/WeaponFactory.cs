@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
-/*class WeaponFactory
+class WeaponFactory
 {
     public WeaponFactory()
     {
@@ -18,7 +19,7 @@ using System.Text;
     }
     public void addDefaultWeapons()
     {
-        this.weapons = new List<WeaponConfiguration>();
+        this.weapons = new List<Weapon>();
         double[] tempVector = new double[2];
         Projectile templateProjectile;
         Explosion templateExplosion;
@@ -30,25 +31,17 @@ using System.Text;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Add a new weapon
-        configuration = new WeaponConfiguration(baseWeapon, new List<WeaponAugment>);
-        newWeapon = new Weapon();
+        configuration = new WeaponConfiguration(baseWeapon, new List<WeaponAugment>());
+        WeaponStats stats = new WeaponStats();
+        //newWeapon = new Weapon();
 
-        // Attributes about when you may own the weapon
-        newWeapon.setCost(1600);
 
         // Attributes about when you may fire
-        newWeapon.setMaxAmmo(15);
-        newWeapon.setAmmoPerBox(15);
+        stats.MaxAmmo = 15;
         //newWeapon.setAmmoRechargeRate(0.222);
-        newWeapon.setReloadTime(3);
-        newWeapon.setAmmoReloadRate(0.667);
-        newWeapon.setWarmupTime(0);
-        newWeapon.setCooldownTime(0.5);
-        newWeapon.setAutomatic(true);
-        newWeapon.setOwnersVelocityScale(0);
-        newWeapon.enableFiringWhileInactive(false);
-        newWeapon.enableCooldownWhileInactive(false);
-        newWeapon.enableRechargeWhileInactive(false);
+        stats.WarmupTime = 0;
+        stats.CooldownTime = 0.5;
+        stats.OwnersVelocityScale = 0;
 
         // Attributes of the projectile it launches, to determine when it hits
         templateProjectile = new Projectile();
@@ -62,7 +55,7 @@ using System.Text;
         templateProjectile.setRemainingFlightTime(5);
         templateProjectile.setPenetration(0);
         templateProjectile.setNumExplosionsRemaining(1);
-        newWeapon.setTemplateProjectile(templateProjectile);
+        stats.TemplateProjectile = templateProjectile;
 
         // Attributes of the explosions that are created
         templateExplosion = new Explosion();
@@ -80,28 +73,19 @@ using System.Text;
         templateExplosion.setTemplateStun(templateStun);
 
         // Add this new weapon
-        this.addWeapon(newWeapon);
+        this.addWeapon(new Weapon(stats));
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Add a new weapon
-        newWeapon = new Weapon();
+        stats = new WeaponStats();
 
-        // Attributes about when you may own the weapon
-        newWeapon.setCost(1600);
 
         // Attributes about when you may fire
-        newWeapon.setMaxAmmo(5);
-        newWeapon.setAmmoPerBox(5);
+        stats.MaxAmmo = 5;
         //newWeapon.setAmmoRechargeRate(0.5);
-        newWeapon.setReloadTime(5);
-        newWeapon.setAmmoReloadRate(1);
-        newWeapon.setWarmupTime(0);
-        newWeapon.setCooldownTime(2);
-        newWeapon.setAutomatic(false);
-        newWeapon.setOwnersVelocityScale(2);
-        newWeapon.enableFiringWhileInactive(false);
-        newWeapon.enableCooldownWhileInactive(true);
-        newWeapon.enableRechargeWhileInactive(false);
+        stats.WarmupTime = 0;
+        stats.CooldownTime = 2;
+        stats.OwnersVelocityScale = 2;
 
         // Attributes of the projectile it launches, to determine when it hits
         templateProjectile = new Projectile();
@@ -117,7 +101,8 @@ using System.Text;
         templateProjectile.setRemainingFlightTime(3);
         templateProjectile.setPenetration(1);
         templateProjectile.setNumExplosionsRemaining(7);
-        newWeapon.setTemplateProjectile(templateProjectile);
+        stats.TemplateProjectile = templateProjectile;
+
 
         // Attributes of the explosions that are created
         templateExplosion = new Explosion();
@@ -135,29 +120,19 @@ using System.Text;
         templateExplosion.setTemplateStun(templateStun);
 
         // Add this new weapon
-        this.addWeapon(newWeapon);
+        this.addWeapon(new Weapon(stats));
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Add a new weapon
-        newWeapon = new Weapon();
+        stats = new WeaponStats();
 
-        // Attributes about when you may own the weapon
-        newWeapon.setCost(1600);
 
         // Attributes about when you may fire
-        newWeapon.setMaxAmmo(10);
-        newWeapon.setAmmoPerBox(10);
-        //newWeapon.setAmmoRechargeRate(0.333);
-        newWeapon.setReloadTime(2);
-        newWeapon.setAmmoReloadRate(1);
-        newWeapon.setWarmupTime(0);
-        newWeapon.setCooldownTime(0.5);
-        newWeapon.setAutomatic(false);
-        newWeapon.setOwnersVelocityScale(0);
-        newWeapon.enableFiringWhileInactive(false);
-        newWeapon.enableCooldownWhileInactive(false);
-        newWeapon.enableRechargeWhileInactive(false);
+        stats.MaxAmmo = 10;
+        stats.WarmupTime = 0;
+        stats.CooldownTime = 0.5;
+        stats.OwnersVelocityScale = 0;
 
         // Attributes of the projectile it launches, to determine when it hits
         templateProjectile = new Projectile();
@@ -174,7 +149,7 @@ using System.Text;
         templateProjectile.setPenetration(1);
         templateProjectile.setNumExplosionsRemaining(3);
         templateProjectile.enableHomingOnProjectiles(true);
-        newWeapon.setTemplateProjectile(templateProjectile);
+        stats.TemplateProjectile = templateProjectile;
 
         // Attributes of the explosions that are created
         templateExplosion = new Explosion();
@@ -191,29 +166,18 @@ using System.Text;
         templateExplosion.setTemplateStun(templateStun);
 
         // Add this new weapon
-        this.addWeapon(newWeapon);
+        this.addWeapon(new Weapon(stats));
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Add a new weapon
-        newWeapon = new Weapon();
-
-        // Attributes about when you may own the weapon
-        newWeapon.setCost(1600);
+        stats = new WeaponStats();
 
         // Attributes about when you may fire
-        newWeapon.setMaxAmmo(10);
-        newWeapon.setAmmoPerBox(10);
-        //newWeapon.setAmmoRechargeRate(1000);
-        newWeapon.setReloadTime(2);
-        newWeapon.setAmmoReloadRate(2);
-        newWeapon.setWarmupTime(1);
-        newWeapon.setCooldownTime(0);
-        newWeapon.setAutomatic(false);
-        newWeapon.setOwnersVelocityScale(0);
-        newWeapon.enableFiringWhileInactive(true);
-        newWeapon.enableCooldownWhileInactive(true);
-        newWeapon.enableRechargeWhileInactive(false);
+        stats.MaxAmmo = 10;
+        stats.WarmupTime = 1;
+        stats.CooldownTime = 0;
+        stats.OwnersVelocityScale = 0;
 
         // Attributes of the projectile it launches, to determine when it hits
         templateProjectile = new Projectile();
@@ -227,7 +191,7 @@ using System.Text;
         templateProjectile.setRemainingFlightTime(3);
         templateProjectile.setPenetration(1);
         templateProjectile.setNumExplosionsRemaining(1);
-        newWeapon.setTemplateProjectile(templateProjectile);
+        stats.TemplateProjectile = templateProjectile;
 
         // Attributes of the explosions that are created
         templateExplosion = new Explosion();
@@ -244,29 +208,18 @@ using System.Text;
         templateExplosion.setTemplateStun(templateStun);
 
         // Add this new weapon
-        this.addWeapon(newWeapon);
+        this.addWeapon(new Weapon(stats));
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Add a new weapon
-        newWeapon = new Weapon();
-
-        // Attributes about when you may own the weapon
-        newWeapon.setCost(1600);
+        stats = new WeaponStats();
 
         // Attributes about when you may fire
-        newWeapon.setMaxAmmo(10);
-        newWeapon.setAmmoPerBox(10);
-        //newWeapon.setAmmoRechargeRate(1);
-        newWeapon.setReloadTime(0.5);
-        newWeapon.setAmmoReloadRate(2);
-        newWeapon.setWarmupTime(0);
-        newWeapon.setCooldownTime(0.5);
-        newWeapon.setAutomatic(false);
-        newWeapon.setOwnersVelocityScale(3);
-        newWeapon.enableFiringWhileInactive(true);
-        newWeapon.enableCooldownWhileInactive(true);
-        newWeapon.enableRechargeWhileInactive(false);
+        stats.MaxAmmo = 10;
+        stats.WarmupTime = 0;
+        stats.CooldownTime = 0.5;
+        stats.OwnersVelocityScale = 3;
 
         // Attributes of the projectile it launches, to determine when it hits
         templateProjectile = new Projectile();
@@ -283,7 +236,7 @@ using System.Text;
         templateProjectile.setRemainingFlightTime(2);
         templateProjectile.setPenetration(0);
         templateProjectile.setNumExplosionsRemaining(1);
-        newWeapon.setTemplateProjectile(templateProjectile);
+        stats.TemplateProjectile = templateProjectile;
 
         // Attributes of the explosions that are created
         templateExplosion = new Explosion();
@@ -301,12 +254,10 @@ using System.Text;
         templateExplosion.setTemplateStun(templateStun);
 
         // Add this new weapon
-        this.addWeapon(newWeapon);
+        this.addWeapon(new Weapon(stats));
     }
     public void addWeapon(Weapon newWeapon)
     {
-        // fill in some additional Stats so we don't need to specify it every time
-        newWeapon.refillAmmo();
         this.weapons.Add(newWeapon);
     }
     public Weapon makeWeapon(int weaponType)
@@ -317,5 +268,5 @@ using System.Text;
     {
         return this.weapons.Count;
     }
-    private List<WeaponConfiguration> weapons;
-}*/
+    private List<Weapon> weapons;
+}

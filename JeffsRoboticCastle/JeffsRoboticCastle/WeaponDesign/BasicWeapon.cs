@@ -72,6 +72,29 @@ namespace Castle.WeaponDesign
             return weapon;
         }
 
+        public BasicWeapon()
+        {
+        }
+
+        public BasicWeapon(WeaponStats basicStats)
+        {
+            this.BaseStats = new WeaponAugmentTemplate();
+            this.ProjectileBitmap = basicStats.TemplateProjectile.getBitmap();
+            this.ExplosionBitmap = basicStats.TemplateProjectile.getTemplateExplosion().getBitmap();
+            this.BaseStats.MaxAmmo = basicStats.MaxAmmo;
+            this.BaseStats.WarmupRate = 1 / (basicStats.WarmupTime + 0.0000001);
+            this.BaseStats.CooldownRate = 1 / (basicStats.CooldownTime + 0.0000001);
+
+            this.BaseStats.HomingAccel = basicStats.TemplateProjectile.getHomingAccel();
+            this.BaseStats.MaxNumExplosions = basicStats.TemplateProjectile.getNumExplosionsRemaining();
+            this.BaseStats.FlightDuration = basicStats.TemplateProjectile.getRemainingFlightTime();
+
+            this.BaseStats.ExplosionRadius = basicStats.TemplateProjectile.getTemplateExplosion().getShape().getWidth() / 2;
+            this.BaseStats.ExplosionDuration = basicStats.TemplateProjectile.getTemplateExplosion().getDuration();
+            this.BaseStats.StunDamagePerSecond = basicStats.TemplateProjectile.getTemplateExplosion().getContactDamagePerSecond();
+            this.BaseStats.TimestopWeight = 1.0 / basicStats.TemplateProjectile.getTemplateExplosion().getTimeMultiplier() - 1;
+        }
+
         public BasicWeapon Clone()
         {
             BasicWeapon weapon = new BasicWeapon();

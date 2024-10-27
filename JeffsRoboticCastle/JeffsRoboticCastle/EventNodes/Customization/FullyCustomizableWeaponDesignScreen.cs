@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Castle.WeaponDesign;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,13 +10,13 @@ using System.Windows.Media;
 // This screen lets the user type in the Stats of the weapon they want, and tries to calculate a good cost to charge for it
 // This screen is unused now because users actually don't like just typing in their weapon Stats
 // Users prefer to assemble their weapons out of discrete components instead
-#if false
+#if true
 namespace Castle.EventNodes.Customization
 {
     class FullyCustomizableWeaponDesignScreen : Screen
     {
         // public
-        public FullyCustomizableWeaponDesignScreen(Size screenSize, Player player)
+        public FullyCustomizableWeaponDesignScreen(Size screenSize, GamePlayer player)
         {
             // setup drawing
             base.Initialize(screenSize);
@@ -38,7 +39,7 @@ namespace Castle.EventNodes.Customization
             this.calculateCost();
             // update the display of purchased weapons if needed
             this.statusDisplay.update();
-            this.currentMoney.Content = this.player.getMoney().ToString();
+            //this.currentMoney.Content = this.player.getMoney().ToString();
         }
 
 
@@ -84,7 +85,7 @@ namespace Castle.EventNodes.Customization
 
             // add a status display to show the current weapons
             Size statusDisplaySize = new Size(this.getSize().Width, this.getSize().Height / 5);
-            statusDisplay = new CharacterStatusDisplay(this.player, this.getCanvas(), new Point(), statusDisplaySize);
+            //statusDisplay = new CharacterStatusDisplay(this.player, this.getCanvas(), new Point(), statusDisplaySize);
 
             // add a bunch of controls for the creation of new weapons
             double labelWidth = this.getSize().Width / 8;
@@ -510,7 +511,7 @@ namespace Castle.EventNodes.Customization
         void quickBuildWeapon()
         {
             this.prebuildWeapon(this.quickbuildWeaponIndex);
-            this.weaponCost.Content = templateWeapon.getCost().ToString();
+            this.weaponCost.Content = "0"; // templateWeapon.getCost().ToString();
             this.quickbuildWeaponIndex++;
             if (this.quickbuildWeaponIndex >= this.weaponFactory.getNumWeapons())
                 quickbuildWeaponIndex = 0;
@@ -519,10 +520,6 @@ namespace Castle.EventNodes.Customization
         void requestWeaponDemo(object sender, EventArgs e)
         {
             this.WantsDemo = true;
-        }
-        void requestExit()
-        {
-            this.Done = true;
         }
         // calculate the cost of the weapon and update the onscreen label
         void calculateCost(object sender, EventArgs e)
@@ -535,23 +532,22 @@ namespace Castle.EventNodes.Customization
             if (!(this.costUpdated))
             {
                 this.updateCurrentWeapon();
-                this.templateWeapon.calculateCost();
+                //this.templateWeapon.calculateCost();
                 this.costUpdated = true;
             }
-            this.weaponCost.Content = this.templateWeapon.getCost().ToString();
+            this.weaponCost.Content = "0"; // this.templateWeapon.getCost().ToString();
         }
         // have the player pay for and receive the current weapon
         void purchaseCurrentWeapon(object sender, EventArgs e)
         {
             this.calculateCost();
-            if (this.player.spendMoney(this.templateWeapon.getCost()))
+            //if (this.player.spendMoney(0))
             {
-                Weapon newWeapon = new Weapon(templateWeapon);
-                this.player.addWeapon(newWeapon);
-                this.player.gotoWeaponTreeRoot();
+                BasicWeapon newWeapon = new BasicWeapon(templateWeapon.Stats);
+                this.player.WeaponConfigurations.Insert(0, new WeaponDesign.WeaponConfiguration(newWeapon, new List<WeaponAugment>()));
             }
             // update the user's money
-            this.currentMoney.Content = this.player.getMoney().ToString();
+            //this.currentMoney.Content = this.player.getMoney().ToString();
         }
 
         // when the user wants to leave this screen
@@ -563,24 +559,17 @@ namespace Castle.EventNodes.Customization
         // update the attributes of the current weapon based on the text fields
         void updateCurrentWeapon()
         {
-            templateWeapon = new Weapon();
+            WeaponStats stats = new WeaponStats();
+            templateWeapon = new Weapon(stats);
             // attributes of the weapon
-            templateWeapon.setMaxAmmo(parseDouble(maxAmmo));
-            templateWeapon.refillAmmo();
-            templateWeapon.setAmmoRechargeRate(parseDouble(ammoRechargeRate));
-            templateWeapon.setAmmoPerBox(parseDouble(ammoPerBox));
-            templateWeapon.setWarmupTime(parseDouble(warmupTime));
-            templateWeapon.setCooldownTime(parseDouble(cooldownTime));
+            stats.MaxAmmo = parseDouble(maxAmmo);
+            stats.WarmupTime = parseDouble(warmupTime);
+            stats.CooldownTime = parseDouble(cooldownTime);
 #if SWITCH_TIMES
         templateWeapon.setSwitchToTime(parseDouble(switchToTime));
         templateWeapon.setSwitchFromTime(parseDouble(switchFromTime));
 #endif
-            templateWeapon.setAutomatic(automatic.IsChecked.Value);
-            templateWeapon.setTriggerSticky(stickyTrigger.IsChecked.Value);
-            templateWeapon.setOwnersVelocityScale(parseDouble(ownersVelocityScale));
-            templateWeapon.enableFiringWhileInactive(fireWhileInactive.IsChecked.Value);
-            templateWeapon.enableCooldownWhileInactive(cooldownWhileInactive.IsChecked.Value);
-            templateWeapon.enableRechargeWhileInactive(rechargeWhileInactive.IsChecked.Value);
+            stats.OwnersVelocityScale = parseDouble(ownersVelocityScale);
 
             Projectile templateProjectile = new Projectile();
             double[] tempVector = new double[2];
@@ -601,7 +590,7 @@ namespace Castle.EventNodes.Customization
             templateProjectile.setBoomerangAccel(parseDouble(boomerangAccel));
             templateProjectile.enableHomingOnProjectiles(homeOnProjectiles.IsChecked.Value);
             templateProjectile.enableHomingOnCharacters(homeOnCharacters.IsChecked.Value);
-            templateWeapon.setTemplateProjectile(templateProjectile);
+            stats.TemplateProjectile = templateProjectile;
 
             Explosion templateExplosion = new Explosion();
             templateExplosion.setBitmap(ImageLoader.loadImage(explosionImage.Text));
@@ -617,6 +606,8 @@ namespace Castle.EventNodes.Customization
             templateStun.setAmmoDrain(parseDouble(ammoDrain));
             templateStun.setDuration(parseDouble(stunDuration));
             templateExplosion.setTemplateStun(templateStun);
+
+            templateWeapon = new Weapon(stats);
         }
         // create set text fields' values to the values for the given weapon type
         void prebuildWeapon(int type)
@@ -631,23 +622,16 @@ namespace Castle.EventNodes.Customization
         {
             // attributes of the weapon
             maxAmmo.Text = templateWeapon.getMaxAmmo().ToString();
-            ammoRechargeRate.Text = templateWeapon.getAmmoRechargeRate().ToString();
-            ammoPerBox.Text = templateWeapon.getAmmoPerBox().ToString();
             warmupTime.Text = templateWeapon.getWarmupTime().ToString();
             cooldownTime.Text = templateWeapon.getCooldownTime().ToString();
 #if SWITCH_TIMES
         switchToTime.Text = templateWeapon.getSwitchToTime().ToString();
         switchFromTime.Text = templateWeapon.getSwitchFromTime().ToString();
 #endif
-            automatic.IsChecked = templateWeapon.isAutomatic();
-            stickyTrigger.IsChecked = templateWeapon.isTriggerSticky();
-            ownersVelocityScale.Text = templateWeapon.getOwnersVelocityScale().ToString();
-            fireWhileInactive.IsChecked = templateWeapon.canFireWhileInactive();
-            cooldownWhileInactive.IsChecked = templateWeapon.coolsDownWhileInactive();
-            rechargeWhileInactive.IsChecked = templateWeapon.rechargesWhileInactive();
+            ownersVelocityScale.Text = templateWeapon.Stats.OwnersVelocityScale.ToString();
 
             // attributes of the projectile
-            Projectile templateProjectile = templateWeapon.getTemplateProjectile();
+            Projectile templateProjectile = templateWeapon.Stats.TemplateProjectile;
             projectileX.Text = templateProjectile.getCenter()[0].ToString();
             projectileY.Text = templateProjectile.getCenter()[1].ToString();
             projectileVX.Text = templateProjectile.getVelocity()[0].ToString();
@@ -681,16 +665,16 @@ namespace Castle.EventNodes.Customization
 
             // now update anything else that might need it
             //this.calculateCost();
-            this.weaponCost.Content = this.templateWeapon.getCost();
+            this.weaponCost.Content = "0";
         }
         public bool WantsDemo;
         public bool Done;
-        
 
-        Player player;
+
+        GamePlayer player;
         Label currentMoney;
         WorldLoader demoWorld;
-        Player demoPlayer;
+        LevelPlayer demoPlayer;
         CharacterStatusDisplay statusDisplay;
         int quickbuildWeaponIndex;
         bool costUpdated;
