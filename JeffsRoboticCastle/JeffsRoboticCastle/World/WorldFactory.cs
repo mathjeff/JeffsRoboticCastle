@@ -28,11 +28,11 @@ namespace Castle.World
 
             // Choose overall approximate difficulties in each category for the level
             List<double> levelAttributes = new List<double>();
-            levelAttributes.Add(this.exponentialRandom()); // density of enemies in world
-            levelAttributes.Add(this.exponentialRandom()); // hitpoints of each enemy
-            levelAttributes.Add(this.exponentialRandom()); // intelligence of each enemy
-            levelAttributes.Add(this.exponentialRandom()); // level of the weapon of each enemy
-            levelAttributes.Add(this.exponentialRandom()); // enemy acceleration
+            levelAttributes.Add(this.randomGenerator.Next()); // density of enemies in world
+            levelAttributes.Add(this.randomGenerator.Next()); // hitpoints of each enemy
+            levelAttributes.Add(this.randomGenerator.Next()); // intelligence of each enemy
+            levelAttributes.Add(this.randomGenerator.Next()); // level of the weapon of each enemy
+            levelAttributes.Add(this.randomGenerator.Next()); // enemy acceleration
 
             levelAttributes = this.normalize(levelAttributes, 1);
             levelAttributes.Add(1); // size of each block: different between blocks but same across levels
@@ -45,7 +45,7 @@ namespace Castle.World
             List<double> blockDifficulties = new List<double>();
             for (int i = 0; i < numBlocks; i++)
             {
-                blockDifficulties.Add(this.exponentialRandom());
+                blockDifficulties.Add(this.randomGenerator.Next());
             }
             blockDifficulties = this.normalize(blockDifficulties, difficulty);
 
@@ -57,7 +57,7 @@ namespace Castle.World
                 List<double> blockStats = new List<double>();
                 for (int j = 0; j < blockAverages.Count; j++)
                 {
-                    blockStats.Add(blockAverages[j] * this.exponentialRandom());
+                    blockStats.Add(blockAverages[j] * this.randomGenerator.Next());
                 }
                 // Reweight the difficulty of this block to be the intended value
                 blockStats = this.normalize(blockStats, blockDifficulties[i]);
@@ -66,10 +66,10 @@ namespace Castle.World
                 {
                     throw new Exception("Internal error - mismatched numer of fields");
                 }
-                block.Width = blockStats[5] * 4000;
-                double enemyDensity = (blockStats[0] + 1) / 1000; // always at least 1 enemy every 1000 pixels
+                block.Width = 3000 * (1 + blockStats[5]);
+                double enemyDensity = 0.001 * (blockStats[0] + 1); // always at least 1 enemy every 1000 pixels
                 block.NumEnemies = (int)(block.Width * enemyDensity + 1); // always at least 1 enemy
-                block.EnemyHitpoints = blockStats[1];
+                block.EnemyHitpoints = 0.01 + blockStats[1];
                 block.EnemyIntelligence = blockStats[2];
                 block.EnemyWeaponLevel = Math.Max((int)Math.Log(blockStats[3], 2), 0);
                 block.EnemyAcceleration = blockStats[4] * 200;
@@ -152,16 +152,6 @@ namespace Castle.World
             return result;
         }
 
-        // Returns a list of values based off of the given ratios but with some random deviations
-        private List<double> random(List<double> ratios, double average)
-        {
-            List<double> randoms = new List<double>();
-            for (int i = 0; i < ratios.Count; i++)
-            {
-                randoms.Add(ratios[i] * this.exponentialRandom());
-            }
-            return this.normalize(randoms, average);
-        }
 
         // Returns a list of values whose average is as requested
         private List<double> normalize(List<double> values, double average)
@@ -171,6 +161,8 @@ namespace Castle.World
             {
                 sum += val;
             }
+            if (sum == 0)
+                sum = 1;
             double multiplier = values.Count * average / sum;
             List<double> results = new List<double>();
             foreach(double val in values)
