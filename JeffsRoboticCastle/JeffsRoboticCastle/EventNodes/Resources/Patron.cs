@@ -22,10 +22,11 @@ namespace Castle
         double RepeatedRewardQuantity;
         double PendingRewardQuantity;
 
-        public Reward GenerateReward(double rewardSize)
+        // Generates a reward based on the given amount of elapsed time
+        public Reward GenerateReward(double elapsedTimeStoryUnits)
         {
             LinkedList<Receivable> items = new LinkedList<Receivable>();
-            this.PendingRewardQuantity += this.RepeatedRewardQuantity * rewardSize;
+            this.PendingRewardQuantity += this.RepeatedRewardQuantity * elapsedTimeStoryUnits;
             int numGifts = (int)Math.Floor(this.PendingRewardQuantity);
             while (this.PendingRewardQuantity >= 1)
             {
@@ -47,7 +48,7 @@ namespace Castle
             List<String> components = new List<string>();
             if (this.PendingRewardQuantity > 0)
             {
-                components.Add(LanguageUtils.FormatQuantity(this.PendingRewardQuantity, this.newItem().ToString()) + " now");
+                components.Add(LanguageUtils.FormatQuantity(this.PendingRewardQuantity, this.newItem().ToString()));
             }
             if (this.RepeatedRewardQuantity > 0)
             {

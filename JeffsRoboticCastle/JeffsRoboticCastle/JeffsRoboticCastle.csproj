@@ -81,6 +81,7 @@
     <Compile Include="EventNodes\EventNode.cs" />
     <Compile Include="EventNodes\Images\StaticImageProvider.cs" />
     <Compile Include="EventNodes\Menus\BranchEventNode.cs" />
+    <Compile Include="EventNodes\Menus\ChooseRewardEventNode.cs" />
     <Compile Include="EventNodes\Menus\HelpEventNode.cs" />
     <Compile Include="EventNodes\Menus\InfoEventNode.cs" />
     <Compile Include="EventNodes\Menus\LinearSelectionEventNode.cs" />

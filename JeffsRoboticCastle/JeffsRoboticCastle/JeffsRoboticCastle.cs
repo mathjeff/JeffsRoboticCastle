@@ -34,15 +34,17 @@ class JeffsRoboticCastle
 
 
 
-        PatronSelectionEventNode patronNode = new PatronSelectionEventNode(this.player, this.weaponAugmentFactory);
-        help.NextNode = patronNode;
+        //PatronSelectionEventNode patronNode = new PatronSelectionEventNode(this.player, this.weaponAugmentFactory);
+        //help.NextNode = patronNode;
 
-        RewardEventNode resourceNode = new RewardEventNode(1, this.player);
-        patronNode.NextNode = resourceNode;
+        ChooseRewardEventNode rewardNode = new ChooseRewardEventNode(this.player, this.weaponAugmentFactory);
+        help.NextNode = rewardNode;
 
+        //RewardEventNode resourceNode = new RewardEventNode(1, this.player);
+        //rewardNode.NextNode = resourceNode;
 
         ShopEventNode designer = new ShopEventNode(this.player);
-        resourceNode.NextNode = designer;
+        rewardNode.NextNode = designer;
 
         ShopEventNode currentNode = designer;
         for (int difficulty = 1; difficulty <= 10; difficulty++)
@@ -50,11 +52,14 @@ class JeffsRoboticCastle
             WorldEventNode world = this.createWorld(difficulty);
             currentNode.NextNode = world;
 
-            RewardEventNode reward = new RewardEventNode(1, this.player);
-            world.SuccessNode = reward;
+            ChooseRewardEventNode rewardNode2 = new ChooseRewardEventNode(this.player, this.weaponAugmentFactory);
+            world.SuccessNode = rewardNode2;
+            //RewardEventNode reward = new RewardEventNode(1, this.player);
+            //world.SuccessNode = reward;
 
             ShopEventNode shop = new ShopEventNode(this.player);
-            reward.NextNode = shop;
+            //reward.NextNode = shop;
+            rewardNode2.NextNode = shop;
 
             currentNode = shop;
         }
