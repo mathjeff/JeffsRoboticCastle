@@ -66,7 +66,7 @@ namespace Castle.World
                 {
                     throw new Exception("Internal error - mismatched numer of fields");
                 }
-                block.Width = 3000 * (1 + blockStats[5]);
+                block.Width = 2000 * (1 + blockStats[5]);
                 double enemyDensity = 0.001 * (blockStats[0] + 1); // always at least 1 enemy every 1000 pixels
                 block.NumEnemies = (int)(block.Width * enemyDensity + 1); // always at least 1 enemy
                 block.EnemyHitpoints = 0.01 + blockStats[1];
