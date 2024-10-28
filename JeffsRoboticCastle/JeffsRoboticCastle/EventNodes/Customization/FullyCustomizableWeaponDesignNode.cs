@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Castle.EventNodes.Menus;
+using Castle.EventNodes.World;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -27,6 +29,13 @@ namespace Castle.EventNodes.Customization
         {
             if (this.screen.Done)
                 return this.NextNode;
+            if (this.screen.WantsDemo)
+            {
+                WorldEventNode demoWorld = this.screen.MakeDemoNode();
+                demoWorld.SuccessNode = this;
+                return demoWorld;
+            }
+            this.screen.TimerTick(duration);
             return this;
         }
 

@@ -86,7 +86,7 @@ namespace Castle.World
             {
                 worldWidth += stats.Width;
             }
-            Size size = new Size(worldWidth, worldHeight);;
+            Size size = new Size(worldWidth, worldHeight);
             WorldLoader worldLoader = new WorldLoader(size, realityBubbleSize);
             double blockX = 0;
             Dictionary<int, WeaponStats> weaponsByLevel = new Dictionary<int, WeaponStats>();

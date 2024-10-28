@@ -1,5 +1,7 @@
-﻿using Castle.WeaponDesign;
+﻿using Castle.EventNodes.World;
+using Castle.WeaponDesign;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +35,18 @@ namespace Castle.EventNodes.Customization
             this.weaponFactory = new WeaponFactory();
             this.weaponFactory.addDefaultWeapons();
         }
+        public void TimerTick(double duration)
+        {
+            if (this.demoWorld != null)
+            {
+                this.demoWorld.TimerTick(duration);
+                if (this.demoWorld.isPlayerSuccessful())
+                {
+                    this.demoWorld = null;
+                }
+            }
+
+        }
         public void update()
         {
             // update the weapon's cost if needed
@@ -43,41 +57,29 @@ namespace Castle.EventNodes.Customization
         }
 
 
-        // private
-        void makeDemoWorld()
+        public WorldEventNode MakeDemoNode()
         {
-            // TODO make this work again
-            /*
-            // make a screen to show the world
-            WorldScreen newScreen = new WorldScreen();
-
-            // enable the escape button for this world
-            newScreen.setEscapeEnabled(true);
-            // tell the world screen to return to this one when done
-            newScreen.setExitScreen(this);
-
             // make the world
-            List<Weapon> demoWeapons = new List<Weapon>();
-            demoWeapons.Add(this.weaponFactory.makeWeapon(0));
-            demoWeapons.Add(this.weaponFactory.makeWeapon(1));
-            this.demoWorld = new WorldLoader(newScreen.getWorldCanvas(), newScreen.getWorldWindowSize(), 1, demoWeapons);
+            WorldLoader worldLoader = new WorldLoader(this.getSize(), this.getSize());
 
-            // make the player
-            double[] location = new double[2];
-            location[0] = 100;
-            location[1] = 30;
-            this.demoPlayer = new Player(player);
-            this.demoPlayer.addWeapon(new Weapon(this.templateWeapon));
-            this.demoPlayer.gotoWeaponTreeRoot();
+            this.updateCurrentWeapon();
+            BasicWeapon basicWeapon = new BasicWeapon(this.templateWeapon.Stats);
+            WeaponStats weaponStats = basicWeapon.WithAugments(new List<WeaponAugmentTemplate>());
+            List<Weapon> demoWeapons = new List<Weapon>() { new Weapon(weaponStats) };
+
+            LevelPlayer levelPlayer = new LevelPlayer(this.player, new double[] { 100, 30 }, demoWeapons);
+            WorldLoader demoWorld = worldLoader;
 
             // put the player in the world
-            this.demoWorld.addItemAndDisableUnloading(demoPlayer);
+            demoWorld.addItemAndDisableUnloading(levelPlayer);
 
-            // tell the screen user interface to show the status of the player
-            newScreen.followCharacter(this.demoPlayer, this.demoWorld);
-            // return the new screen
-            return newScreen;
-            */
+            // don't need another demo
+            this.WantsDemo = false;
+
+            WorldEventNode eventNode = new WorldEventNode(worldLoader, levelPlayer, this.getSize());
+            // Allow the user to press Escape to exit
+            eventNode.EscapeEnabled = true;
+            return eventNode;
         }
         // creates and adds a lot of text boxes to type into
         void addSubviews()
@@ -673,8 +675,8 @@ namespace Castle.EventNodes.Customization
 
         GamePlayer player;
         Label currentMoney;
-        WorldLoader demoWorld;
-        LevelPlayer demoPlayer;
+        WorldScreen demoWorld;
+        //LevelPlayer demoPlayer;
         CharacterStatusDisplay statusDisplay;
         int quickbuildWeaponIndex;
         bool costUpdated;

@@ -539,6 +539,7 @@ class World
         this.screensToInformOfObjectAdditions.Add(screen);
         foreach (GameObject o in this.objects)
         {
+            System.Diagnostics.Debug.WriteLine("screen " + screen + " showing object " + o);
             screen.ShowObject(o);
         }
     }

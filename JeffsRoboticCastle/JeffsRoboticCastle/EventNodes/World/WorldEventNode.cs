@@ -11,19 +11,33 @@ namespace Castle.EventNodes.World
     {
         public WorldEventNode(GamePlayer player, int difficulty, Random randomGenerator)
         {
-            this.player = player;
+            this.gamePlayer = player;
             this.difficulty = difficulty;
             this.randomGenerator = randomGenerator;
+        }
+        public WorldEventNode(WorldLoader worldLoader, LevelPlayer levelPlayer, Size size)
+        {
+            this.worldLoader = worldLoader;
+            this.levelPlayer = levelPlayer;
+            //this.screen = new WorldScreen(size, levelPlayer, this.worldLoader);
         }
         public EventNode SuccessNode;
         //public EventNode FailureNode;
         public void Show(Size size)
         {
-            WorldFactory worldFactory = new WorldFactory(this.randomGenerator);
-            this.worldLoader = worldFactory.Build(this.difficulty, size);
-            LevelPlayer levelPlayer = this.player.PrepareForNewLevel();
-            this.worldLoader.addItemAndDisableUnloading(levelPlayer);
-            this.screen = new WorldScreen(size, levelPlayer, this.worldLoader);
+            if (this.levelPlayer == null)
+            {
+                this.levelPlayer = this.gamePlayer.PrepareForNewLevel();
+            }
+            if (this.worldLoader == null)
+            {
+                WorldFactory worldFactory = new WorldFactory(this.randomGenerator);
+                this.worldLoader = worldFactory.Build(this.difficulty, size);
+                this.worldLoader.addItemAndDisableUnloading(levelPlayer);
+            }
+            this.screen = new WorldScreen(size, this.levelPlayer, this.worldLoader);
+            if (this.EscapeEnabled)
+                this.screen.setEscapeEnabled(true);
         }
         public Screen GetScreen()
         {
@@ -39,13 +53,15 @@ namespace Castle.EventNodes.World
             }
             return this; // Currently we allow the player to continue to watch the world when they lose
         }
+        public bool EscapeEnabled { get; set; }
         private void cleanup()
         {
             this.screen = null; // enable garbage-collection of anything that was part of the screen
             this.worldLoader.destroy();
         }
-        private WorldScreen screen;
-        private GamePlayer player;
+        WorldScreen screen;
+        LevelPlayer levelPlayer;
+        GamePlayer gamePlayer;
         WorldLoader worldLoader;
         int difficulty;
         Random randomGenerator;
