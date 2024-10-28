@@ -24,6 +24,8 @@ namespace Castle.WeaponDesign
             this.StunDuration = original.StunDuration;
             this.StunDamagePerSecond = original.StunDamagePerSecond;
             this.TimestopWeight = original.TimestopWeight;
+            this.KnockbackAccel = original.KnockbackAccel;
+            this.FriendlyFireEnabled = original.FriendlyFireEnabled;
         }
         public WeaponAugmentTemplate Plus(WeaponAugmentTemplate other)
         {
@@ -40,6 +42,8 @@ namespace Castle.WeaponDesign
             result.StunDuration = this.StunDuration + other.StunDuration;
             result.StunDamagePerSecond = this.StunDamagePerSecond + other.StunDamagePerSecond;
             result.TimestopWeight = this.TimestopWeight + other.TimestopWeight;
+            result.KnockbackAccel = this.KnockbackAccel + other.KnockbackAccel;
+            result.FriendlyFireEnabled = this.FriendlyFireEnabled || other.FriendlyFireEnabled;
             return result;
         }
 
@@ -56,6 +60,8 @@ namespace Castle.WeaponDesign
         public double StunDuration;
         public double StunDamagePerSecond;
         public double TimestopWeight; // weight X means time for the target passes 1/(X+1) as quckly
+        public double KnockbackAccel;
+        public bool FriendlyFireEnabled;
         //public double PenetrationWeight; // weight X means each explosion is X/(X+1) as powerful as the previous
         //public double MaxBoomerangAccel;
         //public double OwnerVelocityFraction;

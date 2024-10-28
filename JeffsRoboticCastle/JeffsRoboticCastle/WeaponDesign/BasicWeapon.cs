@@ -37,6 +37,7 @@ namespace Castle.WeaponDesign
             
             // Attributes of the projectile it launches, to determine when it hits
             Projectile templateProjectile = new Projectile();
+            templateProjectile.setCenter(new double[] { 0, 10});
             templateProjectile.setVelocity(new double[] { 100, 0 });
             templateProjectile.setRemainingFlightTime(overallAugment.FlightDuration);
             templateProjectile.setPenetration(0.5);
@@ -54,9 +55,10 @@ namespace Castle.WeaponDesign
             Explosion templateExplosion = new Explosion();
             templateExplosion.setDuration(overallAugment.ExplosionDuration);
             templateExplosion.setFriendlyFireEnabled(false);
-            templateExplosion.setKnockbackAccel(0);
+            templateExplosion.setKnockbackAccel(overallAugment.KnockbackAccel);
             templateExplosion.setShape(new GameCircle(overallAugment.ExplosionRadius));
             templateExplosion.setBitmap(this.ExplosionBitmap);
+            templateExplosion.setFriendlyFireEnabled(overallAugment.FriendlyFireEnabled);
 
             templateProjectile.setTemplateExplosion(templateExplosion);
 
@@ -93,6 +95,8 @@ namespace Castle.WeaponDesign
             this.BaseStats.ExplosionDuration = basicStats.TemplateProjectile.getTemplateExplosion().getDuration();
             this.BaseStats.StunDamagePerSecond = basicStats.TemplateProjectile.getTemplateExplosion().getContactDamagePerSecond();
             this.BaseStats.TimestopWeight = 1.0 / basicStats.TemplateProjectile.getTemplateExplosion().getTimeMultiplier() - 1;
+            this.BaseStats.KnockbackAccel = basicStats.TemplateProjectile.getTemplateExplosion().getKnockbackAccel();
+            this.BaseStats.FriendlyFireEnabled = basicStats.TemplateProjectile.getTemplateExplosion().isFriendlyFireEnabled();
         }
 
         public BasicWeapon Clone()
