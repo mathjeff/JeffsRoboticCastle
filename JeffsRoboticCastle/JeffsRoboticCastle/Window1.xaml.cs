@@ -54,7 +54,7 @@ namespace MyGameWindow
             dispatcherTimer.Tick += new EventHandler(game_tick);
             //timerInterval = new TimeSpan(0, 0, 0, 0, 50);
             dispatcherTimer.Interval = new TimeSpan(desiredNumTicks);
-            maxTickTime = new TimeSpan(0, 0, 0, 1, 0);
+            maxTickTime = new TimeSpan(0, 0, 0, 0, 100);
             //dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 0);
             dispatcherTimer.Start();
         }
@@ -77,7 +77,7 @@ namespace MyGameWindow
             // newItem the current time
             DateTime currentTime = DateTime.Now;
             TimeSpan elapsedTime = currentTime.Subtract(latestTickTime);
-            // cap the elapsed time to 1 second
+            // cap the elapsed time: if the game can't process quickly enough, run the world more slowly
             if (elapsedTime.CompareTo(maxTickTime) > 0)
             {
                 elapsedTime = maxTickTime;
