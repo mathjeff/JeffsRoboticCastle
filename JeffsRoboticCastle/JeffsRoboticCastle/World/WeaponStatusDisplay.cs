@@ -66,7 +66,6 @@ class WeaponStatusDisplay
     }
     public void update()
     {
-        //Weapon newWeapon = this.character.getCurrentWeaponShiftedByIndex(this.indexOffset);
         // update the bar that shows the current firing timer
         double maxDuration;
         double currentDuration;

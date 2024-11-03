@@ -239,7 +239,7 @@ class Weapon
         }
     }
     // advances the state of the weapon by numSeconds. Returns false if nothing happens
-    public bool timerTick(double numSeconds, bool active)
+    public bool timerTick(double numSeconds)
     {
         bool busy = false;
         // figure out if we need to advance the firing timer
@@ -249,35 +249,28 @@ class Weapon
             if (this.firingTimer > this.getWarmupTime())
             {
                 // If we get here, it's cooling down
-                if (active)
-                {
-                    busy = true;    // keep track of whether the weapon is doing anything
-                    // decrease the cooldown time toward zero, so that only the warmup time remains
-                    this.firingTimer = Math.Max(this.firingTimer - numSeconds, this.getWarmupTime());
-                }
+                busy = true;    // keep track of whether the weapon is doing anything
+                                // decrease the cooldown time toward zero, so that only the warmup time remains
+                this.firingTimer = Math.Max(this.firingTimer - numSeconds, this.getWarmupTime());
             }
             else
             {
-                // If we get here, it's warming up
-                if (active)
+                busy = true;    // keep track of whether the weapon is doing anything
+                this.firingTimer -= numSeconds;
+                // check if the projectile launches yet
+                if (this.firingTimer <= 0)
                 {
-                    busy = true;    // keep track of whether the weapon is doing anything
-                    this.firingTimer -= numSeconds;
-                    // check if the projectile launches yet
-                    if (this.firingTimer <= 0)
-                    {
-                        // update the firing timer
-                        firingTimer += (this.getWarmupTime() + this.getCooldownTime());
-                        // we can only fire one shot per tick
-                        if (firingTimer < this.getWarmupTime())
-                            firingTimer = this.getWarmupTime();
+                    // update the firing timer
+                    firingTimer += (this.getWarmupTime() + this.getCooldownTime());
+                    // we can only fire one shot per tick
+                    if (firingTimer < this.getWarmupTime())
+                        firingTimer = this.getWarmupTime();
 
-                        // create the projectile and fill in the information from the template
-                        this.shot = this.makeProjectile(true);
-                        // expend one ammo
-                        this.currentAmmo--;
-                    }
-			    }		 
+                    // create the projectile and fill in the information from the template
+                    this.shot = this.makeProjectile(true);
+                    // expend one ammo
+                    this.currentAmmo--;
+                }
             }
         }
         // tell whether the weapon is doing anything

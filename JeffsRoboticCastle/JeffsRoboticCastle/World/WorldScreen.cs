@@ -136,6 +136,7 @@ class WorldScreen : Screen
     }
     public override void KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
+        // movement
         if (e.Key == Key.W)
             this.movePlayerUp();
         if (e.Key == Key.S)
@@ -144,12 +145,19 @@ class WorldScreen : Screen
             this.movePlayerLeft();
         if (e.Key == Key.D)
             this.movePlayerRight();
+        // firing
+        if (e.Key == Key.L)
+            this.playerPressTrigger(0, true);
         if (e.Key == Key.OemSemicolon)
-            this.playerPressTrigger(true);
+            this.playerPressTrigger(1, true);
+        if (e.Key == Key.OemQuotes)
+            this.playerPressTrigger(2, true);
+        // timing
         if ((e.Key == Key.Escape) && (this.isEscapeEnabled()))
             this.levelIsComplete = true;
         if (e.Key == Key.Space)
             this.togglePause();
+
         base.KeyDown(sender, e);
     }
     public override void KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
@@ -162,8 +170,12 @@ class WorldScreen : Screen
             this.stopMovingPlayerLeft();
         if (e.Key == Key.D)
             this.stopMovingPlayerRight();
+        if (e.Key == Key.L)
+            this.playerPressTrigger(0, false);
         if (e.Key == Key.OemSemicolon)
-            this.playerPressTrigger(false);
+            this.playerPressTrigger(1, false);
+        if (e.Key == Key.OemQuotes)
+            this.playerPressTrigger(2, false);
         base.KeyUp(sender, e);
     }
     public void pause()
@@ -187,9 +199,9 @@ class WorldScreen : Screen
     {
         return this.escapeEnabled;
     }
-    public void playerPressTrigger(bool pressed)
+    public void playerPressTrigger(int weaponIndex, bool pressed)
     {
-        this.player.pressTrigger(pressed);
+        this.player.pressTrigger(weaponIndex, pressed);
     }
 
 

@@ -38,7 +38,6 @@ class Character : GameObject
         //this.targetVelocity = new double[2];
         this.targetVX = 0;
         this.targetVY = 0;
-        this.activeWeapons = new System.Collections.Generic.List<Weapon>();
         this.money = 0;
     }
     public override bool isACharacter()
@@ -204,48 +203,23 @@ class Character : GameObject
     #endregion
 
     #region Weapons
-    public void pressTrigger(bool pressed)
+    public void pressTrigger(int index, bool pressed)
     {
-        Weapon currentWeapon = this.getCurrentWeapon();
-	    if (currentWeapon != null)
-	    {
-            currentWeapon.pressTrigger(pressed);
-	    }
+        if (index < this.weapons.Count)
+        {
+            this.weapons[index].pressTrigger(pressed);
+        }
     }
-    public void cycleWeaponForward()
+    public void cycleAiWeaponForward()
     {
-        int newIndex = this.currentWeaponIndex + 1;
+        int newIndex = this.aiWeaponIndex + 1;
         if (newIndex >= this.weapons.Count)
         {
             newIndex = 0;
         }
-        this.setWeaponIndex(newIndex);
+        this.aiWeaponIndex = newIndex;
     }
-    public void cycleWeaponBackward()
-    {
-        int newIndex = currentWeaponIndex - 1;
-        if (newIndex < 0)
-        {
-            newIndex = this.weapons.Count - 1;
-        }
-        this.setWeaponIndex(newIndex);
-    }
-    public Weapon getCurrentWeapon()
-    {
-        if (this.weapons.Count < 1)
-            return null;
-        return this.weapons[currentWeaponIndex];
-    }
-    public Weapon getCurrentWeaponShiftedByIndex(int indexOffset)
-    {
-        if (this.weapons.Count < 1)
-            return null;
-        int index = this.currentWeaponIndex + indexOffset;
-        index = index % this.weapons.Count;
-        if (index < 0)
-            index += this.weapons.Count;
-        return this.weapons[index];
-    }
+
     public virtual System.Collections.Generic.List<Weapon> getWeaponTreeAtIndex(int index)
     {
         return null;
@@ -257,39 +231,14 @@ class Character : GameObject
     // returns the newly spawned projectile if there is one
     public System.Collections.ArrayList getProjectiles(double numSeconds)
     {
-        int i;
         System.Collections.ArrayList projectiles = new System.Collections.ArrayList(1);
-        Weapon currentWeapon = null;
         Projectile tempProjectile;
-        if (this.weapons.Count > 0)
+        foreach (Weapon weapon in this.weapons)
         {
-            currentWeapon = this.weapons[this.currentWeaponIndex];
-            // make sure that the currently held weapon isn't in the list of active weapons so that it only gets one timer tick
-            this.activeWeapons.Remove(currentWeapon);
-            // advance the state of the weapon by numSeconds
-            currentWeapon.timerTick(numSeconds, true);
-            tempProjectile = currentWeapon.getProjectile();
+            weapon.timerTick(numSeconds);
+            tempProjectile = weapon.getProjectile();
             if (tempProjectile != null)
                 projectiles.Add(tempProjectile);
-        }
-        bool active;
-        Weapon tempWeapon;
-        for (i = this.activeWeapons.Count - 1; i >= 0; i--)
-        {
-            tempWeapon = activeWeapons[i];
-            active = tempWeapon.timerTick(numSeconds, false);
-            tempProjectile = tempWeapon.getProjectile();
-            if (tempProjectile != null)
-                projectiles.Add(tempProjectile);
-            if (!active)
-            {
-                // If the weapon isn't doing anything then remove it from the list of weapons that are doing anything
-                activeWeapons.RemoveAt(i);
-            }
-        }
-        if (currentWeapon != null)
-        {
-            this.activeWeapons.Add(currentWeapon);
         }
         return projectiles;
     }
@@ -311,22 +260,16 @@ class Character : GameObject
     {
         return this.weapons[index];
     }
+
+    public Weapon getAiWeapon()
+    {
+        if (aiWeaponIndex < this.weapons.Count)
+            return this.weapons[aiWeaponIndex];
+        return null;
+    }
     public int getNumWeapons()
     {
         return this.weapons.Count;
-    }
-    public void setWeaponIndex(int index)
-    {
-        if (this.currentWeaponIndex != index)
-        {
-            Weapon currentWeapon = this.getCurrentWeapon();
-            if (currentWeapon.isWarmingUp())
-            {
-                // if the weapon can't fire while inactive and it is about to become inactive, cancel the firing
-                currentWeapon.resetCooldown();
-            }
-            this.currentWeaponIndex = index;
-        }
     }
     // recharge some ammunition due to reaching an ammo box
     
@@ -368,13 +311,12 @@ class Character : GameObject
         // drain ammo
         IEnumerable<Stun> stuns = this.getStuns();
         double currentAmmoDrained;
-        Weapon currentWeapon = this.getCurrentWeapon();
-        if (currentWeapon != null)
+        foreach (Weapon weapon in this.weapons)
         {
             foreach (Stun currentStun in stuns)
             {
                 currentAmmoDrained = currentStun.getAmmoDrain() * numSeconds;
-                if (!(currentWeapon.drainAmmo(currentAmmoDrained)))
+                if (!(weapon.drainAmmo(currentAmmoDrained)))
                 {
                     break;
                 }
@@ -497,12 +439,11 @@ class Character : GameObject
     double[] jumpVelocity;
     GameObject collision;	// Tells what this object is colliding with, or null.
 	System.Collections.Generic.List<Weapon> weapons;
-	int currentWeaponIndex;
+    int aiWeaponIndex;
     Character nearestEnemyCharacter; bool nearestEnemyCharacterUpToDate;
     Projectile nearestEnemyProjectile; bool nearestEnemyProjectileUpToDate;
     GameObject nearestObstacle; bool nearestObstacleUpToDate;
     double contactDamagePerSecond;  // how much damage per second it deals to anything touching it
-    System.Collections.Generic.List<Weapon> activeWeapons;
     #endregion
 };
 

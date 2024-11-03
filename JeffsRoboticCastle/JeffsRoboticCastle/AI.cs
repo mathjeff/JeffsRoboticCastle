@@ -130,7 +130,7 @@ class AI
     {
         if (shotError == null)
         {
-            Weapon currentWeapon = body.getCurrentWeapon();
+            Weapon currentWeapon = body.getAiWeapon();
             if (currentWeapon != null)
                 shotError = currentWeapon.simulateShooting(target);
         }
@@ -140,10 +140,12 @@ class AI
     {
         return this.randomGenerator;
     }
+
 // private
     AINode firstNeuron;
     Random randomGenerator;
     int state;
+    int selectedWeaponIndex;
     double[] shotError;
 }
 
@@ -684,10 +686,10 @@ class AIAmmoDecisionNode : AIDecisionNode
 {
     public override AINode getNextNode(Character body)
     {
-        Weapon currentWeapon = body.getCurrentWeapon();
+        Weapon currentWeapon = body.getAiWeapon();
         if (currentWeapon != null)
         {
-            if (body.getCurrentWeapon().getCurrentAmmo() >= 1)
+            if (currentWeapon.getCurrentAmmo() >= 1)
                 return this.chooseLeftChild();
             else
                 return this.chooseRightChild();
@@ -700,7 +702,7 @@ class AIFreeSwitchDecisionNode : AIDecisionNode
 {
     public override AINode getNextNode(Character body)
     {
-        Weapon currentWeapon = body.getCurrentWeapon();
+        Weapon currentWeapon = body.getAiWeapon();
         if (currentWeapon != null)
         {
             if (currentWeapon.isWarmingUp())
@@ -855,7 +857,7 @@ class AIFireNode : AIActionNode
     }
     public override void execute(Character body)
     {
-        body.pressTrigger(this.firing);
+        body.pressTrigger(0, this.firing);
         // run the next line of code
         base.execute(body);
     }
@@ -871,7 +873,7 @@ class AISelectWeaponNode : AIActionNode
     }
     public override void execute(Character body)
     {
-        body.cycleWeaponForward();
+        body.cycleAiWeaponForward();
         base.execute(body);
     }
 // private
