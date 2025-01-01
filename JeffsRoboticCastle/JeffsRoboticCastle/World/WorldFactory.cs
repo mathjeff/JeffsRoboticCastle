@@ -14,6 +14,7 @@ namespace Castle.World
         {
             this.randomGenerator = randomGenerator;
         }
+        public bool Demo { get; set; }
         public WorldLoader Build(double difficulty, Size realityBubbleSize)
         {
             return this.makeWorld(this.chooseWorldStats(difficulty), realityBubbleSize);
@@ -87,7 +88,7 @@ namespace Castle.World
                 worldWidth += stats.Width;
             }
             Size size = new Size(worldWidth, worldHeight);
-            WorldLoader worldLoader = new WorldLoader(size, realityBubbleSize);
+            WorldLoader worldLoader = new WorldLoader(size, realityBubbleSize, this.Demo);
             double blockX = 0;
             Dictionary<int, WeaponStats> weaponsByLevel = new Dictionary<int, WeaponStats>();
             foreach (ChallengeStats stats in blockStats)

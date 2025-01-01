@@ -30,24 +30,26 @@ namespace Castle.WeaponDesign
             WeaponStats weapon = new WeaponStats();
 
             // Attributes about when you may fire
-            weapon.OwnersVelocityScale = 1;
+            weapon.OwnersVelocityScale = overallAugment.OwnerVelocityFraction;
             weapon.MaxAmmo = overallAugment.MaxAmmo;
             weapon.WarmupTime = 1 / overallAugment.WarmupRate;
             weapon.CooldownTime = 1 / overallAugment.CooldownRate;
             
             // Attributes of the projectile it launches, to determine when it hits
             Projectile templateProjectile = new Projectile();
-            templateProjectile.setCenter(new double[] { 0, 10});
-            templateProjectile.setVelocity(new double[] { 100, 0 });
+            templateProjectile.setBoomerangAccel(overallAugment.BoomerangAccel);
+            templateProjectile.setCenter(this.projectileStartPosition);
+            templateProjectile.setVelocity(this.projectileStartVelocity);
             templateProjectile.setRemainingFlightTime(overallAugment.FlightDuration);
             templateProjectile.setPenetration(0.5);
             templateProjectile.setNumExplosionsRemaining(overallAugment.MaxNumExplosions);
             templateProjectile.setHomingAccel(overallAugment.HomingAccel);
             templateProjectile.enableHomingOnCharacters(true);
             templateProjectile.enableHomingOnProjectiles(true);
-            templateProjectile.setBoomerangAccel(0);
-            templateProjectile.setShape(new GameCircle(10));
+            templateProjectile.setShape(this.ProjectileShape);
             templateProjectile.setBitmap(this.ProjectileBitmap);
+            templateProjectile.setGravity(overallAugment.Gravity);
+            templateProjectile.setDragCoefficient(overallAugment.AirResistance);
 
             weapon.TemplateProjectile = templateProjectile;
 
@@ -76,27 +78,38 @@ namespace Castle.WeaponDesign
 
         public BasicWeapon()
         {
+            this.ProjectileShape = new GameCircle(10);
+            this.projectileStartPosition = new double[] { 100, 0 };
+            this.projectileStartVelocity = new double[] { 10, 0 };
         }
 
         public BasicWeapon(WeaponStats basicStats)
         {
             this.BaseStats = new WeaponAugmentTemplate();
-            this.ProjectileBitmap = basicStats.TemplateProjectile.getBitmap();
-            this.ExplosionBitmap = basicStats.TemplateProjectile.getTemplateExplosion().getBitmap();
             this.BaseStats.MaxAmmo = basicStats.MaxAmmo;
             this.BaseStats.WarmupRate = 1 / (basicStats.WarmupTime + 0.0000001);
             this.BaseStats.CooldownRate = 1 / (basicStats.CooldownTime + 0.0000001);
 
+            this.projectileStartPosition = basicStats.TemplateProjectile.getCenter();
+            this.projectileStartVelocity = basicStats.TemplateProjectile.getVelocity();
+            this.BaseStats.OwnerVelocityFraction = basicStats.OwnersVelocityScale;
+            this.ProjectileBitmap = basicStats.TemplateProjectile.getBitmap();
+            this.ProjectileShape = basicStats.TemplateProjectile.getShape();
             this.BaseStats.HomingAccel = basicStats.TemplateProjectile.getHomingAccel();
+            this.BaseStats.BoomerangAccel = basicStats.TemplateProjectile.getBoomerangAccel();
+            this.BaseStats.AirResistance = basicStats.TemplateProjectile.getDragCoefficient();
             this.BaseStats.MaxNumExplosions = basicStats.TemplateProjectile.getNumExplosionsRemaining();
             this.BaseStats.FlightDuration = basicStats.TemplateProjectile.getRemainingFlightTime();
+            this.BaseStats.Gravity = basicStats.TemplateProjectile.getGravity();
 
             this.BaseStats.ExplosionRadius = basicStats.TemplateProjectile.getTemplateExplosion().getShape().getWidth() / 2;
+            this.ExplosionBitmap = basicStats.TemplateProjectile.getTemplateExplosion().getBitmap();
             this.BaseStats.ExplosionDuration = basicStats.TemplateProjectile.getTemplateExplosion().getDuration();
-            this.BaseStats.StunDamagePerSecond = basicStats.TemplateProjectile.getTemplateExplosion().getContactDamagePerSecond();
+            this.BaseStats.StunDamagePerSecond = basicStats.TemplateProjectile.getTemplateExplosion().getTemplateStun().getDamagePerSecond();
             this.BaseStats.TimestopWeight = 1.0 / basicStats.TemplateProjectile.getTemplateExplosion().getTimeMultiplier() - 1;
             this.BaseStats.KnockbackAccel = basicStats.TemplateProjectile.getTemplateExplosion().getKnockbackAccel();
             this.BaseStats.FriendlyFireEnabled = basicStats.TemplateProjectile.getTemplateExplosion().isFriendlyFireEnabled();
+
         }
 
         public BasicWeapon Clone()
@@ -125,5 +138,9 @@ namespace Castle.WeaponDesign
         public int NumAugmentSlots;
         public BitmapImage ProjectileBitmap;
         public BitmapImage ExplosionBitmap;
+
+        private GameShape ProjectileShape;
+        private double[] projectileStartPosition;
+        private double[] projectileStartVelocity;
     }
 }

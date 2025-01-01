@@ -12,29 +12,18 @@ namespace Castle.WeaponDesign
         // levelAttributes of each individual WeaponAugmentTemplate
         public WeaponAugmentTemplate() { }
         public WeaponAugmentTemplate(String name) { this.Name = name; }
-        public WeaponAugmentTemplate(WeaponAugmentTemplate original)
-        {
-            this.Name = original.Name;
-            this.WarmupRate = original.WarmupRate;
-            this.CooldownRate = original.CooldownRate;
-            this.MaxAmmo = original.MaxAmmo;
-            this.FlightDuration = original.FlightDuration;
-            this.MaxNumExplosions = original.MaxNumExplosions;
-            this.ExplosionDuration = original.ExplosionDuration;
-            this.StunDuration = original.StunDuration;
-            this.StunDamagePerSecond = original.StunDamagePerSecond;
-            this.TimestopWeight = original.TimestopWeight;
-            this.KnockbackAccel = original.KnockbackAccel;
-            this.FriendlyFireEnabled = original.FriendlyFireEnabled;
-        }
         public WeaponAugmentTemplate Plus(WeaponAugmentTemplate other)
         {
             WeaponAugmentTemplate result = new WeaponAugmentTemplate();
             result.Name = this.Name + " + " + other.Name;
+            result.OwnerVelocityFraction = this.OwnerVelocityFraction + other.OwnerVelocityFraction;
             result.WarmupRate = this.WarmupRate + other.WarmupRate;
             result.CooldownRate = this.CooldownRate + other.CooldownRate;
             result.MaxAmmo = this.MaxAmmo + other.MaxAmmo;
             result.HomingAccel += this.HomingAccel + other.HomingAccel;
+            result.BoomerangAccel = this.BoomerangAccel + other.BoomerangAccel;
+            result.AirResistance = this.AirResistance + other.AirResistance;
+            result.Gravity = this.Gravity + other.Gravity;
             result.FlightDuration = this.FlightDuration + other.FlightDuration;
             result.MaxNumExplosions = this.MaxNumExplosions + other.MaxNumExplosions;
             result.ExplosionRadius = this.ExplosionRadius + other.ExplosionRadius;
@@ -49,10 +38,14 @@ namespace Castle.WeaponDesign
 
         public String Name;
 
+        public double OwnerVelocityFraction;
         public double WarmupRate;
         public double CooldownRate;
         public double MaxAmmo;
         public double HomingAccel;
+        public double BoomerangAccel;
+        public double AirResistance;
+        public double Gravity;
         public double FlightDuration;
         public int MaxNumExplosions;
         public double ExplosionRadius;
@@ -63,11 +56,7 @@ namespace Castle.WeaponDesign
         public double KnockbackAccel;
         public bool FriendlyFireEnabled;
         //public double PenetrationWeight; // weight X means each explosion is X/(X+1) as powerful as the previous
-        //public double MaxBoomerangAccel;
-        //public double OwnerVelocityFraction;
         //public double MaxStartingVelocity;
-        //public double MaxGravity;
-        //public double MaxAirResistance;
         //public double MaxProjectileSize;
 
 

@@ -15,8 +15,10 @@ class WorldLoader
 {
 // Public
     // Constructor
-    public WorldLoader(Size worldDimensions, Size realityBubbleSize)
+    public WorldLoader(Size worldDimensions, Size realityBubbleSize, bool demo)
     {
+        this.demo = demo;
+
         // setup machinery to make it fast to run
         this.blockSize = new Size(realityBubbleSize.Width / 8, realityBubbleSize.Height / 4);
         Size characterActiveDimensions = new Size(realityBubbleSize.Width, realityBubbleSize.Height * 1.5);
@@ -304,6 +306,14 @@ class WorldLoader
         this.world.RegisterForUpdates(screen);
     }
 
+    public bool Demo
+    {
+        get
+        {
+            return this.demo;
+        }
+    }
+
 // Private
     // put stuff in the world
     void populate()
@@ -404,4 +414,5 @@ class WorldLoader
     double screenshotTimer;
     int bestNumExplosions;
     bool paused;
+    bool demo;
 };

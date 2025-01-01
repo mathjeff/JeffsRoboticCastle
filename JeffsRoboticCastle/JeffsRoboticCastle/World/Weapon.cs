@@ -296,6 +296,7 @@ class Weapon
         newV[0] += owner.getVelocity()[0] * this.Stats.OwnersVelocityScale;
         newV[1] += owner.getVelocity()[1] * this.Stats.OwnersVelocityScale;
         tempShot.setVelocity(newV);
+        tempShot.setOwner(owner);
         return tempShot;
     }
     // Returns the latest projectile created by firing the weapon

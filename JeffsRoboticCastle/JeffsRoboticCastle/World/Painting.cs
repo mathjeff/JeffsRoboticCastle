@@ -22,7 +22,11 @@ class Painting : GameObject
                 this.setShape(new GameRectangle(1024, 1024));
                 this.setZIndex(-1);
                 break;
-            case 2:
+            case 2: // I should replace the paintings with blueprints in the demo screens (the ones with escape enabled)
+                startingBitmap = ImageLoader.loadImage("Blueprint.png");
+                this.setShape(new GameRectangle(168, 72));
+                break;
+            case 3:
                 startingBitmap = ImageLoader.loadImage("Farm.png");
                 this.setShape(new GameRectangle(168, 72));
                 break;

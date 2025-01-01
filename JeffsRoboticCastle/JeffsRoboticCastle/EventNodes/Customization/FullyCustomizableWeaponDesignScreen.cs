@@ -60,7 +60,7 @@ namespace Castle.EventNodes.Customization
         public WorldEventNode MakeDemoNode()
         {
             // make the world
-            WorldLoader worldLoader = new WorldLoader(this.getSize(), this.getSize());
+            WorldLoader worldLoader = new WorldLoader(this.getSize(), this.getSize(), true);
 
             this.updateCurrentWeapon();
             BasicWeapon basicWeapon = new BasicWeapon(this.templateWeapon.Stats);
@@ -84,48 +84,46 @@ namespace Castle.EventNodes.Customization
         // creates and adds a lot of text boxes to type into
         void addSubviews()
         {
-
-            // add a status display to show the current weapons
-            Size statusDisplaySize = new Size(this.getSize().Width, this.getSize().Height / 5);
-            //statusDisplay = new CharacterStatusDisplay(this.player, this.getCanvas(), new Point(), statusDisplaySize);
-
             // add a bunch of controls for the creation of new weapons
             double labelWidth = this.getSize().Width / 8;
-            double labelHeight = this.getSize().Height / 40;
+            double labelHeight = this.getSize().Height / 35;
             //double verticalPadding1 = 5;
-            double verticalSpacing = labelHeight;
+            double verticalSpacing = labelHeight / 8;
             double horizontalSpacing = labelWidth / 2;
 
             // attributes of the weapon itself, rather than the projectiles or explosions
             Label weaponLabel = new Label();
             weaponLabel.Content = "Weapon";
-            this.addControl(weaponLabel, this.getSize().Width * 3 / 16, statusDisplaySize.Height, labelWidth, labelHeight);
+            this.addControl(weaponLabel, this.getSize().Width * 3 / 16, verticalSpacing, labelWidth, labelHeight);
 
+            /*
             Label weaponCostLabel = new Label();
             weaponCostLabel.Content = "Weapon Cost";
             addControl(weaponCostLabel, getLeft(weaponLabel), getBottom(weaponLabel) + 1, labelWidth, labelHeight);
             weaponCost = new Label();
             addControl(weaponCost, getLeft(weaponCostLabel), getBottom(weaponCostLabel), labelWidth, labelHeight);
+            */
 
             Label ownersVelocityScaleLabel = new Label();
             ownersVelocityScaleLabel.Content = "Scale for owner's velocity";
-            addControl(ownersVelocityScaleLabel, getLeft(weaponCostLabel), getBottom(weaponCostLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(ownersVelocityScaleLabel, getLeft(weaponLabel), getBottom(weaponLabel) + verticalSpacing, labelWidth, labelHeight);
             ownersVelocityScale = new TextBox();
-            addControl(ownersVelocityScale, getLeft(weaponCost), getBottom(weaponCost) + verticalSpacing, labelWidth, labelHeight);
+            addControl(ownersVelocityScale, getLeft(ownersVelocityScaleLabel), getBottom(ownersVelocityScaleLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label warmupTimeLabel = new Label();
             warmupTimeLabel.Content = "Warmup (sec)";
-            addControl(warmupTimeLabel, getLeft(weaponCostLabel), getBottom(ownersVelocityScaleLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(warmupTimeLabel, getLeft(ownersVelocityScale), getBottom(ownersVelocityScale) + verticalSpacing, labelWidth, labelHeight);
             warmupTime = new TextBox();
-            addControl(warmupTime, getLeft(weaponCost), getBottom(ownersVelocityScale) + verticalSpacing, labelWidth, labelHeight);
+            addControl(warmupTime, getLeft(warmupTimeLabel), getBottom(warmupTimeLabel) + verticalSpacing, labelWidth, labelHeight);
 
 
             Label cooldownTimeLabel = new Label();
             cooldownTimeLabel.Content = "Cooldown (sec)";
-            addControl(cooldownTimeLabel, getLeft(weaponCostLabel), getBottom(warmupTimeLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(cooldownTimeLabel, getLeft(warmupTime), getBottom(warmupTime) + verticalSpacing, labelWidth, labelHeight);
             cooldownTime = new TextBox();
-            addControl(cooldownTime, getLeft(weaponCost), getBottom(warmupTime) + verticalSpacing, labelWidth, labelHeight);
+            addControl(cooldownTime, getLeft(cooldownTimeLabel), getBottom(cooldownTimeLabel) + verticalSpacing, labelWidth, labelHeight);
 
+            /*
             Label automaticLabel = new Label();
             automaticLabel.Content = "Automatic";
             addControl(automaticLabel, getLeft(weaponCostLabel), getBottom(cooldownTimeLabel) + verticalSpacing, labelWidth, labelHeight);
@@ -137,6 +135,7 @@ namespace Castle.EventNodes.Customization
             addControl(stickyTriggerLabel, getLeft(weaponCostLabel), getBottom(automaticLabel) + verticalSpacing, labelWidth, labelHeight);
             stickyTrigger = new CheckBox();
             addControl(stickyTrigger, getLeft(weaponCost), getBottom(automatic) + verticalSpacing, labelWidth, labelHeight);
+            */
 
 #if SWITCH_TIMES
         Label switchToTimeLabel = new Label();
@@ -159,8 +158,8 @@ namespace Castle.EventNodes.Customization
         addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(switchFromTimeLabel) + verticalSpacing, labelWidth, labelHeight);
         addControl(maxAmmo, getLeft(weaponCost), getBottom(switchFromTime) + verticalSpacing, labelWidth, labelHeight);
 #else
-            addControl(maxAmmoLabel, getLeft(weaponCostLabel), getBottom(stickyTriggerLabel) + verticalSpacing, labelWidth, labelHeight);
-            addControl(maxAmmo, getLeft(weaponCost), getBottom(stickyTrigger) + verticalSpacing, labelWidth, labelHeight);
+            addControl(maxAmmoLabel, getLeft(cooldownTime), getBottom(cooldownTime) + verticalSpacing, labelWidth, labelHeight);
+            addControl(maxAmmo, getLeft(maxAmmoLabel), getBottom(maxAmmoLabel) + verticalSpacing, labelWidth, labelHeight);
 #endif
 
             /*
@@ -178,7 +177,7 @@ namespace Castle.EventNodes.Customization
             CheckBox rechargeWhileInactive; // Tells whether this weapon can recharge ammo without being the current weapon
             */
 
-
+            /*
             Label ammoRechargeRateLabel = new Label();
             ammoRechargeRateLabel.Content = "Ammo Recharge/sec";
             addControl(ammoRechargeRateLabel, getLeft(weaponCostLabel), getBottom(maxAmmoLabel) + verticalSpacing, labelWidth, labelHeight);
@@ -191,6 +190,7 @@ namespace Castle.EventNodes.Customization
             ammoPerBox = new TextBox();
             addControl(ammoPerBox, getLeft(weaponCost), getBottom(ammoRechargeRate) + verticalSpacing, labelWidth, labelHeight);
 
+            
             Label fireWhileInactiveLabel = new Label();
             fireWhileInactiveLabel.Content = "Fire while Inactive";
             addControl(fireWhileInactiveLabel, getLeft(weaponCostLabel), getBottom(ammoPerBoxLabel) + verticalSpacing, labelWidth, labelHeight);
@@ -208,7 +208,7 @@ namespace Castle.EventNodes.Customization
             addControl(rechargeWhileInactiveLabel, getLeft(weaponCostLabel), getBottom(cooldownWhileInactiveLabel) + verticalSpacing, labelWidth, labelHeight);
             rechargeWhileInactive = new CheckBox();
             addControl(rechargeWhileInactive, getLeft(weaponCost), getBottom(cooldownWhileInactive) + verticalSpacing, labelWidth, labelHeight);
-
+            */
 
             /*
             // attributes of the projectile
@@ -227,94 +227,94 @@ namespace Castle.EventNodes.Customization
 
             Label projectileImageLabel = new Label();
             projectileImageLabel.Content = "Image Name";
-            addControl(projectileImageLabel, getLeft(projectileLabel), getTop(weaponCostLabel), labelWidth, labelHeight);
+            addControl(projectileImageLabel, getLeft(projectileLabel), getBottom(projectileLabel) + verticalSpacing, labelWidth, labelHeight);
             projectileImage = new TextBox();
-            addControl(projectileImage, getLeft(projectileLabel), getTop(weaponCost), labelWidth, labelHeight);
+            addControl(projectileImage, getLeft(projectileImageLabel), getBottom(projectileImageLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label projectileRadiusLabel = new Label();
             projectileRadiusLabel.Content = "Radius";
-            addControl(projectileRadiusLabel, getLeft(projectileImageLabel), getBottom(projectileImageLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileRadiusLabel, getLeft(projectileImage), getBottom(projectileImage) + verticalSpacing, labelWidth, labelHeight);
             projectileRadius = new TextBox();
-            addControl(projectileRadius, getLeft(projectileImage), getBottom(projectileImage) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileRadius, getLeft(projectileRadiusLabel), getBottom(projectileRadiusLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label projectileXLabel = new Label();
             projectileXLabel.Content = "Offset (X)";
-            addControl(projectileXLabel, getLeft(projectileRadiusLabel), getBottom(projectileRadiusLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileXLabel, getLeft(projectileRadius), getBottom(projectileRadius) + verticalSpacing, labelWidth, labelHeight);
             projectileX = new TextBox();
-            addControl(projectileX, getLeft(projectileRadius), getBottom(projectileRadius) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileX, getLeft(projectileXLabel), getBottom(projectileXLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label projectileYLabel = new Label();
             projectileYLabel.Content = "Offset (Y)";
-            addControl(projectileYLabel, getLeft(projectileXLabel), getBottom(projectileXLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileYLabel, getLeft(projectileX), getBottom(projectileX) + verticalSpacing, labelWidth, labelHeight);
             projectileY = new TextBox();
-            addControl(projectileY, getLeft(projectileX), getBottom(projectileX) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileY, getLeft(projectileYLabel), getBottom(projectileYLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label projectileVXLabel = new Label();
             projectileVXLabel.Content = "Velocity (X)";
-            addControl(projectileVXLabel, getLeft(projectileYLabel), getBottom(projectileYLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileVXLabel, getLeft(projectileY), getBottom(projectileY) + verticalSpacing, labelWidth, labelHeight);
             projectileVX = new TextBox();
-            addControl(projectileVX, getLeft(projectileY), getBottom(projectileY) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileVX, getLeft(projectileVXLabel), getBottom(projectileVXLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label projectileVYLabel = new Label();
             projectileVYLabel.Content = "Velocity (Y)";
-            addControl(projectileVYLabel, getLeft(projectileVXLabel), getBottom(projectileVXLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileVYLabel, getLeft(projectileVX), getBottom(projectileVX) + verticalSpacing, labelWidth, labelHeight);
             projectileVY = new TextBox();
-            addControl(projectileVY, getLeft(projectileVX), getBottom(projectileVX) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileVY, getLeft(projectileVYLabel), getBottom(projectileVYLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label projectileDragLabel = new Label();
             projectileDragLabel.Content = "Drag Coefficient";
-            addControl(projectileDragLabel, getLeft(projectileVYLabel), getBottom(projectileVYLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileDragLabel, getLeft(projectileVY), getBottom(projectileVY) + verticalSpacing, labelWidth, labelHeight);
             projectileDrag = new TextBox();
-            addControl(projectileDrag, getLeft(projectileVY), getBottom(projectileVY) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileDrag, getLeft(projectileDragLabel), getBottom(projectileDragLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label projectileGravityLabel = new Label();
             projectileGravityLabel.Content = "Gravity";
-            addControl(projectileGravityLabel, getLeft(projectileDragLabel), getBottom(projectileDragLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileGravityLabel, getLeft(projectileDrag), getBottom(projectileDrag) + verticalSpacing, labelWidth, labelHeight);
             projectileGravity = new TextBox();
-            addControl(projectileGravity, getLeft(projectileDrag), getBottom(projectileDrag) + verticalSpacing, labelWidth, labelHeight);
+            addControl(projectileGravity, getLeft(projectileGravityLabel), getBottom(projectileGravityLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label remainingFlightTimeLabel = new Label();
             remainingFlightTimeLabel.Content = "Max Flight time";
-            addControl(remainingFlightTimeLabel, getLeft(projectileGravityLabel), getBottom(projectileGravityLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(remainingFlightTimeLabel, getLeft(projectileGravity), getBottom(projectileGravity) + verticalSpacing, labelWidth, labelHeight);
             remainingFlightTime = new TextBox();
-            addControl(remainingFlightTime, getLeft(projectileGravity), getBottom(projectileGravity) + verticalSpacing, labelWidth, labelHeight);
+            addControl(remainingFlightTime, getLeft(remainingFlightTimeLabel), getBottom(remainingFlightTimeLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label numExplosionsRemainingLabel = new Label();
             numExplosionsRemainingLabel.Content = "Max # Explosions";
-            addControl(numExplosionsRemainingLabel, getLeft(remainingFlightTimeLabel), getBottom(remainingFlightTimeLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(numExplosionsRemainingLabel, getLeft(remainingFlightTime), getBottom(remainingFlightTime) + verticalSpacing, labelWidth, labelHeight);
             numExplosionsRemaining = new TextBox();
-            addControl(numExplosionsRemaining, getLeft(remainingFlightTime), getBottom(remainingFlightTime) + verticalSpacing, labelWidth, labelHeight);
+            addControl(numExplosionsRemaining, getLeft(numExplosionsRemainingLabel), getBottom(numExplosionsRemainingLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label penetrationLabel = new Label();
             penetrationLabel.Content = "Penetration fraction";
-            addControl(penetrationLabel, getLeft(remainingFlightTimeLabel), getBottom(numExplosionsRemainingLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(penetrationLabel, getLeft(numExplosionsRemaining), getBottom(numExplosionsRemaining) + verticalSpacing, labelWidth, labelHeight);
             penetration = new TextBox();
-            addControl(penetration, getLeft(remainingFlightTime), getBottom(numExplosionsRemaining) + verticalSpacing, labelWidth, labelHeight);
+            addControl(penetration, getLeft(penetrationLabel), getBottom(penetrationLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label homingAccelLabel = new Label();
             homingAccelLabel.Content = "Homing Accel";
-            addControl(homingAccelLabel, getLeft(remainingFlightTimeLabel), getBottom(penetrationLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(homingAccelLabel, getLeft(penetration), getBottom(penetration) + verticalSpacing, labelWidth, labelHeight);
             homingAccel = new TextBox();
-            addControl(homingAccel, getLeft(remainingFlightTime), getBottom(penetration) + verticalSpacing, labelWidth, labelHeight);
+            addControl(homingAccel, getLeft(homingAccelLabel), getBottom(homingAccelLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label boomerangAccelLabel = new Label();
             boomerangAccelLabel.Content = "Boomerang Accel";
-            addControl(boomerangAccelLabel, getLeft(remainingFlightTimeLabel), getBottom(homingAccelLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(boomerangAccelLabel, getLeft(homingAccel), getBottom(homingAccel) + verticalSpacing, labelWidth, labelHeight);
             boomerangAccel = new TextBox();
-            addControl(boomerangAccel, getLeft(remainingFlightTime), getBottom(homingAccel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(boomerangAccel, getLeft(boomerangAccelLabel), getBottom(boomerangAccelLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label homeOnProjectilesLabel = new Label();
             homeOnProjectilesLabel.Content = "Home on Projectiles";
-            addControl(homeOnProjectilesLabel, getLeft(remainingFlightTimeLabel), getBottom(boomerangAccelLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(homeOnProjectilesLabel, getLeft(boomerangAccel), getBottom(boomerangAccel) + verticalSpacing, labelWidth, labelHeight);
             homeOnProjectiles = new CheckBox();
-            addControl(homeOnProjectiles, getLeft(remainingFlightTime), getBottom(boomerangAccel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(homeOnProjectiles, getLeft(homeOnProjectilesLabel), getBottom(homeOnProjectilesLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label homeOnPlayersLabel = new Label();
             homeOnPlayersLabel.Content = "Home on Players";
-            addControl(homeOnPlayersLabel, getLeft(remainingFlightTimeLabel), getBottom(homeOnProjectilesLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(homeOnPlayersLabel, getLeft(homeOnProjectiles), getBottom(homeOnProjectiles) + verticalSpacing, labelWidth, labelHeight);
             homeOnCharacters = new CheckBox();
             homeOnCharacters.IsChecked = true;
-            addControl(homeOnCharacters, getLeft(remainingFlightTime), getBottom(homeOnProjectiles) + verticalSpacing, labelWidth, labelHeight);
+            addControl(homeOnCharacters, getLeft(homeOnPlayersLabel), getBottom(homeOnPlayersLabel) + verticalSpacing, labelWidth, labelHeight);
 
             /*
             // attributes of the explosion
@@ -334,27 +334,27 @@ namespace Castle.EventNodes.Customization
 
             Label explosionRadiusLabel = new Label();
             explosionRadiusLabel.Content = "Radius";
-            addControl(explosionRadiusLabel, getLeft(explosionImageLabel), getBottom(explosionImageLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(explosionRadiusLabel, getLeft(explosionImage), getBottom(explosionImage) + verticalSpacing, labelWidth, labelHeight);
             explosionRadius = new TextBox();
-            addControl(explosionRadius, getLeft(explosionImage), getBottom(explosionImage) + verticalSpacing, labelWidth, labelHeight);
+            addControl(explosionRadius, getLeft(explosionRadiusLabel), getBottom(explosionRadiusLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label explosionDurationLabel = new Label();
             explosionDurationLabel.Content = "Duration";
-            addControl(explosionDurationLabel, getLeft(explosionImageLabel), getBottom(explosionRadiusLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(explosionDurationLabel, getLeft(explosionRadius), getBottom(explosionRadius) + verticalSpacing, labelWidth, labelHeight);
             explosionDuration = new TextBox();
-            addControl(explosionDuration, getLeft(explosionImage), getBottom(explosionRadius) + verticalSpacing, labelWidth, labelHeight);
+            addControl(explosionDuration, getLeft(explosionDurationLabel), getBottom(explosionDurationLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label friendlyFireLabel = new Label();
             friendlyFireLabel.Content = "Friendly Fire";
-            addControl(friendlyFireLabel, getLeft(explosionImageLabel), getBottom(explosionDurationLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(friendlyFireLabel, getLeft(explosionDuration), getBottom(explosionDuration) + verticalSpacing, labelWidth, labelHeight);
             friendlyFire = new CheckBox();
-            addControl(friendlyFire, getLeft(explosionImage), getBottom(explosionDuration) + verticalSpacing, labelWidth, labelHeight);
+            addControl(friendlyFire, getLeft(friendlyFireLabel), getBottom(friendlyFireLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label knockbackLabel = new Label();
             knockbackLabel.Content = "Knockback Accel";
-            addControl(knockbackLabel, getLeft(explosionImageLabel), getBottom(friendlyFireLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(knockbackLabel, getLeft(friendlyFire), getBottom(friendlyFire) + verticalSpacing, labelWidth, labelHeight);
             knockBack = new TextBox();
-            addControl(knockBack, getLeft(explosionImage), getBottom(friendlyFire) + verticalSpacing, labelWidth, labelHeight);
+            addControl(knockBack, getLeft(knockbackLabel), getBottom(knockbackLabel) + verticalSpacing, labelWidth, labelHeight);
 
 
             /*
@@ -367,15 +367,15 @@ namespace Castle.EventNodes.Customization
 
             Label damagePerSecondLabel = new Label();
             damagePerSecondLabel.Content = "Damage per Second";
-            addControl(damagePerSecondLabel, getLeft(stunLabel), getTop(explosionImageLabel), labelWidth, labelHeight);
+            addControl(damagePerSecondLabel, getLeft(stunLabel), getBottom(stunLabel) + verticalSpacing, labelWidth, labelHeight);
             damagePerSecond = new TextBox();
-            addControl(damagePerSecond, getLeft(stunLabel), getTop(explosionImage), labelWidth, labelHeight);
+            addControl(damagePerSecond, getLeft(damagePerSecondLabel), getBottom(damagePerSecondLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label timeMultiplierLabel = new Label();
             timeMultiplierLabel.Content = "Time Multiplier";
-            addControl(timeMultiplierLabel, getLeft(damagePerSecondLabel), getBottom(damagePerSecondLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(timeMultiplierLabel, getLeft(damagePerSecond), getBottom(damagePerSecond) + verticalSpacing, labelWidth, labelHeight);
             timeMultiplier = new TextBox();
-            addControl(timeMultiplier, getLeft(damagePerSecond), getBottom(damagePerSecond) + verticalSpacing, labelWidth, labelHeight);
+            addControl(timeMultiplier, getLeft(timeMultiplierLabel), getBottom(timeMultiplierLabel) + verticalSpacing, labelWidth, labelHeight);
 
             Label ammoDrainLabel = new Label();
             ammoDrainLabel.Content = "Ammo Drain per Sec";
@@ -385,9 +385,9 @@ namespace Castle.EventNodes.Customization
 
             Label stunDurationLabel = new Label();
             stunDurationLabel.Content = "Duration";
-            addControl(stunDurationLabel, getLeft(damagePerSecondLabel), getBottom(timeMultiplierLabel) + verticalSpacing, labelWidth, labelHeight);
+            addControl(stunDurationLabel, getLeft(timeMultiplier), getBottom(timeMultiplier) + verticalSpacing, labelWidth, labelHeight);
             stunDuration = new TextBox();
-            addControl(stunDuration, getLeft(damagePerSecond), getBottom(timeMultiplier) + verticalSpacing, labelWidth, labelHeight);
+            addControl(stunDuration, getLeft(stunDurationLabel), getBottom(stunDurationLabel) + verticalSpacing, labelWidth, labelHeight);
 
             // Some utility buttons
 
@@ -403,7 +403,7 @@ namespace Castle.EventNodes.Customization
 
             Button purchaseButton = new Button();
             purchaseButton.Click += new RoutedEventHandler(purchaseCurrentWeapon);
-            purchaseButton.Content = "Purchase";
+            purchaseButton.Content = "Get";
             this.addControl(purchaseButton, getLeft(quickBuildWeaponButton), getTop(homingAccel), labelWidth, labelHeight);
 
             Button doneButton = new Button();
@@ -411,11 +411,13 @@ namespace Castle.EventNodes.Customization
             doneButton.Content = "Done";
             this.addControl(doneButton, getLeft(quickBuildWeaponButton), getTop(homeOnProjectiles), labelWidth, labelHeight);
 
+            /*
             Label currentMoneyLabel = new Label();
             currentMoneyLabel.Content = "Current Money";
             addControl(currentMoneyLabel, getLeft(weaponLabel) - labelWidth, getBottom(weaponLabel), labelWidth, labelHeight);
             currentMoney = new Label();
             addControl(currentMoney, getLeft(currentMoneyLabel), getBottom(currentMoneyLabel), labelWidth, labelHeight);
+            */
         }
         // adds the textbox to the screen
         void addControl(TextBox box, double x, double y, double width, double height)
@@ -513,7 +515,7 @@ namespace Castle.EventNodes.Customization
         void quickBuildWeapon()
         {
             this.prebuildWeapon(this.quickbuildWeaponIndex);
-            this.weaponCost.Content = "0"; // templateWeapon.getCost().ToString();
+            //this.weaponCost.Content = "0"; // templateWeapon.getCost().ToString();
             this.quickbuildWeaponIndex++;
             if (this.quickbuildWeaponIndex >= this.weaponFactory.getNumWeapons())
                 quickbuildWeaponIndex = 0;
@@ -537,7 +539,7 @@ namespace Castle.EventNodes.Customization
                 //this.templateWeapon.calculateCost();
                 this.costUpdated = true;
             }
-            this.weaponCost.Content = "0"; // this.templateWeapon.getCost().ToString();
+            //this.weaponCost.Content = "0"; // this.templateWeapon.getCost().ToString();
         }
         // have the player pay for and receive the current weapon
         void purchaseCurrentWeapon(object sender, EventArgs e)
@@ -667,7 +669,7 @@ namespace Castle.EventNodes.Customization
 
             // now update anything else that might need it
             //this.calculateCost();
-            this.weaponCost.Content = "0";
+            //this.weaponCost.Content = "0";
         }
         public bool WantsDemo;
         public bool Done;
@@ -681,7 +683,7 @@ namespace Castle.EventNodes.Customization
         int quickbuildWeaponIndex;
         bool costUpdated;
         // attributes of the weapon itself, rather than the projectiles or explosions
-        Label weaponCost;
+        //Label weaponCost;
         TextBox maxAmmo;
         TextBox ammoRechargeRate;
         TextBox ammoPerBox;
