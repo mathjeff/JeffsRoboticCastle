@@ -341,7 +341,10 @@ class WorldLoader
             for (y = 0; y < this.worldDimensions.Height; y += 500)
             {
                 location = new double[2]; location[0] = x; location[1] = y + generator.Next(500);
-                this.addItem(new Painting(location, 0));
+                if (this.demo)
+                    this.addItem(new Painting(location, 2));
+                else
+                    this.addItem(new Painting(location, 0));
             }
         }
         x = 1000;
