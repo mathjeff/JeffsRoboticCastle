@@ -21,7 +21,7 @@ class Enemy : Character
         this.setTeamNum(1);
     }
     // constructor for an enemy
-	static Enemy NewEnemy(double[] location, int type)
+	public static Enemy NewEnemy(double[] location, int type)
     {
         BitmapImage startingImage = null;
         double[] accel;

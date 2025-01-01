@@ -72,6 +72,7 @@ namespace Castle.EventNodes.Customization
 
             // put the player in the world
             demoWorld.addItemAndDisableUnloading(levelPlayer);
+            demoWorld.addItem(Enemy.NewEnemy(new double[] { 400, 30 }, 0));
 
             // don't need another demo
             this.WantsDemo = false;
